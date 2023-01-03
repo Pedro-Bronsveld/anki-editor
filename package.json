@@ -19,7 +19,24 @@
         "command": "anki-template-editor.helloWorld",
         "title": "Hello World"
       }
-    ]
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "anki-template-editor",
+          "title": "Anki Template Editor",
+          "icon": "resources/pages.svg"
+        }
+      ]
+    },
+    "views": {
+      "anki-template-editor": [
+        {
+          "id": "card-templates",
+          "name": "Note Types and Templates"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run esbuild-base -- --minify",
