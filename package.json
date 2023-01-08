@@ -17,8 +17,19 @@
     "commands": [
       {
         "command": "anki-template-editor.helloWorld",
-        "title": "Hello World"
-      }
+        "title": "Hello World",
+        "category": "Anki Template Editor"
+      },
+      {
+				"command": "anki-template-editor.loadNoteTypes",
+				"title": "Load Note Types",
+				"category": "Anki Template Editor"
+			},
+      {
+				"command": "anki-template-editor.workspaceInit",
+				"title": "Setup Workspace",
+				"category": "Anki Template Editor"
+			}
     ],
     "viewsContainers": {
       "activitybar": [
