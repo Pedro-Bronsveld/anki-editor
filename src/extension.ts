@@ -4,7 +4,6 @@ import { invoke } from '@autoanki/anki-connect';
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import { AnkiCardFs } from './anki-card-filesystem';
-import { CardTemplatesProvider } from './card-templates-tree';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -20,26 +19,6 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('anki-template-editor.workspaceInit', _ => {
 		vscode.workspace.updateWorkspaceFolders(0, 0, { uri: vscode.Uri.parse('ankicardfs:'), name: "Anki Test" });
 	}));
-	
-	const noteTypesProvider = new CardTemplatesProvider();
-	vscode.window.registerTreeDataProvider("card-templates", noteTypesProvider);
-
-	vscode.commands.registerCommand('anki-template-editor.loadTemplate', (modelName: string, cardName: string, side: "Front" | "Back") => {
-		
-		invoke({
-			action: "modelTemplates",
-			version: 6,
-			request: {
-				modelName
-			}
-		}).then(modelTemplates => {
-			const template = modelTemplates[cardName][side]
-			console.log(`${side} Template:\n`, template);
-		}).catch(err => {
-			console.log(err);
-		});
-		
-	});
 
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand

@@ -26,23 +26,8 @@
 				"category": "Anki Template Editor"
 			}
     ],
-    "viewsContainers": {
-      "activitybar": [
-        {
-          "id": "anki-template-editor",
-          "title": "Anki Template Editor",
-          "icon": "resources/pages.svg"
-        }
-      ]
-    },
-    "views": {
-      "anki-template-editor": [
-        {
-          "id": "card-templates",
-          "name": "Note Types and Templates"
-        }
-      ]
-    }
+    "viewsContainers": {},
+    "views": {}
   },
   "scripts": {
     "vscode:prepublish": "npm run esbuild-base -- --minify",
