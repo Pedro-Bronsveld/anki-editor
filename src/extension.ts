@@ -20,10 +20,6 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('anki-template-editor.workspaceInit', _ => {
 		vscode.workspace.updateWorkspaceFolders(0, 0, { uri: vscode.Uri.parse('ankicardfs:'), name: "Anki Test" });
 	}));
-
-	context.subscriptions.push(vscode.commands.registerCommand('anki-template-editor.loadNoteTypes', _ => {
-		ankiCardFs.loadNoteTypes();
-	}));
 	
 	const noteTypesProvider = new CardTemplatesProvider();
 	vscode.window.registerTreeDataProvider("card-templates", noteTypesProvider);
@@ -52,18 +48,6 @@ export function activate(context: vscode.ExtensionContext) {
 		// The code you place here will be executed every time your command is executed
 		// Display a message box to the user
 		vscode.window.showInformationMessage('Hello World from anki-template-editor!');
-
-		invoke({
-			action: "modelNames",
-			version: 6,
-			request: undefined
-		}).then(res => {
-			console.log(res);
-		}).catch(err => {
-			console.log(err);
-		});
-		
-		
 	});
 
 	context.subscriptions.push(disposable);

@@ -21,11 +21,6 @@
         "category": "Anki Template Editor"
       },
       {
-				"command": "anki-template-editor.loadNoteTypes",
-				"title": "Load Note Types",
-				"category": "Anki Template Editor"
-			},
-      {
 				"command": "anki-template-editor.workspaceInit",
 				"title": "Setup Workspace",
 				"category": "Anki Template Editor"

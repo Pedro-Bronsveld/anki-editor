@@ -1,6 +1,5 @@
 import { invoke } from "@autoanki/anki-connect";
 import { ModelTemplates } from "@autoanki/anki-connect/dist/model";
-import * as path from 'path';
 import { TextDecoder, TextEncoder } from "util";
 import * as vscode from "vscode";
 
@@ -30,12 +29,7 @@ export type Entry = File | Directory;
 
 export class AnkiCardFs implements vscode.FileSystemProvider {
 
-    root = new Directory('');
-
     private _emitter = new vscode.EventEmitter<vscode.FileChangeEvent[]>();
-    private _bufferedEvents: vscode.FileChangeEvent[] = [];
-	private _fireSoonHandle?: NodeJS.Timer;
-
     readonly onDidChangeFile: vscode.Event<vscode.FileChangeEvent[]> = this._emitter.event;
 
     watch(uri: vscode.Uri, options: { readonly recursive: boolean; readonly excludes: readonly string[]; }): vscode.Disposable {
@@ -153,30 +147,6 @@ export class AnkiCardFs implements vscode.FileSystemProvider {
         throw new Error("Method not implemented.");
     }
 
-    public async loadNoteTypes(): Promise<void> {
-
-        (await invoke({
-            action: "modelNames",
-            version: 6,
-            request: undefined
-        }).then(modelNames => {
-            console.log(modelNames);
-            return modelNames;
-        }).catch(err => {
-            console.log(err);
-            throw new Error(err);
-        })).forEach(modelName => {
-            const uri = vscode.Uri.parse(`ankicardfs:${modelName}`);
-            const basename = path.posix.basename(uri.path);
-            const file = new File(modelName);
-            this.root.entries.set(basename, file);
-		    this._fireSoon({ type: vscode.FileChangeType.Created, uri });
-        });
-
-        this._fireSoon({ type: vscode.FileChangeType.Changed, uri: vscode.Uri.parse("ankicardfs:") });
-
-    }
-
     private async _lookup(uri: vscode.Uri, silent: false): Promise<Entry>;
 	private async _lookup(uri: vscode.Uri, silent: boolean): Promise<Entry | undefined>;
 	private async _lookup(uri: vscode.Uri, silent: boolean): Promise<Entry | undefined> {
@@ -288,31 +258,7 @@ export class AnkiCardFs implements vscode.FileSystemProvider {
             file.data = new TextEncoder().encode(card[side]);
 
             return file;
-            
         }
-
-		// const parts = uri.path.split('/');
-        // let entry: Entry = this.root;
-        
-        // for (const part of parts) {
-        //     if (!part) {
-        //         continue;
-        //     }
-        //     let child: Entry |  undefined;
-        //     if (entry instanceof Directory) {
-        //         child = entry.entries.get(part);
-        //     }
-        //     if (!child) {
-		// 		if (!silent) {
-		// 			throw vscode.FileSystemError.FileNotFound(uri);
-		// 		} else {
-		// 			return undefined;
-		// 		}
-		// 	}
-		// 	entry = child;
-        // }
-        //
-        // return entry
 
         throw vscode.FileSystemError.FileNotFound(uri);
     }
@@ -331,19 +277,6 @@ export class AnkiCardFs implements vscode.FileSystemProvider {
 			return entry;
 		}
 		throw vscode.FileSystemError.FileIsADirectory(uri);
-	}
-
-    private _fireSoon(...events: vscode.FileChangeEvent[]): void {
-		this._bufferedEvents.push(...events);
-
-		if (this._fireSoonHandle) {
-			clearTimeout(this._fireSoonHandle);
-		}
-
-		this._fireSoonHandle = setTimeout(() => {
-			this._emitter.fire(this._bufferedEvents);
-			this._bufferedEvents.length = 0;
-		}, 5);
 	}
 
 }
