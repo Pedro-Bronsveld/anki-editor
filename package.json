@@ -10,7 +10,9 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:anki-template-editor.helloWorld"
+    "onCommand:anki-template-editor.helloWorld",
+    "anki-template-editor.workspaceInit",
+    "onFileSystem:ankieditor"
   ],
   "main": "./out/extension.js",
   "contributes": {

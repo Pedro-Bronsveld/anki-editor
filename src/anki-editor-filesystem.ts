@@ -27,7 +27,7 @@ export class Directory implements vscode.FileStat {
 
 export type Entry = File | Directory;
 
-export class AnkiCardFs implements vscode.FileSystemProvider {
+export class AnkiEditorFs implements vscode.FileSystemProvider {
 
     private _emitter = new vscode.EventEmitter<vscode.FileChangeEvent[]>();
     readonly onDidChangeFile: vscode.Event<vscode.FileChangeEvent[]> = this._emitter.event;
@@ -153,6 +153,10 @@ export class AnkiCardFs implements vscode.FileSystemProvider {
 
         const parts = uri.path.split("/").filter(part => part)
 
+        // exclude some meta folders
+        if (parts.length >= 1 && [".vscode", ".git", "node_modules", "app", "pom.xml"].includes(parts[0]))
+            return undefined;
+
         if (parts.length === 0) {
             // Root, return list of note types directories
             console.log("fetching modelNames");
@@ -163,7 +167,10 @@ export class AnkiCardFs implements vscode.FileSystemProvider {
                 request: undefined
             }).catch(err => {
                 console.log(err);
-                throw new Error(err);
+                // throw new Error(err);
+                vscode.window.showErrorMessage("Anki-Connect can't be reached.");
+                throw vscode.FileSystemError.Unavailable("Anki-Connect can't be reached.")
+                return [];
             })
 
             const rootDir = new Directory("");

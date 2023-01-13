@@ -3,7 +3,7 @@ import { invoke } from '@autoanki/anki-connect';
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import { AnkiCardFs } from './anki-card-filesystem';
+import { AnkiEditorFs } from './anki-editor-filesystem';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -13,11 +13,11 @@ export function activate(context: vscode.ExtensionContext) {
 	// This line of code will only be executed once when your extension is activated
 	console.log('Congratulations, your extension "anki-template-editor" is now active!');
 
-	const ankiCardFs = new AnkiCardFs();
-	context.subscriptions.push(vscode.workspace.registerFileSystemProvider('ankicardfs', ankiCardFs, { isCaseSensitive: true }));
+	const ankiCardFs = new AnkiEditorFs();
+	context.subscriptions.push(vscode.workspace.registerFileSystemProvider('ankieditor', ankiCardFs, { isCaseSensitive: true }));
 
 	context.subscriptions.push(vscode.commands.registerCommand('anki-template-editor.workspaceInit', _ => {
-		vscode.workspace.updateWorkspaceFolders(0, 0, { uri: vscode.Uri.parse('ankicardfs:'), name: "Anki Test" });
+		vscode.workspace.updateWorkspaceFolders(0, 0, { uri: vscode.Uri.parse('ankieditor:'), name: "Anki Test" });
 	}));
 
 	// The command has been defined in the package.json file
