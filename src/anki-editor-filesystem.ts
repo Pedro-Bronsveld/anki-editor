@@ -34,7 +34,7 @@ export class AnkiEditorFs implements vscode.FileSystemProvider {
 
     createDirectory(uri: vscode.Uri): void | Thenable<void> {
         console.log("createDirectory");
-        throw new Error("Method not implemented.");
+        throw vscode.FileSystemError.NoPermissions("Creating a directory is not supported by Anki.");
     }
 
     readFile(uri: vscode.Uri): Thenable<Uint8Array> {
@@ -63,18 +63,12 @@ export class AnkiEditorFs implements vscode.FileSystemProvider {
     }
 
     delete(uri: vscode.Uri, options: { readonly recursive: boolean; }): void | Thenable<void> {
-        console.log("delete");
-        throw new Error("Method not implemented.");
+        throw vscode.FileSystemError.NoPermissions("Anki note types, card templates and stylesheets can't be deleted from Visual Studio Code.");
     }
 
     rename(oldUri: vscode.Uri, newUri: vscode.Uri, options: { readonly overwrite: boolean; }): void | Thenable<void> {
         console.log("rename");
-        throw new Error("Method not implemented.");
-    }
-
-    copy?(source: vscode.Uri, destination: vscode.Uri, options: { readonly overwrite: boolean; }): void | Thenable<void> {
-        console.log("copy");
-        throw new Error("Method not implemented.");
+        throw vscode.FileSystemError.NoPermissions("Anki note types, card templates and stylesheets can't be renamed from Visual Studio Code.");
     }
 
     private async _lookup(uri: vscode.Uri, silent: false): Promise<Entry>;
