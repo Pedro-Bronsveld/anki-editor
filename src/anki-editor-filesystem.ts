@@ -1,12 +1,9 @@
-import { invoke } from "@autoanki/anki-connect";
-import { ModelTemplates } from "@autoanki/anki-connect/dist/model";
-import { TextDecoder } from "util";
 import * as vscode from "vscode";
 import Directory from "./models/directory";
 import { Entry } from "./models/entry";
 import File from "./models/file";
-import { lookupNoteType } from "./uri-parsers/lookup-note-type";
-import { writeNoteType } from "./writers/write-note-type";
+import { lookupNoteType } from "./note-types/lookup-note-type";
+import { writeNoteType } from "./note-types/write-note-type";
 
 export class AnkiEditorFs implements vscode.FileSystemProvider {
 
