@@ -1,31 +1,12 @@
 import { invoke } from "@autoanki/anki-connect";
 import { ModelTemplates } from "@autoanki/anki-connect/dist/model";
-import { TextDecoder, TextEncoder } from "util";
+import { TextDecoder } from "util";
 import * as vscode from "vscode";
-
-export class File implements vscode.FileStat {
-    type: vscode.FileType = vscode.FileType.File;
-	ctime: number = Date.now();
-	mtime: number = Date.now();
-	size: number = 0;
-
-	data?: Uint8Array;
-
-    constructor(public readonly name: string) {}
-}
-
-export class Directory implements vscode.FileStat {
-    type: vscode.FileType = vscode.FileType.Directory;
-    ctime: number = Date.now();
-    mtime: number = Date.now();
-    size: number = 0;
-
-    entries: Map<string, File | Directory> = new Map();
-
-    constructor(public readonly name: string) {}
-}
-
-export type Entry = File | Directory;
+import Directory from "./models/directory";
+import { Entry } from "./models/entry";
+import File from "./models/file";
+import { lookupNoteType } from "./uri-parsers/lookup-note-type";
+import { writeNoteType } from "./writers/write-note-type";
 
 export class AnkiEditorFs implements vscode.FileSystemProvider {
 
@@ -71,63 +52,15 @@ export class AnkiEditorFs implements vscode.FileSystemProvider {
     writeFile(uri: vscode.Uri, content: Uint8Array, options: { readonly create: boolean; readonly overwrite: boolean; }): Thenable<void> {
         console.log("writeFile");
 
-        const parts = uri.path.split("/").filter(part => part)
+        const parts = uri.path.split("/").filter(part => part);
 
         if (parts.length === 0)
             throw vscode.FileSystemError.FileNotFound(`Writing to ${uri} is not supported by this extension.`);
-        
-        const modelName = parts[0];
-        const decodedContent = new TextDecoder().decode(content);
 
-        if (parts.length === 2 && parts[1] === "Styling.css") {
-            // save style
-            return invoke({
-                action: "updateModelStyling",
-                version: 6,
-                request: {
-                    model: {
-                        name: modelName,
-                        css: decodedContent
-                    }
-                }
-            }).then(result => {
-                console.log(result);
-                return Promise.resolve();
-            }).catch(err => {
-                console.log(err);
-                return Promise.reject(err);
-            });
-            
-        }
-        else if (parts.length === 3 && parts[2].endsWith(".html")) {
-            // save template
-            const cardName = parts[1];
-            const side = parts[2].split(".")[0];
+        const topFolder = parts[0];
 
-            if (side !== "Front" && side !== "Back")
-                throw vscode.FileSystemError.FileNotFound(uri);
-            
-            return invoke({
-                action: "updateModelTemplates",
-                version: 6,
-                request: {
-                    model: {
-                        name: modelName,
-                        templates: {
-                            [cardName]: {
-                                [side]: decodedContent
-                            }
-                        } as ModelTemplates
-                    }
-                }
-            }).then(result => {
-                console.log(result);
-                return Promise.resolve();
-            }).catch(err => {
-                console.log(err);
-                return Promise.reject(err);
-            });
-        }
+        if (topFolder === "Note Types")
+            return writeNoteType(uri, content);
         
         throw vscode.FileSystemError.FileNotFound(`Writing to ${uri} is not supported by this extension.`);
     }
@@ -150,124 +83,23 @@ export class AnkiEditorFs implements vscode.FileSystemProvider {
     private async _lookup(uri: vscode.Uri, silent: false): Promise<Entry>;
 	private async _lookup(uri: vscode.Uri, silent: boolean): Promise<Entry | undefined>;
 	private async _lookup(uri: vscode.Uri, silent: boolean): Promise<Entry | undefined> {
-
         const parts = uri.path.split("/").filter(part => part)
 
-        // exclude some meta folders
-        if (parts.length >= 1 && [".vscode", ".git", "node_modules", "app", "pom.xml"].includes(parts[0]))
-            return undefined;
-
         if (parts.length === 0) {
-            // Root, return list of note types directories
-            console.log("fetching modelNames");
-
-            const modelNames = await invoke({
-                action: "modelNames",
-                version: 6,
-                request: undefined
-            }).catch(err => {
-                console.log(err);
-                // throw new Error(err);
-                vscode.window.showErrorMessage("Anki-Connect can't be reached.");
-                throw vscode.FileSystemError.Unavailable("Anki-Connect can't be reached.")
-                return [];
-            })
-
-            const rootDir = new Directory("");
-            modelNames.forEach(modelName => {
-                rootDir.entries.set(modelName, new Directory(modelName));
+            const root = new Directory("Anki Editor");
+            ["Note Types"].forEach(dirName => {
+                root.entries.set(dirName, new Directory(dirName))
             });
-
-            return rootDir;
+            return root;
 
         }
-        else if (parts.length === 1) {
-            // note type model, return list of card directories and stylesheet file
-            
-            const modelName = parts[0];
-            const modelTemplates = await invoke({
-                action: "modelTemplates",
-                version: 6,
-                request: {
-                    modelName
-                }
-            }).catch(err => {
-                console.log(err);
-                throw new Error(err);
-            });
 
-            const noteTypeDir = new Directory(modelName);
-            Object.keys(modelTemplates).forEach(cardName => {
-                noteTypeDir.entries.set(cardName, new Directory(cardName));
-            });
-            noteTypeDir.entries.set("Styling.css", new File("Styling.css"));
+        const topFolder = parts[0];
 
-            return noteTypeDir;
-        }
-        else if (parts.length === 2) {
-
-            const modelName = parts[0];
-            const part = parts[1];
-
-            // File is stylesheet
-            if (part === "Styling.css") {
-                return await invoke({
-                    action: "modelStyling",
-                    version: 6,
-                    request: {
-                        modelName
-                    }
-                }).then(styling => {
-                    const file = new File(part);
-                    file.data = new TextEncoder().encode(styling.css);
-                    return file;
-                }).catch(err => {
-                    console.log(err);
-                    throw new Error(err);
-                })
-            }
-            
-            // Directory with card templates
-            const cardName = part;
-            const cardTemplateDir = new Directory(cardName);
-            ["Front", "Back"].forEach(side => {
-                const fileName = `${side}.html`;
-                cardTemplateDir.entries.set(fileName, new File(fileName));
-            });
-
-            return cardTemplateDir;
-        }
-        else if (parts.length === 3) {
-            const modelName = parts[0];
-            const cardName = parts[1];
-            const sideFileName = parts[2];
-            const side = sideFileName.split(".")[0];
-
-            if (side !== "Front" && side !== "Back")
-                throw vscode.FileSystemError.FileNotFound(uri);
-
-            const modelTemplates = await invoke({
-                action: "modelTemplates",
-                version: 6,
-                request: {
-                    modelName
-                }
-            }).catch(err => {
-                console.log(err);
-                throw new Error(err);
-            });
-
-            const card = modelTemplates[cardName];
-            if (!card)
-                throw vscode.FileSystemError.FileNotFound(uri);
-
-            const file = new File(sideFileName);
-            file.data = new TextEncoder().encode(card[side]);
-
-            return file;
-        }
-
-        throw vscode.FileSystemError.FileNotFound(uri);
+        if (topFolder === "Note Types")
+            return await lookupNoteType(uri);
+        
+        return undefined;
     }
 
     private async _lookupAsDirectory(uri: vscode.Uri, silent: boolean): Promise<Directory> {

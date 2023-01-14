@@ -17,7 +17,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.workspace.registerFileSystemProvider('ankieditor', ankiCardFs, { isCaseSensitive: true }));
 
 	context.subscriptions.push(vscode.commands.registerCommand('anki-template-editor.workspaceInit', _ => {
-		vscode.workspace.updateWorkspaceFolders(0, 0, { uri: vscode.Uri.parse('ankieditor:'), name: "Anki Test" });
+		vscode.workspace.updateWorkspaceFolders(0, 0, { uri: vscode.Uri.parse('ankieditor:/'), name: "Anki Editor" });
 	}));
 
 	// The command has been defined in the package.json file
