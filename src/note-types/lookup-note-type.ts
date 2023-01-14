@@ -4,6 +4,7 @@ import * as vscode from "vscode";
 import Directory from "../models/directory";
 import { Entry } from "../models/entry";
 import File from "../models/file";
+import { decodeEscape, encodeEscape } from "./escape-uri";
 
 export const lookupNoteType = async (uri: vscode.Uri): Promise<Entry | undefined> => {
     const parts = uri.path.split("/").filter(part => part).slice(1);
@@ -18,14 +19,14 @@ export const lookupNoteType = async (uri: vscode.Uri): Promise<Entry | undefined
             request: undefined
         }).catch(err => {
             console.log(err);
-            // throw new Error(err);
             vscode.window.showErrorMessage("Anki-Connect can't be reached.");
             throw vscode.FileSystemError.Unavailable("Anki-Connect can't be reached.")
         })
 
         const rootDir = new Directory("");
         modelNames.forEach(modelName => {
-            rootDir.entries.set(modelName, new Directory(modelName));
+            const dirName = encodeEscape(modelName)
+            rootDir.entries.set(dirName, new Directory(dirName));
         });
 
         return rootDir;
@@ -33,7 +34,7 @@ export const lookupNoteType = async (uri: vscode.Uri): Promise<Entry | undefined
     }
     else if (parts.length === 1) {
         // Note type model, return list of card directories and stylesheet file
-        const modelName = parts[0];
+        const modelName = decodeEscape(parts[0]);
         const modelTemplates = await invoke({
             action: "modelTemplates",
             version: 6,
@@ -47,7 +48,8 @@ export const lookupNoteType = async (uri: vscode.Uri): Promise<Entry | undefined
 
         const noteTypeDir = new Directory(modelName);
         Object.keys(modelTemplates).forEach(cardName => {
-            noteTypeDir.entries.set(cardName, new Directory(cardName));
+            const dirName = encodeEscape(cardName);
+            noteTypeDir.entries.set(dirName, new Directory(dirName));
         });
         noteTypeDir.entries.set("Styling.css", new File("Styling.css"));
 
@@ -55,7 +57,7 @@ export const lookupNoteType = async (uri: vscode.Uri): Promise<Entry | undefined
     }
     else if (parts.length === 2) {
         //  Style sheet file
-        const modelName = parts[0];
+        const modelName = decodeEscape(parts[0]);
         const part = parts[1];
 
         // File is stylesheet
@@ -77,7 +79,7 @@ export const lookupNoteType = async (uri: vscode.Uri): Promise<Entry | undefined
         }
         
         // Directory with card templates
-        const cardName = part;
+        const cardName = decodeEscape(part);
         const cardTemplateDir = new Directory(cardName);
         ["Front", "Back"].forEach(side => {
             const fileName = `${side}.html`;
@@ -88,8 +90,8 @@ export const lookupNoteType = async (uri: vscode.Uri): Promise<Entry | undefined
     }
     else if (parts.length === 3) {
         // Card template file
-        const modelName = parts[0];
-        const cardName = parts[1];
+        const modelName = decodeEscape(parts[0]);
+        const cardName = decodeEscape(parts[1]);
         const sideFileName = parts[2];
         const side = sideFileName.split(".")[0];
 
