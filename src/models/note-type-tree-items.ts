@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { escapeText } from '../note-types/escape-uri';
+import { partsToUri } from '../note-types/uri-parser';
 
 export class NoteTypeTreeItem extends vscode.TreeItem {
     iconPath = new vscode.ThemeIcon("files");
@@ -12,7 +13,7 @@ export class CardFolderTreeItem extends vscode.TreeItem {
         collapsibleState?: vscode.TreeItemCollapsibleState
     ) {
         super(label, collapsibleState);
-        this.resourceUri = vscode.Uri.parse(`ankieditor:/Note Types/${escapeText(label)}`);
+        this.resourceUri = partsToUri(["Note Types", label]);
         this.iconPath = new vscode.ThemeIcon("symbol-constant");
     }
 }
@@ -29,7 +30,7 @@ export class CardTemplateTreeItem extends vscode.TreeItem {
         public readonly side: "Front" | "Back",
         public readonly cardFolder: CardFolderTreeItem,
     ) {
-        super(vscode.Uri.parse(`ankieditor:/Note Types/${escapeText(String(cardFolder.noteType.label))}/${escapeText(String(cardFolder.label))}/${side}.html`));
+        super(partsToUri(["Note Types", String(cardFolder.noteType.label), String(cardFolder.label), `${side}.html`]));
     }
 }
 export class CardStylingTreeItem extends vscode.TreeItem {
@@ -43,7 +44,7 @@ export class CardStylingTreeItem extends vscode.TreeItem {
     constructor(
         public readonly noteType: NoteTypeTreeItem,
     ) {
-        super(vscode.Uri.parse(`ankieditor:/Note Types/${escapeText(String(noteType.label))}/Styling.css`));
+        super(partsToUri(["Note Types", escapeText(String(noteType.label)), "Styling.css"]));
     }
 }
 

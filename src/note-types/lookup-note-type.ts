@@ -54,10 +54,11 @@ export const lookupNoteType = async (uri: vscode.Uri): Promise<Entry | undefined
         // Directory with card templates
         const cardName = unescapeCardName(part);
         const cardTemplateDir = new Directory(cardName);
-        ["Front", "Back"].forEach(side => {
-            const fileName = `${side}.html`;
-            cardTemplateDir.entries.set(fileName, new File(fileName));
-        });
+        ["Front", "Back"]
+            .map(side => `${side}.html`)
+            .forEach(fileName => {
+                cardTemplateDir.entries.set(fileName, new File(fileName));
+            });
 
         return cardTemplateDir;
     }
