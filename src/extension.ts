@@ -19,8 +19,9 @@ export function activate(context: vscode.ExtensionContext) {
 		);
 
 	// Add command to add anki editor root folder to workspace
-	context.subscriptions.push(vscode.commands.registerCommand('anki-template-editor.workspaceInit', _ => {
-			vscode.workspace.updateWorkspaceFolders(0, 0, { uri: vscode.Uri.parse('ankieditor:/'), name: "Anki Editor" });
+	context.subscriptions.push(vscode.commands.registerCommand('anki-template-editor.openAsFolder', _ => {
+			// vscode.workspace.updateWorkspaceFolders(0, 0, { uri: vscode.Uri.parse('ankieditor:/'), name: "Anki Editor" });
+			vscode.commands.executeCommand('vscode.openFolder', vscode.Uri.parse("ankieditor:/"));
 		}));
 
 	// Register note type tree
@@ -31,14 +32,14 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// Refresh node type tree list in tree command
 	context.subscriptions.push(
-		vscode.commands.registerCommand('anki-template-editor.refresNoteTypesTree', () => {
+		vscode.commands.registerCommand('anki-template-editor.refreshNoteTypesTree', () => {
 			noteTypesProvider.refresh();
 		}));
 
 	// Refresh node type tree on window focus
 	context.subscriptions.push(vscode.window.onDidChangeWindowState((e) => {
 			if (e.focused)
-				vscode.commands.executeCommand("anki-template-editor.refresNoteTypesTree");
+				vscode.commands.executeCommand("anki-template-editor.refreshNoteTypesTree");
 		}));
 
 	// The command has been defined in the package.json file
@@ -48,8 +49,6 @@ export function activate(context: vscode.ExtensionContext) {
 		// The code you place here will be executed every time your command is executed
 		// Display a message box to the user
 		vscode.window.showInformationMessage('Hello World from anki-template-editor!');
-		// vscode.commands.executeCommand('vscode.open', vscode.Uri.parse("ankieditor:/Note Types/Test Note Type/Card 3/Front.html"));
-		vscode.commands.executeCommand('vscode.openFolder', vscode.Uri.parse("ankieditor:/"));
 	});
 
 	context.subscriptions.push(disposable);

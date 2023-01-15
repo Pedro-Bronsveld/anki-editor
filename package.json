@@ -23,13 +23,15 @@
         "category": "Anki Template Editor"
       },
       {
-				"command": "anki-template-editor.workspaceInit",
-				"title": "Setup Workspace",
-				"category": "Anki Template Editor"
+				"command": "anki-template-editor.openAsFolder",
+				"title": "Open as folder",
+				"category": "Anki Template Editor",
+        "icon": "$(root-folder-opened)"
 			},
       {
-        "command": "anki-template-editor.refresNoteTypesTree",
+        "command": "anki-template-editor.refreshNoteTypesTree",
         "title": "Refresh Note Types",
+        "category": "Anki Template Editor",
         "icon": "$(refresh)"
       }
     ],
@@ -53,7 +55,12 @@
     "menus": {
       "view/title": [
         {
-          "command": "anki-template-editor.refresNoteTypesTree",
+          "command": "anki-template-editor.refreshNoteTypesTree",
+          "when": "view == note-types-tree",
+          "group": "navigation"
+        },
+        {
+          "command": "anki-template-editor.openAsFolder",
           "when": "view == note-types-tree",
           "group": "navigation"
         }
