@@ -26,10 +26,39 @@
 				"command": "anki-template-editor.workspaceInit",
 				"title": "Setup Workspace",
 				"category": "Anki Template Editor"
-			}
+			},
+      {
+        "command": "anki-template-editor.refresNoteTypesTree",
+        "title": "Refresh Note Types",
+        "icon": "$(refresh)"
+      }
     ],
-    "viewsContainers": {},
-    "views": {}
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "anki-template-editor",
+          "title": "Anki Template Editor",
+          "icon": "resources/pages.svg"
+        }
+      ]
+    },
+    "views": {
+      "anki-template-editor": [
+        {
+          "id": "note-types-tree",
+          "name": "Note Types"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "anki-template-editor.refresNoteTypesTree",
+          "when": "view == note-types-tree",
+          "group": "navigation"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run esbuild-base -- --minify",

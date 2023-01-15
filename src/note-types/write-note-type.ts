@@ -2,6 +2,8 @@ import { invoke } from "@autoanki/anki-connect";
 import { ModelTemplates } from "@autoanki/anki-connect/dist/model";
 import { TextDecoder } from "util";
 import * as vscode from "vscode";
+import { updateModelStyling } from "../anki-connect/update-model-styling";
+import { updateModelTemplates } from "../anki-connect/update-model-templates";
 import { decodeEscape } from "./escape-uri";
 
 export const writeNoteType = (uri: vscode.Uri, content: Uint8Array): Promise<void> => {
@@ -16,23 +18,7 @@ export const writeNoteType = (uri: vscode.Uri, content: Uint8Array): Promise<voi
 
         if (parts.length === 2 && parts[1] === "Styling.css") {
             // save style
-            return invoke({
-                action: "updateModelStyling",
-                version: 6,
-                request: {
-                    model: {
-                        name: modelName,
-                        css: decodedContent
-                    }
-                }
-            }).then(result => {
-                console.log(result);
-                return Promise.resolve();
-            }).catch(err => {
-                console.log(err);
-                return Promise.reject(err);
-            });
-            
+            return updateModelStyling(modelName, decodedContent);
         }
         else if (parts.length === 3 && parts[2].endsWith(".html")) {
             // save template
@@ -42,26 +28,7 @@ export const writeNoteType = (uri: vscode.Uri, content: Uint8Array): Promise<voi
             if (side !== "Front" && side !== "Back")
                 throw vscode.FileSystemError.FileNotFound(uri);
             
-            return invoke({
-                action: "updateModelTemplates",
-                version: 6,
-                request: {
-                    model: {
-                        name: modelName,
-                        templates: {
-                            [cardName]: {
-                                [side]: decodedContent
-                            }
-                        } as ModelTemplates
-                    }
-                }
-            }).then(result => {
-                console.log(result);
-                return Promise.resolve();
-            }).catch(err => {
-                console.log(err);
-                return Promise.reject(err);
-            });
+            return updateModelTemplates(modelName, cardName, side, decodedContent);
         }
         
         throw vscode.FileSystemError.FileNotFound(`Writing to ${uri} is not supported by this extension.`);
