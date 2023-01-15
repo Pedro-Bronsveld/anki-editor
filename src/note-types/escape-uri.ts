@@ -35,7 +35,7 @@ export const escapeCardName = (rawCardName: string): string =>
         .replace(/^Styling.css$/, "Styling.css\xAD");
 
 export const unescapeCardName = (encodedCardName: string): string =>
-    unescapeText(encodedCardName)
+    unescapeText(
         // Remove escape character from end of card name
         // when card is "Styling.css"
-        .replace(/^Styling.css\xAD$/, "Styling.css");
+        encodedCardName.replace(/^Styling.css\xAD$/, "Styling.css"));
