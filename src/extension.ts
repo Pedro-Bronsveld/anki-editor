@@ -10,7 +10,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "anki-template-editor" is now active!');
+	console.log('Congratulations, your extension "anki-editor" is now active!');
 
 	// Create Anki Eidtor Filesystem
 	const ankiCardFs = new AnkiEditorFs();
@@ -19,7 +19,7 @@ export function activate(context: vscode.ExtensionContext) {
 		);
 
 	// Add command to add anki editor root folder to workspace
-	context.subscriptions.push(vscode.commands.registerCommand('anki-template-editor.openAsFolder', _ => {
+	context.subscriptions.push(vscode.commands.registerCommand('anki-editor.openAsFolder', _ => {
 			// vscode.workspace.updateWorkspaceFolders(0, 0, { uri: vscode.Uri.parse('ankieditor:/'), name: "Anki Editor" });
 			vscode.commands.executeCommand('vscode.openFolder', vscode.Uri.parse("ankieditor:/"));
 		}));
@@ -32,23 +32,23 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// Refresh node type tree list in tree command
 	context.subscriptions.push(
-		vscode.commands.registerCommand('anki-template-editor.refreshNoteTypesTree', () => {
+		vscode.commands.registerCommand('anki-editor.refreshNoteTypesTree', () => {
 			noteTypesProvider.refresh();
 		}));
 
 	// Refresh node type tree on window focus
 	context.subscriptions.push(vscode.window.onDidChangeWindowState((e) => {
 			if (e.focused)
-				vscode.commands.executeCommand("anki-template-editor.refreshNoteTypesTree");
+				vscode.commands.executeCommand("anki-editor.refreshNoteTypesTree");
 		}));
 
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('anki-template-editor.helloWorld', () => {
+	let disposable = vscode.commands.registerCommand('anki-editor.helloWorld', () => {
 		// The code you place here will be executed every time your command is executed
 		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from anki-template-editor!');
+		vscode.window.showInformationMessage('Hello World from anki-editor!');
 	});
 
 	context.subscriptions.push(disposable);

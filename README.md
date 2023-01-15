@@ -1,6 +1,6 @@
-# anki-template-editor README
+# anki-editor README
 
-This is the README for your extension "anki-template-editor". After writing up a brief description, we recommend including the following sections.
+This is the README for your extension "anki-editor". After writing up a brief description, we recommend including the following sections.
 
 ## Features
 

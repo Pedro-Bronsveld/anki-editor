@@ -1,6 +1,6 @@
 {
-  "name": "anki-template-editor",
-  "displayName": "anki-template-editor",
+  "name": "anki-editor",
+  "displayName": "anki-editor",
   "description": "Edit HTML and CSS of Anki card templates in Visual Studio Code.",
   "version": "0.0.1",
   "engines": {
@@ -10,42 +10,42 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:anki-template-editor.helloWorld",
-    "anki-template-editor.workspaceInit",
+    "onCommand:anki-editor.helloWorld",
+    "anki-editor.workspaceInit",
     "onFileSystem:ankieditor"
   ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "anki-template-editor.helloWorld",
+        "command": "anki-editor.helloWorld",
         "title": "Hello World",
-        "category": "Anki Template Editor"
+        "category": "Anki Editor"
       },
       {
-				"command": "anki-template-editor.openAsFolder",
+				"command": "anki-editor.openAsFolder",
 				"title": "Open as folder",
-				"category": "Anki Template Editor",
+				"category": "Anki Editor",
         "icon": "$(root-folder-opened)"
 			},
       {
-        "command": "anki-template-editor.refreshNoteTypesTree",
+        "command": "anki-editor.refreshNoteTypesTree",
         "title": "Refresh Note Types",
-        "category": "Anki Template Editor",
+        "category": "Anki Editor",
         "icon": "$(refresh)"
       }
     ],
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "anki-template-editor",
-          "title": "Anki Template Editor",
+          "id": "anki-editor",
+          "title": "Anki Editor",
           "icon": "resources/pages.svg"
         }
       ]
     },
     "views": {
-      "anki-template-editor": [
+      "anki-editor": [
         {
           "id": "note-types-tree",
           "name": "Note Types"
@@ -55,12 +55,12 @@
     "menus": {
       "view/title": [
         {
-          "command": "anki-template-editor.refreshNoteTypesTree",
+          "command": "anki-editor.refreshNoteTypesTree",
           "when": "view == note-types-tree",
           "group": "navigation"
         },
         {
-          "command": "anki-template-editor.openAsFolder",
+          "command": "anki-editor.openAsFolder",
           "when": "view == note-types-tree",
           "group": "navigation"
         }
