@@ -1,4 +1,3 @@
-import { invoke } from "@autoanki/anki-connect";
 import { TextEncoder } from "util";
 import * as vscode from "vscode";
 import { getModelNames } from "../anki-connect/get-model-names";
@@ -7,13 +6,14 @@ import { getModelTemplates } from "../anki-connect/get-model-templates";
 import Directory from "../models/directory";
 import { Entry } from "../models/entry";
 import File from "../models/file";
-import { unescapeText, escapeText, escapeCardName, unescapeCardName } from "./escape-uri";
+import { escapeText, escapeCardName } from "./escape-uri";
+import { uriPathToParts } from "./uri-parser";
 
 export const lookupNoteType = async (uri: vscode.Uri): Promise<Entry | undefined> => {
-    const parts = uri.path.split("/").filter(part => part).slice(1);
+    const parts = uriPathToParts(uri).slice(1);
 
     if (parts.length === 0) {
-        // Root, return list of note types directories
+        // Uri is root of note types folder, return list of note type directories
         console.log("fetching modelNames");
         const modelNames = await getModelNames();
 
@@ -25,11 +25,12 @@ export const lookupNoteType = async (uri: vscode.Uri): Promise<Entry | undefined
             });
 
         return rootDir;
-
     }
-    else if (parts.length === 1) {
-        // Note type model, return list of card directories and stylesheet file
-        const modelName = unescapeText(parts[0]);
+
+    const [modelName, cardName, sideFileName] = parts;
+
+    if (parts.length === 1) {
+        // Uri is a note type model, return list of card directories and stylesheet file
         const modelTemplates = await getModelTemplates(modelName);
 
         const noteTypeDir = new Directory(modelName);
@@ -43,16 +44,11 @@ export const lookupNoteType = async (uri: vscode.Uri): Promise<Entry | undefined
         return noteTypeDir;
     }
     else if (parts.length === 2) {
-        //  Style sheet file
-        const modelName = unescapeText(parts[0]);
-        const part = parts[1];
-
-        // File is stylesheet
-        if (part === "Styling.css")
-            return await getModelStyling(modelName, part);
+        // Uri is a stylesheet
+        if (cardName === "Styling.css")
+            return await getModelStyling(modelName, cardName);
         
-        // Directory with card templates
-        const cardName = unescapeCardName(part);
+        // Uri is a directory with card templates
         const cardTemplateDir = new Directory(cardName);
         ["Front", "Back"]
             .map(side => `${side}.html`)
@@ -63,19 +59,13 @@ export const lookupNoteType = async (uri: vscode.Uri): Promise<Entry | undefined
         return cardTemplateDir;
     }
     else if (parts.length === 3) {
-        // Card template file
-        const modelName = unescapeText(parts[0]);
-        const cardName = unescapeCardName(parts[1]);
-        const sideFileName = parts[2];
+        // Uri is card template html file
         const side = sideFileName.split(".")[0];
-
-        const test = cardName.endsWith("\xAD");
 
         if (side !== "Front" && side !== "Back")
             throw vscode.FileSystemError.FileNotFound(uri);
 
         const modelTemplates = await getModelTemplates(modelName);
-
         const card = modelTemplates[cardName];
         if (!card)
             throw vscode.FileSystemError.FileNotFound(uri);
