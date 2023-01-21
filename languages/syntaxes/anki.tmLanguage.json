@@ -1,0 +1,52 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "AnkiTemplate",
+	"patterns": [
+		{
+			"include": "text.html.basic"
+		},
+		{
+			"include": "#anki-template"
+		}
+	],
+	"repository": {
+		"keywords": {
+			"patterns": [{
+				"name": "keyword.control.anki",
+				"match": "\\b(if|while|for|return)\\b"
+			}]
+		},
+		"strings": {
+			"name": "string.quoted.double.anki",
+			"begin": "\"",
+			"end": "\"",
+			"patterns": [
+				{
+					"name": "constant.character.escape.anki",
+					"match": "\\\\."
+				}
+			]
+		},
+		"anki-template": {
+			"name": "support.constant.handlebars.anki",
+			"begin": "{{",
+			"end": "}}",
+			"contentName": "source.anki.template",
+			"patterns": [
+				{
+					"name": "invalid.illegal.anki.if",
+					"match": "(?<=(#|/|\\^)\\s*)(#|/|\\^)"
+				},
+				{
+					"name": "keyword.control.anki.if",
+					"match": "#|/|\\^"
+				},
+				{
+					"name": "variable.anki",
+					"match": "[^#^/\\s:\"{}]+[^:\"{}]*[^:\"{}\\s]"
+				}
+			]
+		}
+	},
+	"scopeName": "text.html.anki"
+}

@@ -65,7 +65,25 @@
           "group": "navigation"
         }
       ]
-    }
+    },
+    "languages": [{
+      "id": "anki",
+      "aliases": ["AnkiTemplate", "anki"],
+      "extensions": [".anki.html"],
+      "configuration": "./languages/language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "anki",
+      "scopeName": "text.html.anki",
+      "path": "./languages/syntaxes/anki.tmLanguage.json",
+      "embeddedLanguages": {
+        "text.html": "html",
+        "source.anki.template": "anki",
+        "source.js": "javascript",
+        "source.css": "css",
+        "support.constant.handlebars": "handlebars"
+      }
+    }]
   },
   "scripts": {
     "vscode:prepublish": "npm run esbuild-base -- --minify",
