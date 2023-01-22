@@ -72,18 +72,25 @@
       "extensions": [".anki.html"],
       "configuration": "./languages/language-configuration.json"
     }],
-    "grammars": [{
+    "grammars": [
+      {
       "language": "anki",
       "scopeName": "text.html.anki",
       "path": "./languages/syntaxes/anki.tmLanguage.json",
       "embeddedLanguages": {
         "text.html": "html",
-        "source.anki.template": "anki",
+        "source.anki": "anki",
         "source.js": "javascript",
         "source.css": "css",
         "support.constant.handlebars": "handlebars"
+        }
+      },
+      {
+        "path": "./languages/syntaxes/anki-template.injection.json",
+        "scopeName": "source.anki",
+        "injectTo": ["text.html.anki"]
       }
-    }]
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run esbuild-base -- --minify",

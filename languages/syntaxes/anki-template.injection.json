@@ -1,0 +1,90 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"injectionSelector": "L:text.html.anki",
+	"name": "Anki - Injected Template",
+	"scopeName": "source.anki",
+	"patterns": [
+		{
+		  "include": "#anki-template"
+		}
+	],
+	"repository": {
+		"anki-template": {
+			"name": "support.constant.handlebars.anki",
+			"begin": "{{",
+			"end": "}}",
+			"contentName": "source.anki.template",
+			"patterns": [
+				{
+					"name": "invalid.illegal.anki.conditional",
+					"match": "(?<=(:|#|\/|\\^)\\s*)(#|\/|\\^)|(#|\/|\\^)(?=.*(:|(FrontSide)(?=[\\s\\n\\t]*}})))"
+				},
+				{
+					"name": "keyword.control.anki.if",
+					"match": "#|/|\\^"
+				},
+				{
+					"name": "source.anki.template.function",
+					"match": "([^:{}\"#]+)(?=:)",
+					"captures": {
+						"0": {
+							"patterns": [
+								{
+									"name": "support.function.anki.builtin",
+									"match": "tts(-voices)?|cloze|hint|text|furigana|kana|kanji|type"
+								},
+								{
+									"name": "support.function.anki.template",
+									"match": "(?<=:|{{\\s*)[a-zA-Z-]+(?=:)"
+								},
+								{
+									"name": "string.other.anki.tts.language",
+									"match": "(?<=tts )[a-z]{2}_[A-Z]{2}"
+								},
+								{
+									"match": "(voices)(=)([^\\s{}:]+)?",
+									"captures": {
+										"1": { "name": "variable.parameter.anki.tts.voices" },
+										"2": { "name": "keyword.operator.assignment.anki" },
+										"3": {
+											"patterns": [
+												{
+													"name": "punctuation.separator.comma",
+													"match": ","
+												},
+												{
+													"name": "string.other.anki.tts",
+													"match": "[^\\s{}:,]+"
+												}
+											]
+										}
+									}
+								},
+								{
+									"match": "(speed)(=)(\\d+\\.?\\d*)?",
+									"captures": {
+										"1": { "name": "variable.parameter.anki.tts.speed" },
+										"2": { "name": "keyword.operator.assignment.anki" },
+										"3": { "name": "constant.numeric" }
+									}
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "invalid.illegal.anki.field",
+					"match": "(?<=:)\\s+.*(?=}})"
+				},
+				{
+					"name": "variable.other.constant.anki.special-field",
+					"match": "(Tags|Type|Deck|Subdeck|CardFlag|Card|FrontSide)(?=[\\s\\n\\t]*}})"
+				},
+				{
+					"name": "variable.anki.field",
+					"match": "[^#^\\/\\s:\"{}]+[^:\"{}]*[^:\"{}\\s]*"
+				}
+			]
+		}
+	}
+}
