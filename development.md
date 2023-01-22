@@ -39,14 +39,14 @@ Anki documentation:
 
 ### Invalid Template Characters
 
-The first pattern, `#anki-invalid-template`, tries to match any templates (anything between double curly braces) containing the invalid characters `"` `{` `}` . 
+The first pattern, `#anki-template-invalid`, tries to match any templates (anything between double curly braces) containing the invalid characters `"` `{` `}` . 
 No template is allowed to contain these characters.
 The pattern will color the double braces and the invalid characters of this template red.
 By catching these invalid characters in the first pattern, there's a guarantee they can't appear in later patterns.
 
 ```json
 {
-    "include": "#anki-invalid-template"
+    "include": "#anki-template-invalid"
 },
 ```
 

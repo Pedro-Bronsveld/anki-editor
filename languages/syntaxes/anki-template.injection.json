@@ -5,17 +5,17 @@
 	"scopeName": "source.anki",
 	"patterns": [
 		{
-			"include": "#anki-invalid-template"
+			"include": "#anki-template-invalid"
 		},
 		{
 			"patterns": [
-				{ "include": "#anki-invalid-conditional-block" },
+				{ "include": "#anki-conditional-block-invalid" },
 				{ "include": "#anki-conditional-block" }
 			]
 		}
 	],
 	"repository": {
-		"anki-invalid-template": {
+		"anki-template-invalid": {
 			"match": "({{)[^\"{}]*([\"{}]+)[^\"{}]*(}})",
 			"captures": {
 				"1": {
@@ -34,7 +34,7 @@
 				}
 			}
 		},
-		"anki-invalid-conditional-block": {
+		"anki-conditional-block-invalid": {
 			"match": "({{\\s*[#^/])[^:{}]*(:+)[^:{}]*(}})",
 			"captures": {
 				"1": {
@@ -130,7 +130,7 @@
 			]
 		},
 		"anki-conditional-block": {
-			"name": "meta.block.anki",
+			"name": "meta.block.anki.conditional",
 			"match": "({{\\s*[#^\/])([#^\/\\s]*)([^#^\/\\s]+([^\\s]|\\s(?!\\s*}}))*)(\\s*)(}})",
 			"captures": {
 				"1": {
@@ -140,16 +140,19 @@
 					"name": "invalid.illegal.anki.conditional"
 				},
 				"3": {
-					"name": "variable.anki.field"
+					"patterns": [
+						{ "include": "#anki-field-special" },
+						{ "include": "#anki-field" }
+					]
 				},
 				"6": {
 					"name": "keyword.control.anki.conditional"
 				}
 			}
 		},
-		"anki-special-field": {
+		"anki-field-special": {
 			"name": "variable.other.constant.anki.special-field",
-			"match": "(?<=\\s)(Tags|Type|Deck|Subdeck|CardFlag|Card|FrontSide)(?=\\s*}})"
+			"match": "(?<=[#^/\\s])(Tags|Type|Deck|Subdeck|CardFlag|Card|FrontSide)$"
 		},
 		"anki-field": {
 			"name": "variable.anki.field",
