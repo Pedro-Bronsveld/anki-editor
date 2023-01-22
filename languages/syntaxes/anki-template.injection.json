@@ -42,7 +42,7 @@
 									"match": "(?<=tts )[a-z]{2}_[A-Z]{2}"
 								},
 								{
-									"match": "(voices)(=)([^\\s{}:]+)?",
+									"match": "(?<=tts [a-zA-Z_]+.*)(voices)(=)([^\\s{}:]+)?",
 									"captures": {
 										"1": { "name": "variable.parameter.anki.tts.voices" },
 										"2": { "name": "keyword.operator.assignment.anki" },
@@ -53,7 +53,7 @@
 													"match": ","
 												},
 												{
-													"name": "string.other.anki.tts",
+													"name": "string.other.anki.tts.voice",
 													"match": "[^\\s{}:,]+"
 												}
 											]
@@ -61,7 +61,7 @@
 									}
 								},
 								{
-									"match": "(speed)(=)(\\d+\\.?\\d*)?",
+									"match": "(?<=tts [a-zA-Z_]+.*)(speed)(=)(\\d+\\.?\\d*)?",
 									"captures": {
 										"1": { "name": "variable.parameter.anki.tts.speed" },
 										"2": { "name": "keyword.operator.assignment.anki" },

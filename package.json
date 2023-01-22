@@ -74,15 +74,15 @@
     }],
     "grammars": [
       {
-      "language": "anki",
-      "scopeName": "text.html.anki",
-      "path": "./languages/syntaxes/anki.tmLanguage.json",
-      "embeddedLanguages": {
-        "text.html": "html",
-        "source.anki": "anki",
-        "source.js": "javascript",
-        "source.css": "css",
-        "support.constant.handlebars": "handlebars"
+        "language": "anki",
+        "scopeName": "text.html.anki",
+        "path": "./languages/syntaxes/anki.tmLanguage.json",
+        "embeddedLanguages": {
+          "text.html": "html",
+          "source.anki": "anki",
+          "source.js": "javascript",
+          "source.css": "css",
+          "support.constant.handlebars": "handlebars"
         }
       },
       {
