@@ -1,12 +1,11 @@
 {
 	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
 	"name": "AnkiTemplate",
-	"patterns": [
-		{
-			"include": "text.html.basic"
+	"patterns": [{
+			"include": "#anki-template"
 		},
 		{
-			"include": "#anki-template"
+			"include": "text.html.basic"
 		}
 	],
 	"repository": {
@@ -49,7 +48,7 @@
 							"patterns": [
 								{
 									"name": "support.function.anki.builtin",
-									"match": "tts(-voices)?|cloze|hint"
+									"match": "tts(-voices)?|cloze|hint|text|furigana|kana|kanji|type"
 								},
 								{
 									"name": "support.function.anki.template",
