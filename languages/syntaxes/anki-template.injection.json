@@ -5,10 +5,55 @@
 	"scopeName": "source.anki",
 	"patterns": [
 		{
-		  "include": "#anki-template"
+			"include": "#anki-invalid-template"
+		},
+		{
+			"patterns": [
+				{ "include": "#anki-invalid-conditional-block" },
+				{ "include": "#anki-conditional-block" }
+			]
 		}
 	],
 	"repository": {
+		"anki-invalid-template": {
+			"match": "({{)[^\"{}]*([\"{}]+)[^\"{}]*(}})",
+			"captures": {
+				"1": {
+					"name": "invalid.illegal.anki.template"
+				},
+				"2": {
+					"patterns": [
+						{
+							"name": "invalid.illegal.anki.template.character",
+							"match": "[\"{}]"
+						}
+					]
+				},
+				"3": {
+					"name": "invalid.illegal.anki.template"
+				}
+			}
+		},
+		"anki-invalid-conditional-block": {
+			"match": "({{\\s*[#^/])[^:{}]*(:+)[^:{}]*(}})",
+			"captures": {
+				"1": {
+					"patterns": [{
+						"name": "invalid.illegal.anki.template",
+						"match": "{{"
+					}]
+				},
+				"2": {
+					"patterns": [{
+						"name": "invalid.illegal.anki.template.character",
+						"match": ":"
+					}]
+				},
+				"3": {
+					"name": "invalid.illegal.anki.template"
+				}
+			}
+		},
 		"anki-template": {
 			"name": "support.constant.handlebars.anki",
 			"begin": "{{",
@@ -17,7 +62,7 @@
 			"patterns": [
 				{
 					"name": "invalid.illegal.anki.conditional",
-					"match": "(?<=(:|#|\/|\\^)\\s*)(#|\/|\\^)|(#|\/|\\^)(?=.*(:|(FrontSide)(?=[\\s\\n\\t]*}})))"
+					"match": "(?<=(:|#|\/|\\^)\\s*)(#|\/|\\^)|(#|\/|\\^)(?=.*(:|(FrontSide)(?=\\s*}})))"
 				},
 				{
 					"name": "keyword.control.anki.if",
@@ -77,14 +122,38 @@
 					"match": "(?<=:)\\s+.*(?=}})"
 				},
 				{
-					"name": "variable.other.constant.anki.special-field",
-					"match": "(Tags|Type|Deck|Subdeck|CardFlag|Card|FrontSide)(?=[\\s\\n\\t]*}})"
+					"include": "#anki-special-field"
 				},
 				{
-					"name": "variable.anki.field",
-					"match": "[^#^\\/\\s:\"{}]+[^:\"{}]*[^:\"{}\\s]*"
+					"include": "#anki-field"
 				}
 			]
+		},
+		"anki-conditional-block": {
+			"name": "meta.block.anki",
+			"match": "({{\\s*[#^\/])([#^\/\\s]*)([^#^\/\\s]+([^\\s]|\\s(?!\\s*}}))*)(\\s*)(}})",
+			"captures": {
+				"1": {
+					"name": "keyword.control.anki.conditional"
+				},
+				"2": {
+					"name": "invalid.illegal.anki.conditional"
+				},
+				"3": {
+					"name": "variable.anki.field"
+				},
+				"6": {
+					"name": "keyword.control.anki.conditional"
+				}
+			}
+		},
+		"anki-special-field": {
+			"name": "variable.other.constant.anki.special-field",
+			"match": "(?<=\\s)(Tags|Type|Deck|Subdeck|CardFlag|Card|FrontSide)(?=\\s*}})"
+		},
+		"anki-field": {
+			"name": "variable.anki.field",
+			"match": "[^#^\/\\s:]+([^:\\s]|\\s(?!\\s*}}))*"
 		}
 	}
 }
