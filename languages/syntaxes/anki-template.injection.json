@@ -5,56 +5,30 @@
 	"scopeName": "source.anki",
 	"patterns": [
 		{
-			"include": "#anki-template-invalid"
-		},
-		{
-			"patterns": [
-				{ "include": "#anki-conditional-block-invalid" },
-				{ "include": "#anki-conditional-block" }
-			]
+			"include": "#anki-template"
 		}
 	],
 	"repository": {
-		"anki-template-invalid": {
-			"match": "({{)[^\"{}]*([\"{}]+)[^\"{}]*(}})",
-			"captures": {
-				"1": {
-					"name": "invalid.illegal.anki.template"
-				},
-				"2": {
-					"patterns": [
-						{
-							"name": "invalid.illegal.anki.template.character",
-							"match": "[\"{}]"
-						}
-					]
-				},
-				"3": {
-					"name": "invalid.illegal.anki.template"
-				}
-			}
-		},
-		"anki-conditional-block-invalid": {
-			"match": "({{\\s*[#^/])[^:{}]*(:+)[^:{}]*(}})",
-			"captures": {
-				"1": {
-					"patterns": [{
-						"name": "invalid.illegal.anki.template",
-						"match": "{{"
-					}]
-				},
-				"2": {
-					"patterns": [{
-						"name": "invalid.illegal.anki.template.character",
-						"match": ":"
-					}]
-				},
-				"3": {
-					"name": "invalid.illegal.anki.template"
-				}
-			}
-		},
 		"anki-template": {
+			"begin": "{{",
+			"end": "}}",
+			"beginCaptures": {
+				"0": { "name": "support.constant.handlebars.anki" }
+			},
+			"endCaptures": {
+				"0": { "name": "support.constant.handlebars.anki" }
+			},
+			"patterns": [
+				{ "include": "#anki-template-invalid-characters" },
+				{ "include": "#anki-conditional-block" }
+			],
+			"name": "source.anki.template"
+		},
+		"anki-template-invalid-characters": {
+			"match": "[\"{}]",
+			"name": "invalid.illegal.anki.template"
+		},
+		"anki-template-oneline": {
 			"name": "support.constant.handlebars.anki",
 			"begin": "{{",
 			"end": "}}",
@@ -130,33 +104,36 @@
 			]
 		},
 		"anki-conditional-block": {
-			"name": "meta.block.anki.conditional",
-			"match": "({{\\s*[#^\/])([#^\/\\s]*)([^#^\/\\s]+([^\\s]|\\s(?!\\s*}}))*)(\\s*)(}})",
-			"captures": {
-				"1": {
-					"name": "keyword.control.anki.conditional"
+			"begin": "[#^/]",
+			"end": "(?=}})",
+			"beginCaptures": {
+				"0": {
+					"name": "keyword.control.anki.conditional.start"
+				}
+			},
+			"patterns": [
+				{ 	"include": "#anki-template-invalid-characters" },
+				{
+					"match": ":",
+					"name": "invalid.illegal.anki.template.separator"
 				},
-				"2": {
+				{
+					"match": "(?<=[#^/\\s])[#^/]",
 					"name": "invalid.illegal.anki.conditional"
 				},
-				"3": {
-					"patterns": [
-						{ "include": "#anki-field-special" },
-						{ "include": "#anki-field" }
-					]
-				},
-				"6": {
-					"name": "keyword.control.anki.conditional"
-				}
-			}
+				{ 	"include": "#anki-field" }
+			]
 		},
 		"anki-field-special": {
 			"name": "variable.other.constant.anki.special-field",
-			"match": "(?<=[#^/\\s])(Tags|Type|Deck|Subdeck|CardFlag|Card|FrontSide)$"
+			"match": "(?<=[#^\/\\s:{}\"])(Tags|Type|Deck|Subdeck|CardFlag|Card|FrontSide)$"
 		},
 		"anki-field": {
 			"name": "variable.anki.field",
-			"match": "[^#^\/\\s:]+([^:\\s]|\\s(?!\\s*}}))*"
+			"match": "[^#^\/\\s:{}\"]+([^:{}\\s\"]|\\s(?!\\s*}}))*",
+			"captures": {
+				"0": { "patterns": [{ "include": "#anki-field-special" }] }
+			}
 		}
 	}
 }
