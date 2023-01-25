@@ -20,65 +20,50 @@ Anki documentation:
   - This is also true for the first character.
 - Special field names are a subset of normal field names.
 
+### Regex
+
+Match field name
+
 ```javascript
-// match field name
 /[^#^\/\s:\"{}]+([^:\"{}\s]|\s(?!\s*}}))*/g
+```
 
-// match field name, assuming it can't contain invalid characters: " { }
-/[^#^\/\s:]+([^:\s]|\s(?!\s*}}))*/g
+Match first character
 
-// match first character
+```javascript
 /[^#^\/\s:\"{}]+/
 
-// matches following characters, 
-// exclude spaces at the end
+```
+
+Match following characters, exclude spaces at the end
+
+```javascript
 /([^:\"{}\s]|\s(?!\s*}}))*/
 ```
 
-## Template Pattern Matching
+## Template Format
 
-### Invalid Template Characters
+- A template in Anki is opened by `{{` and closed by `}}`.
+- A template can't contain `"`, `{` or `}`. 
 
-The first pattern, `#anki-template-invalid`, tries to match any templates (anything between double curly braces) containing the invalid characters `"` `{` `}` . 
-No template is allowed to contain these characters.
-The pattern will color the double braces and the invalid characters of this template red.
-By catching these invalid characters in the first pattern, there's a guarantee they can't appear in later patterns.
+When looking at syntax highlighting, there are two main types of templates to be parsed:
 
-```json
-{
-    "include": "#anki-template-invalid"
-},
+### Conditional opening and closing
+The template serves as an opening or closing tag for an if/else block.
+
+- A template is a conditional block when the first character following the opening `{{` is a `#`, `^` or `/`.
+- There can be any number of spaces between the opening `{{` and `#`, `^` or `/`
+- A conditional opening or closing block can't contain a `:` character anywhere.
+
+#### Examples
+```
+{{#FrontField}}
+{{/FrontField}}
 ```
 
-The `"` character in this example will be marked as invalid:
-```
-{{Field"Name}}
-```
-
-### Conditional Blocks
-
-The `#anki-conditional-block` pattern matches a conditional block.
-This is a block that starts with a template like `{{#FieldName}}` or `{{^FieldName}}`, and is closed by `{{/FieldName}}`. Matching valid conditional blocks is done in two steps:
-
-Because field names can't contain the `:` character, and because the `#`, `^` and `/` characters are followed by a field name, the start and end blocks can't contain a `:` character.
-Therefore, a first pattern is used to mark the invalid `:` character in a conditional opening or closing template.
-
-After filtering the invalid character, the regex pattern matches a template that starts with double curly braces, followed by any number of spaces and a `#`, `^` or `/` character, and then containing a field name.
-One pattern is used to match the opening template and the closing template.
-`beginCapture` and `endCapture` are not used for this block because content inside the block would not receive correct syntax highlighting of the surrounding scope.
-
-Example of a conditional block:
+Any number of spaces is allowed at the start of a conditional opening or closing template.
 
 ```
-{{#FieldName}}
-    Conditional Content Here
-{{/FieldName}}
-```
-
-Spaces are allowed in conditionals:
-
-```
-{{   #    FieldName}}
-    Conditional Content Here
-{{ /  FieldName}}
+{{  #   FrontField}}
+{{ /  FrontField}}
 ```
