@@ -68,10 +68,13 @@
 			]
 		},
 		"anki-template-segment": {
-			"begin": "(?:(?<={{)|(:(?=[\\s\n]+))|(:))(?!\\s*(?:$))",
+			"begin": "(?:(?<={{)|(:(?=[\\s\n]+))|(:))(?!\\s*$)",
 			"beginCaptures": {
 				"1": {
 					"name": "invalid.illegal.anki.template.separator"
+				},
+				"2": {
+					"name": "punctuation.separator.anki.segment"
 				}
 			},
 			"end": "(?=:|}})",
@@ -94,7 +97,7 @@
 			"name": "invalid.illegal.anki.template.function.characters"
 		},
 		"anki-template-function-tts": {
-			"begin": "tts(?!-)",
+			"begin": "tts(?!(?:[^\\s]|\\s*(?:$|}})))",
 			"end": "(?=:)|(?=}})",
 			"name": "support.type.anki.function.tts"
 		},
