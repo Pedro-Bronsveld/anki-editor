@@ -18,6 +18,7 @@ Anki documentation:
 - Field name can't start or end with a space, but can contain spaces.
 - Field name can't contain template characters: `:` `"` `{` `}` .
   - This is also true for the first character.
+- The Anki field editor window doesn't allow for newline characters to be used in field names, so it's safe to assume field names can't contain `\n` .
 - Special field names are a subset of normal field names.
 
 ### Regex
@@ -25,7 +26,7 @@ Anki documentation:
 Match field name
 
 ```javascript
-/[^#^\/\s:\"{}]+([^:\"{}\s]|\s(?!\s*}}))*/g
+/[^#^\/\s:\"{}]+([^:\"{}\s]|\s(?!\s*(}}|$)))*/g
 ```
 
 Match first character
@@ -49,7 +50,7 @@ Match following characters, exclude spaces at the end
 When looking at syntax highlighting, there are two main types of templates to be parsed:
 
 ### Conditional opening and closing
-The template serves as an opening or closing tag for an if/else block.
+The template can serve as an opening or closing tag for an if/else block.
 
 - A template is a conditional block when the first character following the opening `{{` is a `#`, `^` or `/`.
 - There can be any number of spaces between the opening `{{` and `#`, `^` or `/`
