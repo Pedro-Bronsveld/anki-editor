@@ -21,7 +21,7 @@
 			"patterns": [
 				{ "include": "#anki-template-invalid-characters" },
 				{ "include": "#anki-conditional-block" },
-				{ "include": "#anki-template-segment-list" }
+				{ "include": "#anki-template-segment" }
 			],
 			"name": "source.anki.template"
 		},
@@ -50,7 +50,7 @@
 				{ 	"include": "#anki-field" }
 			]
 		},
-		"anki-template-segment-list": {
+		"anki-template-segment": {
 			"begin": "(?<={{)|(:(?=[\\s\n]+))|(:)",
 			"beginCaptures": {
 				"1": {
@@ -60,6 +60,7 @@
 			"end": "(?=:|}})",
 			"patterns": [
 				{ "include": "#anki-template-function" },
+				{ "include": "#anki-template-function-invalid-characters" },
 				{ "include": "#anki-template-function-tts" },
 				{ "include": "#anki-template-function-invalid-start" },
 				{ "include": "#anki-template-function-invalid-end" },
@@ -67,8 +68,12 @@
 			]
 		},
 		"anki-template-function": {
-			"match": "(?<=(?::|(?:{{|^)\\s*))[^\"{}\\s]+(?=:)",
+			"match": "(?<=(?::|(?:{{|^)\\s*))(tts-voices|cloze|hint|type|furigana|kana|kanji)(?=:)",
 			"name": "support.function.anki.template"
+		},
+		"anki-template-function-invalid-characters": {
+			"match": "[#^/\"{}](?=.*:)",
+			"name": "invalid.illegal.anki.template.function"
 		},
 		"anki-template-function-tts": {
 			"begin": "tts",
@@ -91,7 +96,7 @@
 		},
 		"anki-field": {
 			"name": "variable.anki.field",
-			"match": "[^#^\/\\s:{}\"]+([^:{}\\s\"]|\\s(?!\\s*(}}|$)))*",
+			"match": "[^#^\/\\s:{}\"]+([^:{}\\s\"]|\\s(?!\\s*(}}|$)))*(?!.*:)",
 			"captures": {
 				"0": { "patterns": [{ "include": "#anki-field-special" }] }
 			}
