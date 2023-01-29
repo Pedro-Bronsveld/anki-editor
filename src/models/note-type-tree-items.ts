@@ -32,6 +32,7 @@ export class CardTemplateTreeItem extends vscode.TreeItem {
         public readonly cardFolder: CardFolderTreeItem,
     ) {
         super(partsToUri(["Note Types", String(cardFolder.noteType.label), String(cardFolder.label), `${side}${TEMPLATE_EXTENSION}`]));
+        this.label = side;
     }
 }
 export class CardStylingTreeItem extends vscode.TreeItem {
