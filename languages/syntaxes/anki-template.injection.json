@@ -181,7 +181,7 @@
 			"name": "invalid.illegal.anki.template.filter.start"
 		},
 		"anki-template-filter-invalid-end": {
-			"begin": "(?<=:|^\\s*)[^\"{}\\s]+\\s+(?=:)",
+			"begin": "(?<=:|(?:^|{{)\\s*)[^\"{}\\s]+\\s+(?=:)",
 			"end": ":|(?=}})",
 			"name": "invalid.illegal.anki.template.filter.end"
 		},
