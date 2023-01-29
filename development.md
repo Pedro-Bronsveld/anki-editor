@@ -10,6 +10,7 @@ Anki documentation:
   - [Card Generation](https://docs.ankiweb.net/templates/generation.html)
   - [Styling & HTML](https://docs.ankiweb.net/templates/generation.html)
   - [Checks and Errors](https://docs.ankiweb.net/templates/errors.html)
+- [Filter Demo](https://github.com/ankitects/anki-addons/blob/main/demos/field_filter/__init__.py)
 
 ## Field name format
 

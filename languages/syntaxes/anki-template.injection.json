@@ -40,11 +40,12 @@
 			"patterns": [
 				{ "include": "#anki-template-invalid-characters" },
 				{ "include": "#anki-conditional-block" }
-			]
+			],
+			"name": "meta.anki.template.oneline.conditional"
 		},
 		"anki-template-invalid-characters": {
 			"match": "[\"{}]",
-			"name": "invalid.illegal.anki.template"
+			"name": "invalid.illegal.anki.template.characters"
 		},
 		"anki-conditional-block": {
 			"begin": "(?<=(?:^|{{)\\s*)[#^/]",
@@ -65,10 +66,11 @@
 					"name": "invalid.illegal.anki.conditional"
 				},
 				{ 	"include": "#anki-field" }
-			]
+			],
+			"name": "meta.anki.conditional.block"
 		},
 		"anki-template-segment": {
-			"begin": "(?:(?<={{)|(:(?=[\\s\n]+))|(:))(?!\\s*$)",
+			"begin": "(?:(?<={{)|(:(?=[\\s\n]+))|(:))",
 			"beginCaptures": {
 				"1": {
 					"name": "invalid.illegal.anki.template.separator"
@@ -89,17 +91,94 @@
 			"name": "meta.anki.template.segment"
 		},
 		"anki-template-function": {
-			"match": "(?<=(?::|(?:{{|^)\\s*))(tts-voices|cloze|hint|type|furigana|kana|kanji)(?=:)",
-			"name": "support.function.anki.template"
+			"match": "(?<=(?::|(?:{{|^)\\s*))([^\"{}\\s:]+)(?=:)",
+			"name": "meta.anki.template.function.$1",
+			"captures": {
+				"0": {
+					"patterns": [
+						{
+							"match": "tts-voices|cloze(?:-only)?|hint|type|text|furigana|kana|kanji",
+							"name": "support.function.anki.$1"
+						}
+					]
+				}
+			}
 		},
 		"anki-template-function-invalid-characters": {
 			"match": "[#^/\"{}]",
 			"name": "invalid.illegal.anki.template.function.characters"
 		},
 		"anki-template-function-tts": {
-			"begin": "tts(?!(?:[^\\s]|\\s*(?:$|}})))",
+			"begin": "(?:(tts(?=\\s\\S))|(tts(?=\\s{2,}\\S)))(?!\\s*(?:$|}}))",
+			"beginCaptures": {
+				"1": { "name": "support.function.anki.tts" },
+				"2": { "name": "invalid.illegal.anki.tts.spacing" }
+			},
 			"end": "(?=:)|(?=}})",
-			"name": "support.type.anki.function.tts"
+			"patterns": [
+				{ "include": "#anki-template-function-invalid-characters" },
+				{ "include": "#tts-spacing-invalid" },
+				{ "include": "#tts-language-invalid" },
+				{ "include": "#tts-language" },
+				{ "include": "#tts-language-options" }
+			],
+			"name": "meta.anki.template.function.tts"
+		},
+		"tts-language": {
+			"match": "((?<=tts\\s)[a-z]{1,2}(?:_[A-Z]{0,2})?)(\\S*)",
+			"name": "meta.anki.function.tts.language",
+			"captures": {
+				"1": { "name": "string.anki.tts.language" },
+				"2": { "name": "invalid.illegal.anki.tts.language.suffix" }
+			}
+		},
+		"tts-language-invalid": {
+			"match": "(?<=tts\\s)[^a-z]+",
+			"name": "invalid.illegal.anki.tts.language"
+		},
+		"tts-spacing-invalid": {
+			"match": "(?<=tts\\s{2,})[a-zA-Z_]+",
+			"name": "invalid.illegal.anki.tts.spacing"
+		},
+		"tts-language-options": {
+			"begin": "(?<=tts\\s+[a-zA-Z_]+\\s*)",
+			"end": "(?=:)|(?=}})",
+			"patterns": [
+				{ "include": "#anki-template-function-invalid-characters" },
+				{ "include": "#tts-language-option-value" }
+			],
+			"name": "meta.anki.tts.options"
+		},
+		"tts-language-option-value": {
+			"match": "([a-z]+)(=)([^:\\s={}\"]*)?",
+			"captures": {
+				"1": { "name": "variable.parameter.anki.tts" },
+				"2": { "name": "keyword.operator.assignment.anki" },
+				"3": {
+					"name": "meta.anki.tts.option.value",
+					"patterns": [
+						{ "include": "#tts-option-decimal" },
+						{ "include": "#tts-option-string-list" }
+					]
+				}
+			},
+			"name": "meta.anki.tts.option"
+		},
+		"tts-option-string-list": {
+			"patterns": [
+				{
+					"match": "[^\\s,]",
+					"name": "string.anki.tts.option.value"
+				},
+				{
+					"match": ",",
+					"name": "punctuation.anki.tts.option.separator"
+				}
+			]
+		},
+		"tts-option-decimal": {
+			"match": "(?<==)\\d\\.?\\d?(?=[:}\\s\n]|$)",
+			"name": "constant.numeric.anki.tts.option.decimal"
 		},
 		"anki-template-function-invalid-start": {
 			"begin": "(?<=:)(?:\\s|$)",
