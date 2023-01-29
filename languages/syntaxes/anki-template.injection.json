@@ -104,7 +104,7 @@
 			"name": "invalid.illegal.anki.template.filter.characters"
 		},
 		"anki-template-filter-tts": {
-			"begin": "(?:(tts(?=\\s\\S))|(tts(?=\\s{2,}\\S)))(?!\\s*(?:$|}}))",
+			"begin": "(?<=(?:{{|^)\\s*|:)(?:(tts(?=\\s\\S))|(tts(?=\\s{2,}\\S)))(?!\\s*(?:$|}}))",
 			"beginCaptures": {
 				"1": { "name": "support.function.anki.tts" },
 				"2": { "name": "invalid.illegal.anki.tts.spacing" }
