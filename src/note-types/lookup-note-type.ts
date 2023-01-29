@@ -3,6 +3,7 @@ import * as vscode from "vscode";
 import { getModelNames } from "../anki-connect/get-model-names";
 import { getModelStyling } from "../anki-connect/get-model-styling";
 import { getModelTemplates } from "../anki-connect/get-model-templates";
+import { TEMPLATE_EXTENSION } from "../constants";
 import Directory from "../models/directory";
 import { Entry } from "../models/entry";
 import File from "../models/file";
@@ -51,7 +52,7 @@ export const lookupNoteType = async (uri: vscode.Uri): Promise<Entry | undefined
         // Uri is a directory with card templates
         const cardTemplateDir = new Directory(cardName);
         ["Front", "Back"]
-            .map(side => `${side}.html`)
+            .map(side => `${side}${TEMPLATE_EXTENSION}`)
             .forEach(fileName => {
                 cardTemplateDir.entries.set(fileName, new File(fileName));
             });

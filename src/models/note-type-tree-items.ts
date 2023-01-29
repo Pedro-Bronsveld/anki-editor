@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { TEMPLATE_EXTENSION } from '../constants';
 import { escapeText } from '../note-types/escape-uri';
 import { partsToUri } from '../note-types/uri-parser';
 
@@ -30,7 +31,7 @@ export class CardTemplateTreeItem extends vscode.TreeItem {
         public readonly side: "Front" | "Back",
         public readonly cardFolder: CardFolderTreeItem,
     ) {
-        super(partsToUri(["Note Types", String(cardFolder.noteType.label), String(cardFolder.label), `${side}.html`]));
+        super(partsToUri(["Note Types", String(cardFolder.noteType.label), String(cardFolder.label), `${side}${TEMPLATE_EXTENSION}`]));
     }
 }
 export class CardStylingTreeItem extends vscode.TreeItem {
