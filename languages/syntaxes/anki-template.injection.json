@@ -172,7 +172,7 @@
 			]
 		},
 		"tts-option-decimal": {
-			"match": "(?<==)\\d\\.?\\d?(?=[:}\\s\n]|$)",
+			"match": "(?<==)\\d*\\.?\\d*(?=[:}\\s\n]|$)",
 			"name": "constant.numeric.anki.tts.option.decimal"
 		},
 		"anki-template-filter-invalid-start": {
