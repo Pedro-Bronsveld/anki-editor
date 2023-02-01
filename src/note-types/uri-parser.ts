@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { ANKI_EDITOR_SCHEME } from '../constants';
 import { escapeCardName, escapeText, unescapeCardName, unescapeText } from './escape-uri';
 
 export const uriPathToParts = (uri: vscode.Uri): string[] => {
@@ -31,5 +32,5 @@ export const partsToUri = (parts: string[]): vscode.Uri => {
     }
 
     const path = resultParts.join("/");
-    return vscode.Uri.parse(`ankieditor:/${path}`);
+    return vscode.Uri.parse(`${ANKI_EDITOR_SCHEME}${path}`);
 }

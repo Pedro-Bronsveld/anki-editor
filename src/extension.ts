@@ -2,6 +2,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import { AnkiEditorFs } from './anki-editor-filesystem';
+import { ANKI_EDITOR_SCHEME } from './constants';
 import { NoteTypesTreeProvider } from './note-types-tree-provider';
 
 // This method is called when your extension is activated
@@ -15,13 +16,13 @@ export function activate(context: vscode.ExtensionContext) {
 	// Create Anki Eidtor Filesystem
 	const ankiCardFs = new AnkiEditorFs();
 	context.subscriptions.push(
-			vscode.workspace.registerFileSystemProvider('ankieditor', ankiCardFs, { isCaseSensitive: true })
+			vscode.workspace.registerFileSystemProvider('anki-editor', ankiCardFs, { isCaseSensitive: true })
 		);
 
 	// Add command to add anki editor root folder to workspace
 	context.subscriptions.push(vscode.commands.registerCommand('anki-editor.openAsFolder', _ => {
-			// vscode.workspace.updateWorkspaceFolders(0, 0, { uri: vscode.Uri.parse('ankieditor:/'), name: "Anki Editor" });
-			vscode.commands.executeCommand('vscode.openFolder', vscode.Uri.parse("ankieditor:/"));
+			// vscode.workspace.updateWorkspaceFolders(0, 0, { uri: vscode.Uri.parse('anki-editor:'), name: "Anki Editor" });
+			vscode.commands.executeCommand('vscode.openFolder', vscode.Uri.parse(`${ANKI_EDITOR_SCHEME}`));
 		}));
 
 	// Register note type tree

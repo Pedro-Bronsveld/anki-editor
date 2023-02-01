@@ -12,7 +12,7 @@
   "activationEvents": [
     "onCommand:anki-editor.helloWorld",
     "anki-editor.workspaceInit",
-    "onFileSystem:ankieditor"
+    "onFileSystem:anki-editor"
   ],
   "main": "./out/extension.js",
   "contributes": {

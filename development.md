@@ -1,7 +1,7 @@
 # Development
 
 ##  Uri Schema
-`ankieditor:<ModelName>/<Card #|Styling>/<Back|Front>`
+`anki-editor:Note Types/<ModelName>/<Card #|Styling>/<Back|Front>`
 
 ## Anki Card Templates
 Anki documentation:
