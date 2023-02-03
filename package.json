@@ -23,11 +23,11 @@
         "category": "Anki Editor"
       },
       {
-				"command": "anki-editor.openAsFolder",
-				"title": "Open as folder",
-				"category": "Anki Editor",
+        "command": "anki-editor.openAsFolder",
+        "title": "Open as folder",
+        "category": "Anki Editor",
         "icon": "$(root-folder-opened)"
-			},
+      },
       {
         "command": "anki-editor.refreshNoteTypesTree",
         "title": "Refresh Note Types",
@@ -66,12 +66,19 @@
         }
       ]
     },
-    "languages": [{
-      "id": "anki",
-      "aliases": ["AnkiTemplate", "anki"],
-      "extensions": [".template.anki"],
-      "configuration": "./languages/language-configuration.json"
-    }],
+    "languages": [
+      {
+        "id": "anki",
+        "aliases": [
+          "AnkiTemplate",
+          "anki"
+        ],
+        "extensions": [
+          ".template.anki"
+        ],
+        "configuration": "./languages/language-configuration.json"
+      }
+    ],
     "grammars": [
       {
         "language": "anki",
@@ -88,13 +95,15 @@
       {
         "path": "./languages/syntaxes/anki-template.injection.json",
         "scopeName": "source.anki",
-        "injectTo": ["text.html.anki"]
+        "injectTo": [
+          "text.html.anki"
+        ]
       }
     ]
   },
   "scripts": {
     "vscode:prepublish": "npm run esbuild-base -- --minify",
-    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node",
+    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/extension.js --external:vscode --external:vscode-html-languageservice --format=cjs --platform=node",
     "build": "npm run esbuild-base -- --sourcemap",
     "watch": "npm run esbuild-base -- --sourcemap --watch",
     "pretest": "npm run compile && npm run lint",
@@ -114,7 +123,8 @@
     "eslint": "^8.28.0",
     "glob": "^8.0.3",
     "mocha": "^10.1.0",
-    "typescript": "^4.9.3"
+    "typescript": "^4.9.3",
+    "vscode-html-languageservice": "^5.0.4"
   },
   "dependencies": {
     "@autoanki/anki-connect": "^0.1.1"

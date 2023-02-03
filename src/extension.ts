@@ -1,8 +1,13 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import { Hover } from 'vscode';
+import { Position } from 'vscode-html-languageservice';
 import { AnkiEditorFs } from './anki-editor-filesystem';
 import { ANKI_EDITOR_SCHEME } from './constants';
+import { getEmbbeddedDocument } from './language-service/embedded-document';
+import TemplateHoverProvider from './language-service/template-hover-provider';
+import VirtualDocumentProvider from './language-service/virtual-documents-provider';
 import { NoteTypesTreeProvider } from './note-types-tree-provider';
 
 // This method is called when your extension is activated
@@ -53,6 +58,16 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	context.subscriptions.push(disposable);
+
+	const virtualDocumentProvider = new VirtualDocumentProvider();
+	const templateHoverProvider = new TemplateHoverProvider(virtualDocumentProvider);
+
+	vscode.workspace.registerTextDocumentContentProvider('anki-editor-embedded', virtualDocumentProvider);
+
+	context.subscriptions.push(
+		vscode.languages.registerHoverProvider({ language: "anki", pattern: "**/*.template.anki" }, templateHoverProvider)
+	);
+	
 }
 
 // This method is called when your extension is deactivated
