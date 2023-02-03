@@ -1,11 +1,10 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import { Hover } from 'vscode';
-import { Position } from 'vscode-html-languageservice';
 import { AnkiEditorFs } from './anki-editor-filesystem';
 import { ANKI_EDITOR_SCHEME } from './constants';
 import { getEmbbeddedDocument } from './language-service/embedded-document';
+import { runHoverProviderDummy } from './language-service/hover-provider-dummy';
 import TemplateHoverProvider from './language-service/template-hover-provider';
 import VirtualDocumentProvider from './language-service/virtual-documents-provider';
 import { NoteTypesTreeProvider } from './note-types-tree-provider';
@@ -62,11 +61,17 @@ export function activate(context: vscode.ExtensionContext) {
 	const virtualDocumentProvider = new VirtualDocumentProvider();
 	const templateHoverProvider = new TemplateHoverProvider(virtualDocumentProvider);
 
-	vscode.workspace.registerTextDocumentContentProvider('anki-editor-embedded', virtualDocumentProvider);
+	context.subscriptions.push(
+		vscode.workspace.registerTextDocumentContentProvider('anki-editor-embedded', virtualDocumentProvider)
+	);
 
 	context.subscriptions.push(
 		vscode.languages.registerHoverProvider({ language: "anki", pattern: "**/*.template.anki" }, templateHoverProvider)
 	);
+
+	// Hack to work around vscode only providing hover information after the first 2 hovers
+	// for embedded javascript. Simply performs two dummy hovers when the extension activates.
+	runHoverProviderDummy(virtualDocumentProvider);
 	
 }
 
