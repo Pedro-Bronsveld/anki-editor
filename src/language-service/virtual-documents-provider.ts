@@ -6,8 +6,7 @@ export default class VirtualDocumentProvider implements vscode.TextDocumentConte
     constructor() {}
     
     provideTextDocumentContent(uri: vscode.Uri, token: vscode.CancellationToken): vscode.ProviderResult<string> {
-        const doc = this.documents.get(uri.toString());
-        return doc;
+        return this.documents.get(uri.toString());
     }
 
     setDocumentContent(uri: vscode.Uri, document: string) {

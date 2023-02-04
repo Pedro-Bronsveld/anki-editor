@@ -3,10 +3,10 @@
 import * as vscode from 'vscode';
 import { AnkiEditorFs } from './anki-editor-filesystem';
 import { ANKI_EDITOR_SCHEME } from './constants';
-import { getEmbbeddedDocument } from './language-service/embedded-document';
 import { runHoverProviderDummy } from './language-service/hover-provider-dummy';
 import TemplateCompletionItemProvider from './language-service/template-completion-item-provider';
 import TemplateHoverProvider from './language-service/template-hover-provider';
+import TemplateSignatureHelpProvider from './language-service/template-signature-help-provider';
 import VirtualDocumentProvider from './language-service/virtual-documents-provider';
 import { NoteTypesTreeProvider } from './note-types-tree-provider';
 
@@ -62,6 +62,7 @@ export function activate(context: vscode.ExtensionContext) {
 	const virtualDocumentProvider = new VirtualDocumentProvider();
 	const templateHoverProvider = new TemplateHoverProvider(virtualDocumentProvider);
 	const templateCompletionItemProvider = new TemplateCompletionItemProvider(virtualDocumentProvider);
+	const templateSignatureHelpProvider = new TemplateSignatureHelpProvider(virtualDocumentProvider);
 
 	context.subscriptions.push(
 		vscode.workspace.registerTextDocumentContentProvider('anki-editor-embedded', virtualDocumentProvider)
@@ -72,7 +73,11 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 
 	context.subscriptions.push(
-		vscode.languages.registerCompletionItemProvider({ language: "anki" }, templateCompletionItemProvider)
+		vscode.languages.registerCompletionItemProvider({ language: "anki" }, templateCompletionItemProvider, ".")
+	);
+
+	context.subscriptions.push(
+		vscode.languages.registerSignatureHelpProvider({ language: "anki" }, templateSignatureHelpProvider, "(")
 	);
 
 	// Hack to work around vscode only providing hover information after the first 2 hovers
