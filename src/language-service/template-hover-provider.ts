@@ -1,14 +1,10 @@
 import * as vscode from 'vscode';
-import { getEmbbeddedDocument } from './embedded-document';
-import VirtualDocumentProvider from './virtual-documents-provider';
+import LanguageFeatureProviderBase from './language-feature-provider-base';
 
-export default class TemplateHoverProvider implements vscode.HoverProvider {
+export default class TemplateHoverProvider extends LanguageFeatureProviderBase implements vscode.HoverProvider {
 
-    constructor(private virtualDocumentProvider: VirtualDocumentProvider) {}
-    
     async provideHover(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Promise<vscode.Hover | null | undefined> {
-        const embeddedDocument = getEmbbeddedDocument(document, position);
-        this.virtualDocumentProvider.setDocumentContent(embeddedDocument.virtualUri, embeddedDocument.content);
+        const embeddedDocument = super.getEmbedded(document, position);
 
         console.log("hover");
 

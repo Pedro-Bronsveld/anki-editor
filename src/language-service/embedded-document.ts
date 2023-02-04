@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { getLanguageService, TokenType } from 'vscode-html-languageservice';
 
-type EmbeddedDocument = {
+export type EmbeddedDocument = {
     languageId: string,
     content: string,
     virtualUri: vscode.Uri
@@ -9,13 +9,13 @@ type EmbeddedDocument = {
 
 export const getEmbbeddedDocument = (document: vscode.TextDocument, position: vscode.Position): EmbeddedDocument => {
     
-    const embeddedRegion = getEmbeddedContent(document, position);
+    const embeddedContent = getEmbeddedContent(document, position);
 
-    const virtualUri = createVirtualUri(embeddedRegion.languageId, embeddedRegion.fileExtension, document.uri);
+    const virtualUri = createVirtualUri(embeddedContent.languageId, embeddedContent.fileExtension, document.uri);
 
     return {
-        languageId: embeddedRegion.languageId,
-        content: embeddedRegion.content,
+        languageId: embeddedContent.languageId,
+        content: embeddedContent.content,
         virtualUri,
     }
 }
