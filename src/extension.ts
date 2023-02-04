@@ -5,6 +5,7 @@ import { AnkiEditorFs } from './anki-editor-filesystem';
 import { ANKI_EDITOR_SCHEME } from './constants';
 import { getEmbbeddedDocument } from './language-service/embedded-document';
 import { runHoverProviderDummy } from './language-service/hover-provider-dummy';
+import TemplateCompletionItemProvider from './language-service/template-completion-item-provider';
 import TemplateHoverProvider from './language-service/template-hover-provider';
 import VirtualDocumentProvider from './language-service/virtual-documents-provider';
 import { NoteTypesTreeProvider } from './note-types-tree-provider';
@@ -60,13 +61,18 @@ export function activate(context: vscode.ExtensionContext) {
 
 	const virtualDocumentProvider = new VirtualDocumentProvider();
 	const templateHoverProvider = new TemplateHoverProvider(virtualDocumentProvider);
+	const templateCompletionItemProvider = new TemplateCompletionItemProvider(virtualDocumentProvider);
 
 	context.subscriptions.push(
 		vscode.workspace.registerTextDocumentContentProvider('anki-editor-embedded', virtualDocumentProvider)
 	);
 
 	context.subscriptions.push(
-		vscode.languages.registerHoverProvider({ language: "anki", pattern: "**/*.template.anki" }, templateHoverProvider)
+		vscode.languages.registerHoverProvider({ language: "anki" }, templateHoverProvider)
+	);
+
+	context.subscriptions.push(
+		vscode.languages.registerCompletionItemProvider({ language: "anki" }, templateCompletionItemProvider)
 	);
 
 	// Hack to work around vscode only providing hover information after the first 2 hovers
