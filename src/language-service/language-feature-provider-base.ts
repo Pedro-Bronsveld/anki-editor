@@ -15,8 +15,8 @@ export default abstract class LanguageFeatureProviderBase {
      * @returns {EmbeddedDocument}
      * @memberof TemplateBaseProvider
      */
-    protected getEmbedded(document: vscode.TextDocument, position: vscode.Position): EmbeddedDocument {
-        const embeddedDocument = getEmbbeddedDocument(document, position);
+    protected getEmbedded(document: vscode.TextDocument, position: vscode.Position, asLanguageId?: string): EmbeddedDocument {
+        const embeddedDocument = getEmbbeddedDocument(document, position, asLanguageId);
         this.virtualDocumentProvider.setDocumentContent(embeddedDocument.virtualUri, embeddedDocument.content);
         return embeddedDocument;
     }

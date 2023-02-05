@@ -7,9 +7,9 @@ export type EmbeddedDocument = {
     virtualUri: vscode.Uri
 }
 
-export const getEmbbeddedDocument = (document: vscode.TextDocument, position: vscode.Position): EmbeddedDocument => {
+export const getEmbbeddedDocument = (document: vscode.TextDocument, position: vscode.Position, asLanguageId?: string): EmbeddedDocument => {
     
-    const embeddedContent = getEmbeddedContent(document, position);
+    const embeddedContent = getEmbeddedContent(document, position, asLanguageId);
 
     const virtualUri = createVirtualUri(embeddedContent.languageId, embeddedContent.fileExtension, document.uri);
 
@@ -36,7 +36,7 @@ interface EmbeddedContent {
  * @param {vscode.Position} position
  * @returns {EmbeddedContent}
  */
-const getEmbeddedContent = (document: vscode.TextDocument, position: vscode.Position): EmbeddedContent => {
+const getEmbeddedContent = (document: vscode.TextDocument, position: vscode.Position, asLanguageId?: string): EmbeddedContent => {
     const htmlLanguageService = getLanguageService();
 	const scanner = htmlLanguageService.createScanner(document.getText());
     const offset = document.offsetAt(position);
@@ -45,7 +45,7 @@ const getEmbeddedContent = (document: vscode.TextDocument, position: vscode.Posi
 	while (token !== TokenType.EOS) {
 		switch (token) {
 			case TokenType.Script:
-				if (offset >= scanner.getTokenOffset() && offset <= scanner.getTokenEnd()) {
+				if ((!asLanguageId || asLanguageId === "javascript") && offset >= scanner.getTokenOffset() && offset <= scanner.getTokenEnd()) {
                     return {
                         languageId: "javascript",
                         fileExtension: "js",
