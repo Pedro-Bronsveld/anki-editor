@@ -7,6 +7,7 @@ import { runHoverProviderDummy } from './language-service/hover-provider-dummy';
 import TemplateCompletionItemProvider from './language-service/template-completion-item-provider';
 import TemplateHoverProvider from './language-service/template-hover-provider';
 import TemplateRenameProvider from './language-service/template-rename-provider';
+import TemplateSemanticTokenProvider from './language-service/template-semantic-token-provider';
 import TemplateSignatureHelpProvider from './language-service/template-signature-help-provider';
 import VirtualDocumentProvider from './language-service/virtual-documents-provider';
 import { NoteTypesTreeProvider } from './note-types-tree-provider';
@@ -61,6 +62,8 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(disposable);
 
 	const virtualDocumentProvider = new VirtualDocumentProvider();
+	const templateTokenLegend = new vscode.SemanticTokensLegend(['class', 'interface', 'enum', 'function', 'variable'], ['declaration', 'documentation', 'readonly']);
+	const templateSemanticTokenProvider = new TemplateSemanticTokenProvider(virtualDocumentProvider, templateTokenLegend);
 	const templateHoverProvider = new TemplateHoverProvider(virtualDocumentProvider);
 	const templateCompletionItemProvider = new TemplateCompletionItemProvider(virtualDocumentProvider);
 	const templateSignatureHelpProvider = new TemplateSignatureHelpProvider(virtualDocumentProvider);
@@ -68,6 +71,10 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(
 		vscode.workspace.registerTextDocumentContentProvider('anki-editor-embedded', virtualDocumentProvider)
+	);
+
+	context.subscriptions.push(
+		vscode.languages.registerDocumentSemanticTokensProvider({ language: "anki" }, templateSemanticTokenProvider, templateTokenLegend)
 	);
 
 	context.subscriptions.push(
