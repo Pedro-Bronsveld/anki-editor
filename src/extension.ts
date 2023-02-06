@@ -106,6 +106,9 @@ export function activate(context: vscode.ExtensionContext) {
 			templateDiagnosticsProvider.updateDiagnostics(editor.document, diagnosticCollection);
 		}
 	}));
+	context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(event => {
+			templateDiagnosticsProvider.updateDiagnostics(event.document, diagnosticCollection);
+	}));
 
 	// Hack to work around vscode only providing hover information after the first 2 hovers
 	// for embedded javascript. Simply performs two dummy hovers when the extension activates.
