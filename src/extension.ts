@@ -5,6 +5,7 @@ import { AnkiEditorFs } from './anki-editor-filesystem';
 import { ANKI_EDITOR_SCHEME } from './constants';
 import { runHoverProviderDummy } from './language-service/hover-provider-dummy';
 import TemplateCompletionItemProvider from './language-service/template-completion-item-provider';
+import TemplateDiagnosticsProvider from './language-service/template-diagnostics-collection';
 import TemplateHoverProvider from './language-service/template-hover-provider';
 import TemplateRenameProvider from './language-service/template-rename-provider';
 import TemplateSemanticTokenProvider from './language-service/template-semantic-token-provider';
@@ -61,13 +62,17 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(disposable);
 
+	// Language service features
 	const virtualDocumentProvider = new VirtualDocumentProvider();
+	const diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection('anki');
 	const templateTokenLegend = new vscode.SemanticTokensLegend(['class', 'interface', 'enum', 'function', 'variable'], ['declaration', 'documentation', 'readonly']);
+	
 	const templateSemanticTokenProvider = new TemplateSemanticTokenProvider(virtualDocumentProvider, templateTokenLegend);
 	const templateHoverProvider = new TemplateHoverProvider(virtualDocumentProvider);
 	const templateCompletionItemProvider = new TemplateCompletionItemProvider(virtualDocumentProvider);
 	const templateSignatureHelpProvider = new TemplateSignatureHelpProvider(virtualDocumentProvider);
 	const templateRenameProvider = new TemplateRenameProvider(virtualDocumentProvider);
+	const templateDiagnosticsProvider = new TemplateDiagnosticsProvider(virtualDocumentProvider);
 
 	context.subscriptions.push(
 		vscode.workspace.registerTextDocumentContentProvider('anki-editor-embedded', virtualDocumentProvider)
@@ -92,6 +97,15 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.languages.registerRenameProvider({ language: "anki" }, templateRenameProvider)
 	);
+
+	if (vscode.window.activeTextEditor) {
+		templateDiagnosticsProvider.updateDiagnostics(vscode.window.activeTextEditor.document, diagnosticCollection);
+	}
+	context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(editor => {
+		if (editor) {
+			templateDiagnosticsProvider.updateDiagnostics(editor.document, diagnosticCollection);
+		}
+	}));
 
 	// Hack to work around vscode only providing hover information after the first 2 hovers
 	// for embedded javascript. Simply performs two dummy hovers when the extension activates.

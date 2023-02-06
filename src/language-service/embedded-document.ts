@@ -1,33 +1,16 @@
 import * as vscode from 'vscode';
 import { getLanguageService, TokenType } from 'vscode-html-languageservice';
 
-export type EmbeddedDocument = {
-    languageId: string,
-    content: string,
-    virtualUri: vscode.Uri
-}
-
-export const getEmbbeddedDocument = (document: vscode.TextDocument, position: vscode.Position, asLanguageId?: string): EmbeddedDocument => {
-    
-    const embeddedContent = getEmbeddedContent(document, position, asLanguageId);
-
-    const virtualUri = createVirtualUri(embeddedContent.languageId, embeddedContent.fileExtension, document.uri);
-
-    return {
-        languageId: embeddedContent.languageId,
-        content: embeddedContent.content,
-        virtualUri,
-    }
+export interface LanguageRegion {
+    languageId: string;
+    fileExtension: string;
+    content: string;
+    start: number;
+    end: number;
 }
 
 export const createVirtualUri = (languageId: string, fileExtension: string, originalUri: vscode.Uri) => 
     vscode.Uri.parse(`anki-editor-embedded:/${languageId}${originalUri.path}.${fileExtension}`);
-
-interface EmbeddedContent {
-	languageId: string;
-    fileExtension: string;
-    content: string;
-}
 
 /**
  * Extract a language id, file extension and content string from a given html document at a position.
@@ -36,30 +19,73 @@ interface EmbeddedContent {
  * @param {vscode.Position} position
  * @returns {EmbeddedContent}
  */
-const getEmbeddedContent = (document: vscode.TextDocument, position: vscode.Position, asLanguageId?: string): EmbeddedContent => {
+export const getLanguageRegionAtPosition = (document: vscode.TextDocument, position: vscode.Position): LanguageRegion => {
+    const languageRegions = getLanguageRegions(document);
+    const offset = document.offsetAt(position);
+
+    for (const region of languageRegions) {
+        if (offset >= region.start && offset <= region.end)
+            return region;
+    }
+
+    return defaultLanguageRegion(document);
+}
+
+export const getLanguageRegionByLanguage = (document: vscode.TextDocument, languageId: string): LanguageRegion | undefined => {
+    const languageRegions = getLanguageRegions(document);
+    
+    for (const region of languageRegions) {
+        if (region.languageId === languageId)
+            return region;
+    }
+
+    return undefined
+}
+
+const getLanguageRegions = (document: vscode.TextDocument): LanguageRegion[] => {
     const htmlLanguageService = getLanguageService();
 	const scanner = htmlLanguageService.createScanner(document.getText());
-    const offset = document.offsetAt(position);
+
+    const languageRegions: LanguageRegion[] = [];
 
     let token = scanner.scan();
 	while (token !== TokenType.EOS) {
 		switch (token) {
 			case TokenType.Script:
-				if ((!asLanguageId || asLanguageId === "javascript") && offset >= scanner.getTokenOffset() && offset <= scanner.getTokenEnd()) {
-                    return {
-                        languageId: "javascript",
-                        fileExtension: "js",
-                        content: blankOutSurrounding(document.getText(), scanner.getTokenOffset(), scanner.getTokenEnd())
-                    }
-				}
+                languageRegions.push({
+                    languageId: "javascript",
+                    fileExtension: "js",
+                    content: blankOutSurrounding(document.getText(), scanner.getTokenOffset(), scanner.getTokenEnd()),
+                    start: scanner.getTokenOffset(),
+                    end: scanner.getTokenEnd()
+                });
+                break;
+            case TokenType.Styles:
+                languageRegions.push({
+                    languageId: "css",
+                    fileExtension: "css",
+                    content: blankOutSurrounding(document.getText(), scanner.getTokenOffset(), scanner.getTokenEnd()),
+                    start: scanner.getTokenOffset(),
+                    end: scanner.getTokenEnd()
+                });
+                break;
 		}
 		token = scanner.scan();
 	}
 
+    languageRegions.push(defaultLanguageRegion(document));
+
+    return languageRegions;
+}
+
+const defaultLanguageRegion = (document: vscode.TextDocument): LanguageRegion => {
+    const htmlContent = document.getText();
     return {
         languageId: "html",
         fileExtension: "html",
-        content: document.getText()
+        content: htmlContent,
+        start: 0,
+        end: htmlContent.length 
     }
 }
 
