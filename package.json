@@ -123,11 +123,11 @@
     "eslint": "^8.28.0",
     "glob": "^8.0.3",
     "mocha": "^10.1.0",
-    "typescript": "^4.9.3",
-    "vscode-css-languageservice": "^6.2.3",
-    "vscode-html-languageservice": "^5.0.4"
+    "typescript": "^4.9.3"
   },
   "dependencies": {
-    "@autoanki/anki-connect": "^0.1.1"
+    "@autoanki/anki-connect": "^0.1.1",
+    "vscode-css-languageservice": "^6.2.3",
+    "vscode-html-languageservice": "^5.0.4"
   }
 }
