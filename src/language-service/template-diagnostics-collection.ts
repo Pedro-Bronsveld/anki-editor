@@ -26,7 +26,22 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
         const stylesheet =this.cssLanguageService.parseStylesheet(cssDocument);
         const diagnostics = this.cssLanguageService.doValidation(cssDocument, stylesheet);
 
-        collection.set(document.uri, diagnostics as unknown as vscode.Diagnostic[]);
+        // Map from css language service types to vscode types
+        const transformedDiagnostics: vscode.Diagnostic[] = diagnostics.map(d => ({
+            ...d,
+            severity: d.severity ? d.severity - 1 : 3,
+            range: new vscode.Range(
+                new vscode.Position(d.range.start.line, d.range.start.character), 
+                new vscode.Position(d.range.end.line, d.range.end.character)),
+            relatedInformation: d.relatedInformation?.map(r => new vscode.DiagnosticRelatedInformation(
+                new vscode.Location(vscode.Uri.parse(r.location.uri), new vscode.Range(
+                    new vscode.Position(r.location.range.start.line, r.location.range.start.character),
+                    new vscode.Position(r.location.range.end.line, r.location.range.end.character))), r.message
+                )
+            )
+        }));
+
+        collection.set(document.uri, transformedDiagnostics);
 
         return;
     }
