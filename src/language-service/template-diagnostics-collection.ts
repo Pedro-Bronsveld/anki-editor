@@ -79,10 +79,14 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
             );
     
             const diagnostics = this.languageService.getSemanticDiagnostics(fileName);
+            this.project.removeSourceFile(jsSourceFile);
     
             const transformedDiagnostics: vscode.Diagnostic[] = diagnostics.map(dia => ({
                 ...dia,
-                range: new vscode.Range(document.positionAt(dia.start ?? 0), document.positionAt((dia.start ?? 0) + (dia.length ?? 0))),
+                range: new vscode.Range(
+                    document.positionAt(dia.start ?? 0),
+                    document.positionAt((dia.start ?? 0) + (dia.length ?? 0))
+                ),
                 message: typeof dia.messageText === "string" ? dia.messageText : this.flattenDiagnosticMessageChain(dia.messageText).join("\n"),
                 severity: this.severityMap[dia.category],
                 relatedInformation: dia.relatedInformation?.map(rel => ({
@@ -93,7 +97,9 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                             document.positionAt(rel.start ?? 0),
                             document.positionAt((rel.start ?? 0) + (rel.length ?? 0)))
                     ),
-                    message: typeof rel.messageText === "string" ? rel.messageText : this.flattenDiagnosticMessageChain(rel.messageText).join("\n"),
+                    message: typeof rel.messageText === "string" 
+                        ? rel.messageText
+                        : this.flattenDiagnosticMessageChain(rel.messageText).join("\n"),
                 }))
             }));
     
