@@ -4,7 +4,7 @@ import LanguageFeatureProviderBase from './language-feature-provider-base';
 export default class TemplateHoverProvider extends LanguageFeatureProviderBase implements vscode.HoverProvider {
 
     async provideHover(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Promise<vscode.Hover | null | undefined> {
-        const embeddedDocument = super.getEmbeddedByPosition(document, position);
+        const embeddedDocument = super.getEmbeddedByPosition(document, position, true);
 
         console.log("hover");
 

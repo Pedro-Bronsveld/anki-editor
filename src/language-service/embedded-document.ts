@@ -19,8 +19,8 @@ export const createVirtualUri = (languageId: string, fileExtension: string, orig
  * @param {vscode.Position} position
  * @returns {EmbeddedContent}
  */
-export const getLanguageRegionAtPosition = (document: vscode.TextDocument, position: vscode.Position): LanguageRegion => {
-    const languageRegions = getLanguageRegions(document);
+export const getLanguageRegionAtPosition = (document: vscode.TextDocument, position: vscode.Position, combineByLanguage: boolean = false): LanguageRegion => {
+    const languageRegions = getLanguageRegions(document, combineByLanguage);
     const offset = document.offsetAt(position);
 
     for (const region of languageRegions) {
