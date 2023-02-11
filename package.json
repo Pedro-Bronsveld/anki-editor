@@ -127,6 +127,7 @@
   },
   "dependencies": {
     "@autoanki/anki-connect": "^0.1.1",
+    "@ts-morph/bootstrap": "^0.18.0",
     "vscode-css-languageservice": "^6.2.3",
     "vscode-html-languageservice": "^5.0.4"
   }
