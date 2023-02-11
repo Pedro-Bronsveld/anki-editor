@@ -4,7 +4,7 @@ import LanguageFeatureProviderBase from './language-feature-provider-base';
 export default class TemplateCompletionItemProvider extends LanguageFeatureProviderBase implements vscode.CompletionItemProvider {
     
     async provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext): Promise<vscode.CompletionItem[] | vscode.CompletionList<vscode.CompletionItem> | null | undefined> {        
-        const embeddedDocument = super.getEmbeddedByPosition(document, position);
+        const embeddedDocument = this.getEmbeddedByPosition(document, position);
 
         const completionList = await vscode.commands.executeCommand<vscode.CompletionList>(
             'vscode.executeCompletionItemProvider',

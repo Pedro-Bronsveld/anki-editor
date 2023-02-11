@@ -11,7 +11,7 @@ export default class TemplateSemanticTokenProvider extends LanguageFeatureProvid
     async provideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SemanticTokens | null | undefined> {
         return undefined;
         // const position = new vscode.Position(54, 0);
-        // const embeddedDocument = super.getEmbeddedByLanguage(document, "javascript");
+        // const embeddedDocument = this.getEmbeddedByLanguage(document, "javascript");
 
         // if (!embeddedDocument)
         //     return undefined;
