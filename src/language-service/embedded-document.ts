@@ -32,8 +32,8 @@ export const getLanguageRegionAtPosition = (document: vscode.TextDocument, posit
 }
 
 export const getLanguageRegionByLanguage = (document: vscode.TextDocument, languageId: string): LanguageRegion | undefined => {
-    const languageRegions = getLanguageRegions(document);
-    
+    const languageRegions = getLanguageRegions(document, true);
+
     for (const region of languageRegions) {
         if (region.languageId === languageId)
             return region;
@@ -42,7 +42,7 @@ export const getLanguageRegionByLanguage = (document: vscode.TextDocument, langu
     return undefined
 }
 
-const getLanguageRegions = (document: vscode.TextDocument): LanguageRegion[] => {
+const getLanguageRegions = (document: vscode.TextDocument, combineByLanguage: boolean = false): LanguageRegion[] => {
     const htmlLanguageService = getLanguageService();
 	const scanner = htmlLanguageService.createScanner(document.getText());
 
@@ -73,9 +73,25 @@ const getLanguageRegions = (document: vscode.TextDocument): LanguageRegion[] => 
 		token = scanner.scan();
 	}
 
-    languageRegions.push(defaultLanguageRegion(document));
-
-    return languageRegions;
+    const outputLanguageRegions = combineByLanguage
+        ? Array.from(languageRegions.reduce((output, region) => {
+            output.get(region.languageId)?.push(region) ?? output.set(region.languageId, [region]);
+            return output;
+        }, new Map<string, LanguageRegion[]>()))
+        .map<LanguageRegion>(([languageId, regions]) => 
+        ({
+            languageId,
+            fileExtension: regions[0].fileExtension,
+            content: regions.slice(1).reduce((outputContent, region) => 
+                replaceRange(outputContent, region.start, region.end, region.content.substring(region.start, region.end)), regions[0].content),
+            start: regions[0].start,
+            end: regions[regions.length-1].end
+        }))
+        : languageRegions;
+    
+    outputLanguageRegions.push(defaultLanguageRegion(document));
+    
+    return outputLanguageRegions;
 }
 
 const defaultLanguageRegion = (document: vscode.TextDocument): LanguageRegion => {
@@ -93,3 +109,6 @@ const blankOutSurrounding = (content: string, start: number, end: number) =>
     content.slice(0, start).replace(/[^\n\r]/g, " ") +
     content.slice(start, end) + 
     content.slice(end).replace(/[^\n\r]/g, " ");
+
+const replaceRange = (text: string, start: number, end: number, substitute: string) =>
+    text.substring(0, start) + substitute + text.substring(end);
