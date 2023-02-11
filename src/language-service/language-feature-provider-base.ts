@@ -15,8 +15,8 @@ export default abstract class LanguageFeatureProviderBase {
      * @returns {EmbeddedDocument}
      * @memberof TemplateBaseProvider
      */
-    protected getEmbeddedByPosition(document: vscode.TextDocument, position: vscode.Position, combineByLanguage: boolean = false): EmbeddedDocument {
-        const languageRegion = getLanguageRegionAtPosition(document, position, combineByLanguage);
+    protected getEmbeddedByPosition(document: vscode.TextDocument, position: vscode.Position): EmbeddedDocument {
+        const languageRegion = getLanguageRegionAtPosition(document, position);
 
         return this.toEmbeddedDocument(languageRegion, document.uri);
     }

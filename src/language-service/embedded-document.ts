@@ -19,30 +19,30 @@ export const createVirtualUri = (languageId: string, fileExtension: string, orig
  * @param {vscode.Position} position
  * @returns {EmbeddedContent}
  */
-export const getLanguageRegionAtPosition = (document: vscode.TextDocument, position: vscode.Position, combineByLanguage: boolean = false): LanguageRegion => {
-    const languageRegions = getLanguageRegions(document, combineByLanguage);
+export const getLanguageRegionAtPosition = (document: vscode.TextDocument, position: vscode.Position): LanguageRegion => {
+    const languageRegions = getLanguageRegions(document);
     const offset = document.offsetAt(position);
 
-    for (const region of languageRegions) {
-        if (offset >= region.start && offset <= region.end)
-            return region;
-    }
+    const positionRegion = languageRegions.find(region => offset >= region.start && offset <= region.end)
 
-    return defaultLanguageRegion(document);
+    if (!positionRegion)
+        return defaultLanguageRegion(document);
+
+    const resultRegion = combineLanguageRegionsById(languageRegions).find(region => region.languageId === positionRegion.languageId);
+    
+    return resultRegion ?? defaultLanguageRegion(document);
+
 }
 
 export const getLanguageRegionByLanguage = (document: vscode.TextDocument, languageId: string): LanguageRegion | undefined => {
-    const languageRegions = getLanguageRegions(document, true);
+    const languageRegions = getLanguageRegions(document);
 
-    for (const region of languageRegions) {
-        if (region.languageId === languageId)
-            return region;
-    }
+    const combinedLanguageRegions = combineLanguageRegionsById(languageRegions);
 
-    return undefined
+    return combinedLanguageRegions.find(region => region.languageId === languageId);
 }
 
-const getLanguageRegions = (document: vscode.TextDocument, combineByLanguage: boolean = false): LanguageRegion[] => {
+const getLanguageRegions = (document: vscode.TextDocument): LanguageRegion[] => {
     const htmlLanguageService = getLanguageService();
 	const scanner = htmlLanguageService.createScanner(document.getText());
 
@@ -72,27 +72,26 @@ const getLanguageRegions = (document: vscode.TextDocument, combineByLanguage: bo
 		}
 		token = scanner.scan();
 	}
-
-    const outputLanguageRegions = combineByLanguage
-        ? Array.from(languageRegions.reduce((output, region) => {
-            output.get(region.languageId)?.push(region) ?? output.set(region.languageId, [region]);
-            return output;
-        }, new Map<string, LanguageRegion[]>()))
-        .map<LanguageRegion>(([languageId, regions]) => 
-        ({
-            languageId,
-            fileExtension: regions[0].fileExtension,
-            content: regions.slice(1).reduce((outputContent, region) => 
-                replaceRange(outputContent, region.start, region.end, region.content.substring(region.start, region.end)), regions[0].content),
-            start: regions[0].start,
-            end: regions[regions.length-1].end
-        }))
-        : languageRegions;
     
-    outputLanguageRegions.push(defaultLanguageRegion(document));
+    languageRegions.push(defaultLanguageRegion(document));
     
-    return outputLanguageRegions;
+    return languageRegions;
 }
+
+const combineLanguageRegionsById = (languageRegions: LanguageRegion[]): LanguageRegion[] => 
+    Array.from(languageRegions.reduce((output, region) => {
+        output.get(region.languageId)?.push(region) ?? output.set(region.languageId, [region]);
+        return output;
+    }, new Map<string, LanguageRegion[]>()))
+    .map<LanguageRegion>(([languageId, regions]) => 
+    ({
+        languageId,
+        fileExtension: regions[0].fileExtension,
+        content: regions.slice(1).reduce((outputContent, region) => 
+            replaceRange(outputContent, region.start, region.end, region.content.substring(region.start, region.end)), regions[0].content),
+        start: regions[0].start,
+        end: regions[regions.length-1].end
+    }));
 
 const defaultLanguageRegion = (document: vscode.TextDocument): LanguageRegion => {
     const htmlContent = document.getText();
