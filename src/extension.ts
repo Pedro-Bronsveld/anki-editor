@@ -9,6 +9,7 @@ import TemplateDefinitionProvider from './language-service/template-definition-p
 import TemplateDiagnosticsProvider from './language-service/template-diagnostics-collection';
 import TemplateHighlightsProvider from './language-service/template-highlights-provider';
 import TemplateHoverProvider from './language-service/template-hover-provider';
+import TemplateDocumentChangeProvider from './language-service/template-document-change-provider';
 import TemplateRenameProvider from './language-service/template-rename-provider';
 import TemplateSemanticTokenProvider from './language-service/template-semantic-token-provider';
 import TemplateSignatureHelpProvider from './language-service/template-signature-help-provider';
@@ -79,6 +80,7 @@ export function activate(context: vscode.ExtensionContext) {
 	const templateDefinitionProvider = new TemplateDefinitionProvider(virtualDocumentProvider);
 	const templateHighlightsProvider = new TemplateHighlightsProvider(virtualDocumentProvider);
 	const templateSymbolProvider = new TemplateSymbolProvider(virtualDocumentProvider);
+	const templateDocumentChangeProvider = new TemplateDocumentChangeProvider(virtualDocumentProvider);
 
 	context.subscriptions.push(
 		vscode.workspace.registerTextDocumentContentProvider('anki-editor-embedded', virtualDocumentProvider)
@@ -126,6 +128,10 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(
 		vscode.languages.registerDocumentSymbolProvider({ language: "anki" }, templateSymbolProvider)
+	);
+
+	context.subscriptions.push(
+		vscode.workspace.onDidChangeTextDocument(event => templateDocumentChangeProvider.onDocumentChange(event))
 	);
 
 	// Hack to work around vscode only providing hover information after the first 2 hovers
