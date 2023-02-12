@@ -111,8 +111,10 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.languages.registerRenameProvider({ language: "anki" }, templateRenameProvider)
 	);
-
+	
 	if (vscode.window.activeTextEditor) {
+		templateDiagnosticsProvider.updateDiagnostics(vscode.window.activeTextEditor.document, diagnosticCollection);
+		// running this twice because sometimes diagnostics aren't loaded if the file was already opened in the editor
 		templateDiagnosticsProvider.updateDiagnostics(vscode.window.activeTextEditor.document, diagnosticCollection);
 	}
 	context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(editor => {

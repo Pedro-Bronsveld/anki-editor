@@ -77,40 +77,52 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                     scriptKind: ts.ScriptKind.JS
                 }
             );
-    
-            const diagnostics = this.tsLanguageService.getSemanticDiagnostics(fileName);
+            
+            // Semantic diagnostics
+            const semanticDiagnostics = this.tsLanguageService.getSemanticDiagnostics(fileName);
             this.project.removeSourceFile(jsSourceFile);
     
-            const transformedDiagnostics: vscode.Diagnostic[] = diagnostics.map(dia => ({
-                ...dia,
-                range: new vscode.Range(
-                    document.positionAt(dia.start ?? 0),
-                    document.positionAt((dia.start ?? 0) + (dia.length ?? 0))
-                ),
-                message: typeof dia.messageText === "string" ? dia.messageText : this.flattenDiagnosticMessageChain(dia.messageText).join("\n"),
-                severity: this.severityMap[dia.category],
-                relatedInformation: dia.relatedInformation?.map(rel => ({
-                    ...rel,
-                    location: new vscode.Location(
-                        document.uri,
-                        new vscode.Range(
-                            document.positionAt(rel.start ?? 0),
-                            document.positionAt((rel.start ?? 0) + (rel.length ?? 0)))
-                    ),
-                    message: typeof rel.messageText === "string" 
-                        ? rel.messageText
-                        : this.flattenDiagnosticMessageChain(rel.messageText).join("\n"),
-                }))
-            }));
+            const transformedSemanticDiagnostics: vscode.Diagnostic[] = this.transformTsDiagnostics(document, semanticDiagnostics);
     
-            allDiagnostics.push(...transformedDiagnostics);
+            allDiagnostics.push(...transformedSemanticDiagnostics);
+
+            // Syntactic diagnostics
+            const syntacticDiagnistics = this.tsLanguageService.getSyntacticDiagnostics(fileName);
+            console.log(syntacticDiagnistics);
+
+            const transformedSyntacticDiagnostics: vscode.Diagnostic[] = this.transformTsDiagnostics(document, syntacticDiagnistics);
+
+            allDiagnostics.push(...transformedSyntacticDiagnostics);
+            
         }
 
         collection.set(document.uri, allDiagnostics);
     }
 
-    private flattenDiagnosticMessageChain(chain: ts.DiagnosticMessageChain): ts.DiagnosticMessageChain[] {
-        return [chain].concat(chain.next ? chain.next.flatMap(this.flattenDiagnosticMessageChain) : []);
-    }
+    private transformTsDiagnostics = (document: vscode.TextDocument, tsDiagnostics: ts.Diagnostic[]): vscode.Diagnostic[] => 
+        tsDiagnostics.map(dia => ({
+            ...dia,
+            range: new vscode.Range(
+                document.positionAt(dia.start ?? 0),
+                document.positionAt((dia.start ?? 0) + (dia.length ?? 0))
+            ),
+            message: typeof dia.messageText === "string" ? dia.messageText : this.flattenDiagnosticMessageChain(dia.messageText).join("\n"),
+            severity: this.severityMap[dia.category],
+            relatedInformation: dia.relatedInformation?.map(rel => ({
+                ...rel,
+                location: new vscode.Location(
+                    document.uri,
+                    new vscode.Range(
+                        document.positionAt(rel.start ?? 0),
+                        document.positionAt((rel.start ?? 0) + (rel.length ?? 0)))
+                ),
+                message: typeof rel.messageText === "string" 
+                    ? rel.messageText
+                    : this.flattenDiagnosticMessageChain(rel.messageText).join("\n"),
+            }))
+        }));
+
+    private flattenDiagnosticMessageChain = (chain: ts.DiagnosticMessageChain): ts.DiagnosticMessageChain[] =>
+        [chain].concat(chain.next ? chain.next.flatMap(this.flattenDiagnosticMessageChain) : []);
     
 }
