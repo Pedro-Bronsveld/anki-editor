@@ -20,6 +20,8 @@ import TemplateTypeHierarchyProvider from './language-service/template-type-hier
 import TemplateReferenceProvider from './language-service/template-reference-provider';
 import TemplateCodeActionProvider from './language-service/template-code-action-provider';
 import TemplateDocumentColorProvider from './language-service/template-document-color-provider';
+import TemplateDocumentFormattingEditProvider from './language-service/template-document-formatting-edit-provider';
+import TemplateDocumentRangeFormattingEditProvider from './language-service/template-document-range-formatting-edit-provider';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -89,6 +91,8 @@ export function activate(context: vscode.ExtensionContext) {
 	const templateReferenceProvider = new TemplateReferenceProvider(virtualDocumentProvider);
 	const templateCodeActionProvider = new TemplateCodeActionProvider(virtualDocumentProvider);
 	const templateDocumentColorProvider = new TemplateDocumentColorProvider(virtualDocumentProvider);
+	const templateDocumentFormattingEditProvider = new TemplateDocumentFormattingEditProvider(virtualDocumentProvider);
+	const templateDocumentRangeFormattingEditProvider = new TemplateDocumentRangeFormattingEditProvider(virtualDocumentProvider);
 
 	context.subscriptions.push(
 		vscode.workspace.registerTextDocumentContentProvider('anki-editor-embedded', virtualDocumentProvider)
@@ -158,6 +162,14 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(
 		vscode.languages.registerColorProvider({ language: "anki" }, templateDocumentColorProvider)
+	);
+
+	context.subscriptions.push(
+		vscode.languages.registerDocumentFormattingEditProvider({ language: "anki" }, templateDocumentFormattingEditProvider)
+	);
+
+	context.subscriptions.push(
+		vscode.languages.registerDocumentRangeFormattingEditProvider({ language: "anki" }, templateDocumentRangeFormattingEditProvider)
 	);
 
 	// Hack to work around vscode only providing hover information after the first 2 hovers
