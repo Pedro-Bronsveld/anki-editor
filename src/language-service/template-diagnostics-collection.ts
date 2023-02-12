@@ -8,7 +8,7 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
 
     private cssLanguageService = getCSSLanguageService();
     private project: Project;
-    private languageService: ts.LanguageService;
+    private tsLanguageService: ts.LanguageService;
 
     private severityMap = {
         [ts.DiagnosticCategory.Warning]: vscode.DiagnosticSeverity.Warning,
@@ -28,7 +28,7 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
             }
         });
 
-        this.languageService = this.project.getLanguageService();
+        this.tsLanguageService = this.project.getLanguageService();
     }
     
     async updateDiagnostics(document: vscode.TextDocument, collection: vscode.DiagnosticCollection): Promise<void> {
@@ -78,7 +78,7 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                 }
             );
     
-            const diagnostics = this.languageService.getSemanticDiagnostics(fileName);
+            const diagnostics = this.tsLanguageService.getSemanticDiagnostics(fileName);
             this.project.removeSourceFile(jsSourceFile);
     
             const transformedDiagnostics: vscode.Diagnostic[] = diagnostics.map(dia => ({
