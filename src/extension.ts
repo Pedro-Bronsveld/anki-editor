@@ -11,7 +11,7 @@ import TemplateHighlightsProvider from './language-service/template-highlights-p
 import TemplateHoverProvider from './language-service/template-hover-provider';
 import TemplateDocumentChangeProvider from './language-service/template-document-change-provider';
 import TemplateRenameProvider from './language-service/template-rename-provider';
-import TemplateSemanticTokenProvider from './language-service/template-semantic-token-provider';
+import TemplateSemanticTokenProvider, { tsTokenLegend } from './language-service/template-semantic-token-provider';
 import TemplateSignatureHelpProvider from './language-service/template-signature-help-provider';
 import TemplateSymbolProvider from './language-service/template-symbol-provider';
 import VirtualDocumentProvider from './language-service/virtual-documents-provider';
@@ -75,9 +75,8 @@ export function activate(context: vscode.ExtensionContext) {
 	// Language service features
 	const virtualDocumentProvider = new VirtualDocumentProvider();
 	const diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection('anki');
-	const templateTokenLegend = new vscode.SemanticTokensLegend(['class', 'interface', 'enum', 'function', 'variable'], ['declaration', 'documentation', 'readonly']);
 	
-	const templateSemanticTokenProvider = new TemplateSemanticTokenProvider(virtualDocumentProvider, templateTokenLegend);
+	const templateSemanticTokenProvider = new TemplateSemanticTokenProvider(virtualDocumentProvider);
 	const templateHoverProvider = new TemplateHoverProvider(virtualDocumentProvider);
 	const templateCompletionItemProvider = new TemplateCompletionItemProvider(virtualDocumentProvider);
 	const templateSignatureHelpProvider = new TemplateSignatureHelpProvider(virtualDocumentProvider);
@@ -99,7 +98,7 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 
 	context.subscriptions.push(
-		vscode.languages.registerDocumentSemanticTokensProvider({ language: "anki" }, templateSemanticTokenProvider, templateTokenLegend)
+		vscode.languages.registerDocumentSemanticTokensProvider({ language: "anki" }, templateSemanticTokenProvider, tsTokenLegend)
 	);
 
 	context.subscriptions.push(
