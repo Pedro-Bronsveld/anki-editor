@@ -3,7 +3,7 @@
 	"name": "AnkiTemplate",
 	"patterns": [
 		{
-			"include": "text.html.basic"
+			"include": "text.html.derivative"
 		}
 	],
 	"scopeName": "text.html.anki"
