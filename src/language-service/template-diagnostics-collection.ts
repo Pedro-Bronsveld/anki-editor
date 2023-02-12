@@ -80,7 +80,6 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
             
             // Semantic diagnostics
             const semanticDiagnostics = this.tsLanguageService.getSemanticDiagnostics(fileName);
-            this.project.removeSourceFile(jsSourceFile);
     
             const transformedSemanticDiagnostics: vscode.Diagnostic[] = this.transformTsDiagnostics(document, semanticDiagnostics);
     
@@ -88,11 +87,12 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
 
             // Syntactic diagnostics
             const syntacticDiagnistics = this.tsLanguageService.getSyntacticDiagnostics(fileName);
-            console.log(syntacticDiagnistics);
 
             const transformedSyntacticDiagnostics: vscode.Diagnostic[] = this.transformTsDiagnostics(document, syntacticDiagnistics);
 
             allDiagnostics.push(...transformedSyntacticDiagnostics);
+
+            this.project.removeSourceFile(jsSourceFile);
             
         }
 
