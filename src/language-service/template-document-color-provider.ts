@@ -31,7 +31,6 @@ export default class TemplateDocumentColorProvider extends LanguageFeatureProvid
 
         const cssDocument = CssTextDocument.create(embeddedDocument.virtualUri.toString(), embeddedDocument.languageId, context.document.version, embeddedDocument.content);        
         const stylesheet = this.cssLanguageService.parseStylesheet(cssDocument);
-
         
         const colorPresentations = this.cssLanguageService.getColorPresentations(cssDocument, stylesheet, color, context.range);
 
@@ -46,14 +45,12 @@ export default class TemplateDocumentColorProvider extends LanguageFeatureProvid
                     presentation.textEdit.newText
                 )
                 : undefined,
-            additionalTextEdits: presentation.additionalTextEdits
-                ? presentation.additionalTextEdits.map(textEdit => new vscode.TextEdit(
-                    new vscode.Range(
-                        new vscode.Position(textEdit.range.start.line, textEdit.range.start.character),
-                        new vscode.Position(textEdit.range.end.line, textEdit.range.end.character)
-                    ),
-                    textEdit.newText))
-                : undefined
+            additionalTextEdits: presentation.additionalTextEdits?.map(textEdit => new vscode.TextEdit(
+                new vscode.Range(
+                    new vscode.Position(textEdit.range.start.line, textEdit.range.start.character),
+                    new vscode.Position(textEdit.range.end.line, textEdit.range.end.character)
+                ),
+                textEdit.newText))
         }));
 
         return transformedColorPresentations;
