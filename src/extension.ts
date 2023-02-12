@@ -18,7 +18,7 @@ import VirtualDocumentProvider from './language-service/virtual-documents-provid
 import { NoteTypesTreeProvider } from './note-types-tree-provider';
 import TemplateTypeHierarchyProvider from './language-service/template-type-hierarchy-provider';
 import TemplateReferenceProvider from './language-service/template-reference-provider';
-import TemplateCodeActionProvider from './language-service/template-action-provider';
+import TemplateCodeActionProvider from './language-service/template-code-action-provider';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
