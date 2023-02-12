@@ -19,8 +19,4 @@ export default class TemplateCodeActionProvider extends LanguageFeatureProviderB
         return commands;
     }
 
-    resolveCodeAction?(codeAction: vscode.CodeAction, token: vscode.CancellationToken): vscode.ProviderResult<vscode.CodeAction> {
-        throw new Error('Method not implemented.');
-    }
-
 }
