@@ -16,6 +16,7 @@ import TemplateSignatureHelpProvider from './language-service/template-signature
 import TemplateSymbolProvider from './language-service/template-symbol-provider';
 import VirtualDocumentProvider from './language-service/virtual-documents-provider';
 import { NoteTypesTreeProvider } from './note-types-tree-provider';
+import TemplateTypeHierarchyProvider from './language-service/template-type-hierarchy-provider';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -81,6 +82,7 @@ export function activate(context: vscode.ExtensionContext) {
 	const templateHighlightsProvider = new TemplateHighlightsProvider(virtualDocumentProvider);
 	const templateSymbolProvider = new TemplateSymbolProvider(virtualDocumentProvider);
 	const templateDocumentChangeProvider = new TemplateDocumentChangeProvider(virtualDocumentProvider);
+	const templateTypeHierarchyProvider = new TemplateTypeHierarchyProvider(virtualDocumentProvider);
 
 	context.subscriptions.push(
 		vscode.workspace.registerTextDocumentContentProvider('anki-editor-embedded', virtualDocumentProvider)
@@ -132,6 +134,10 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(
 		vscode.workspace.onDidChangeTextDocument(event => templateDocumentChangeProvider.onDocumentChange(event))
+	);
+	
+	context.subscriptions.push(
+		vscode.languages.registerTypeHierarchyProvider({ language: "anki" }, templateTypeHierarchyProvider)
 	);
 
 	// Hack to work around vscode only providing hover information after the first 2 hovers
