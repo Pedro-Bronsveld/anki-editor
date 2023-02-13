@@ -14,8 +14,8 @@ export default class TemplateFoldingRangeProvider extends LanguageFeatureProvide
         
         const transformedFoldingRanges: vscode.FoldingRange[] = foldingRanges.map(foldingRange => 
             new vscode.FoldingRange(
-                document.offsetAt(new vscode.Position(foldingRange.startLine, foldingRange.startCharacter ?? 0)),
-                document.offsetAt(new vscode.Position(foldingRange.endLine, foldingRange.endCharacter ?? 0)),
+                foldingRange.startLine,
+                foldingRange.endLine,
                 foldingRange.kind ? foldingRangeKindMap[foldingRange.kind] : undefined
             ));
         

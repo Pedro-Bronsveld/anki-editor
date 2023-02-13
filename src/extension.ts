@@ -22,6 +22,7 @@ import TemplateCodeActionProvider from './language-service/template-code-action-
 import TemplateDocumentColorProvider from './language-service/template-document-color-provider';
 import TemplateDocumentFormattingEditProvider from './language-service/template-document-formatting-edit-provider';
 import TemplateDocumentRangeFormattingEditProvider from './language-service/template-document-range-formatting-edit-provider';
+import TemplateFoldingRangeProvider from './language-service/template-folding-range-provider';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -92,6 +93,7 @@ export function activate(context: vscode.ExtensionContext) {
 	const templateDocumentColorProvider = new TemplateDocumentColorProvider(virtualDocumentProvider);
 	const templateDocumentFormattingEditProvider = new TemplateDocumentFormattingEditProvider(virtualDocumentProvider);
 	const templateDocumentRangeFormattingEditProvider = new TemplateDocumentRangeFormattingEditProvider(virtualDocumentProvider);
+	const templateFoldingRangeProvider = new TemplateFoldingRangeProvider(virtualDocumentProvider);
 
 	context.subscriptions.push(
 		vscode.workspace.registerTextDocumentContentProvider('anki-editor-embedded', virtualDocumentProvider)
@@ -169,6 +171,10 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(
 		vscode.languages.registerDocumentRangeFormattingEditProvider({ language: "anki" }, templateDocumentRangeFormattingEditProvider)
+	);
+
+	context.subscriptions.push(
+		vscode.languages.registerFoldingRangeProvider({ language: "anki" }, templateFoldingRangeProvider)
 	);
 
 	// Hack to work around vscode only providing hover information after the first 2 hovers
