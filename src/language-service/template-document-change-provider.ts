@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { getLanguageService, LanguageService, TextDocument as HtmlLibTextDocument } from 'vscode-html-languageservice';
+import { TEMPLATE_LANGUAGE_ID } from '../constants';
 import LanguageFeatureProviderBase from './language-feature-provider-base';
 import VirtualDocumentProvider from './virtual-documents-provider';
 
@@ -14,7 +15,7 @@ export default class TemplateDocumentChangeProvider extends LanguageFeatureProvi
     }
     async onDocumentChange(event: vscode.TextDocumentChangeEvent) {
         const { document } = event;     
-        if (document.languageId !== "anki" || event.contentChanges.length === 0)
+        if (document.languageId !== TEMPLATE_LANGUAGE_ID || event.contentChanges.length === 0)
             return;
 
         const change = event.contentChanges[0];

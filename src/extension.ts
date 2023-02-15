@@ -2,7 +2,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import { AnkiEditorFs } from './anki-editor-filesystem';
-import { ANKI_EDITOR_SCHEME } from './constants';
+import { ANKI_EDITOR_EMBEDDED_SCHEME_BASE, ANKI_EDITOR_SCHEME, ANKI_EDITOR_SCHEME_BASE, TEMPLATE_SELECTOR } from './constants';
 import { runHoverProviderDummy } from './language-service/hover-provider-dummy';
 import TemplateCompletionItemProvider from './language-service/template-completion-item-provider';
 import TemplateDefinitionProvider from './language-service/template-definition-provider';
@@ -35,7 +35,7 @@ export function activate(context: vscode.ExtensionContext) {
 	// Create Anki Eidtor Filesystem
 	const ankiCardFs = new AnkiEditorFs();
 	context.subscriptions.push(
-			vscode.workspace.registerFileSystemProvider('anki-editor', ankiCardFs, { isCaseSensitive: true })
+			vscode.workspace.registerFileSystemProvider(ANKI_EDITOR_SCHEME_BASE, ankiCardFs, { isCaseSensitive: true })
 		);
 
 	// Add command to add anki editor root folder to workspace
@@ -96,27 +96,27 @@ export function activate(context: vscode.ExtensionContext) {
 	const templateFoldingRangeProvider = new TemplateFoldingRangeProvider(virtualDocumentProvider);
 
 	context.subscriptions.push(
-		vscode.workspace.registerTextDocumentContentProvider('anki-editor-embedded', virtualDocumentProvider)
+		vscode.workspace.registerTextDocumentContentProvider(ANKI_EDITOR_EMBEDDED_SCHEME_BASE, virtualDocumentProvider)
 	);
 
 	context.subscriptions.push(
-		vscode.languages.registerDocumentSemanticTokensProvider({ language: "anki" }, templateSemanticTokenProvider, tsTokenLegend)
+		vscode.languages.registerDocumentSemanticTokensProvider(TEMPLATE_SELECTOR, templateSemanticTokenProvider, tsTokenLegend)
 	);
 
 	context.subscriptions.push(
-		vscode.languages.registerHoverProvider({ language: "anki" }, templateHoverProvider)
+		vscode.languages.registerHoverProvider(TEMPLATE_SELECTOR, templateHoverProvider)
 	);
 
 	context.subscriptions.push(
-		vscode.languages.registerCompletionItemProvider({ language: "anki" }, templateCompletionItemProvider, ".")
+		vscode.languages.registerCompletionItemProvider(TEMPLATE_SELECTOR, templateCompletionItemProvider, ".")
 	);
 
 	context.subscriptions.push(
-		vscode.languages.registerSignatureHelpProvider({ language: "anki" }, templateSignatureHelpProvider, "(")
+		vscode.languages.registerSignatureHelpProvider(TEMPLATE_SELECTOR, templateSignatureHelpProvider, "(")
 	);
 
 	context.subscriptions.push(
-		vscode.languages.registerRenameProvider({ language: "anki" }, templateRenameProvider)
+		vscode.languages.registerRenameProvider(TEMPLATE_SELECTOR, templateRenameProvider)
 	);
 	
 	if (vscode.window.activeTextEditor) {
@@ -134,15 +134,15 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	context.subscriptions.push(
-		vscode.languages.registerDefinitionProvider({ language: "anki" }, templateDefinitionProvider)
+		vscode.languages.registerDefinitionProvider(TEMPLATE_SELECTOR, templateDefinitionProvider)
 	);
 
 	context.subscriptions.push(
-		vscode.languages.registerDocumentHighlightProvider({ language: "anki" }, templateHighlightsProvider)
+		vscode.languages.registerDocumentHighlightProvider(TEMPLATE_SELECTOR, templateHighlightsProvider)
 	);
 
 	context.subscriptions.push(
-		vscode.languages.registerDocumentSymbolProvider({ language: "anki" }, templateSymbolProvider)
+		vscode.languages.registerDocumentSymbolProvider(TEMPLATE_SELECTOR, templateSymbolProvider)
 	);
 
 	context.subscriptions.push(
@@ -150,31 +150,31 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 	
 	context.subscriptions.push(
-		vscode.languages.registerTypeHierarchyProvider({ language: "anki" }, templateTypeHierarchyProvider)
+		vscode.languages.registerTypeHierarchyProvider(TEMPLATE_SELECTOR, templateTypeHierarchyProvider)
 	);
 
 	context.subscriptions.push(
-		vscode.languages.registerReferenceProvider({ language: "anki" }, templateReferenceProvider)
+		vscode.languages.registerReferenceProvider(TEMPLATE_SELECTOR, templateReferenceProvider)
 	);
 
 	context.subscriptions.push(
-		vscode.languages.registerCodeActionsProvider({ language: "anki" }, templateCodeActionProvider)
+		vscode.languages.registerCodeActionsProvider(TEMPLATE_SELECTOR, templateCodeActionProvider)
 	);
 
 	context.subscriptions.push(
-		vscode.languages.registerColorProvider({ language: "anki" }, templateDocumentColorProvider)
+		vscode.languages.registerColorProvider(TEMPLATE_SELECTOR, templateDocumentColorProvider)
 	);
 
 	context.subscriptions.push(
-		vscode.languages.registerDocumentFormattingEditProvider({ language: "anki" }, templateDocumentFormattingEditProvider)
+		vscode.languages.registerDocumentFormattingEditProvider(TEMPLATE_SELECTOR, templateDocumentFormattingEditProvider)
 	);
 
 	context.subscriptions.push(
-		vscode.languages.registerDocumentRangeFormattingEditProvider({ language: "anki" }, templateDocumentRangeFormattingEditProvider)
+		vscode.languages.registerDocumentRangeFormattingEditProvider(TEMPLATE_SELECTOR, templateDocumentRangeFormattingEditProvider)
 	);
 
 	context.subscriptions.push(
-		vscode.languages.registerFoldingRangeProvider({ language: "anki" }, templateFoldingRangeProvider)
+		vscode.languages.registerFoldingRangeProvider(TEMPLATE_SELECTOR, templateFoldingRangeProvider)
 	);
 
 	// Hack to work around vscode only providing hover information after the first 2 hovers

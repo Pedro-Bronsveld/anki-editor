@@ -68,10 +68,10 @@
     },
     "languages": [
       {
-        "id": "anki",
+        "id": "anki-template",
         "aliases": [
-          "AnkiTemplate",
-          "anki"
+          "Anki Template",
+          "anki-template"
         ],
         "extensions": [
           ".template.anki"
@@ -81,12 +81,12 @@
     ],
     "grammars": [
       {
-        "language": "anki",
+        "language": "anki-template",
         "scopeName": "text.html.anki",
         "path": "./languages/syntaxes/anki.tmLanguage.json",
         "embeddedLanguages": {
           "text.html": "html",
-          "source.anki": "anki",
+          "source.anki": "anki-template",
           "source.js": "javascript",
           "source.css": "css",
           "support.constant.handlebars": "handlebars"
