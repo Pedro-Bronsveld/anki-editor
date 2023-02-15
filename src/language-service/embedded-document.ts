@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { getLanguageService, TokenType } from 'vscode-html-languageservice';
+import { ANKI_EDITOR_EMBEDDED_SCHEME } from '../constants';
 
 export interface LanguageRegion {
     languageId: string;
@@ -10,7 +11,7 @@ export interface LanguageRegion {
 }
 
 export const createVirtualUri = (languageId: string, fileExtension: string, originalUri: vscode.Uri) => 
-    vscode.Uri.parse(`anki-editor-embedded:/${languageId}${originalUri.path}.${fileExtension}`);
+    vscode.Uri.parse(`${ANKI_EDITOR_EMBEDDED_SCHEME}${languageId}${originalUri.path}.${fileExtension}`);
 
 /**
  * Extract a language id, file extension and content string from a given html document at a position.
