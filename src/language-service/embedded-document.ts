@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { getLanguageService, TokenType } from 'vscode-html-languageservice';
-import { ANKI_EDITOR_EMBEDDED_SCHEME } from '../constants';
+import { ANKI_EDITOR_EMBEDDED_SCHEME, TEMPLATE_EXTENSION, TEMPLATE_LANGUAGE_ID } from '../constants';
 
 export interface LanguageRegion {
     languageId: string;
@@ -43,12 +43,35 @@ export const getLanguageRegionByLanguage = (document: vscode.TextDocument, langu
     return combinedLanguageRegions.find(region => region.languageId === languageId);
 }
 
+const templateRegexp = /{{[^{}]*}}/g;
+
+export const getTemplateMatches = (documentText: string) => [...documentText.matchAll(templateRegexp)];
+
 const getLanguageRegions = (document: vscode.TextDocument): LanguageRegion[] => {
     const htmlLanguageService = getLanguageService();
-	const scanner = htmlLanguageService.createScanner(document.getText());
-
+    const documentText = document.getText();
     const languageRegions: LanguageRegion[] = [];
 
+    // extract anki-template regions
+    const templateMatches = getTemplateMatches(documentText);
+
+    const templateRegions = templateMatches
+        .map<LanguageRegion>(({ 0: text, index }) => 
+            ({
+                languageId: TEMPLATE_LANGUAGE_ID,
+                fileExtension: TEMPLATE_EXTENSION,
+                content: blankOutSurrounding(documentText, index ?? 0, (index ?? 0) + text.length),
+                start: index ?? 0,
+                end: (index ?? 0) + text.length
+            })
+        );
+    languageRegions.push(...templateRegions);
+
+    // Remove template regions from document before extracing javascript and css
+    const clearedDocument = blankOutLanguageRegions(documentText, templateRegions);
+	
+    // extract javascript and css regions
+    const scanner = htmlLanguageService.createScanner(clearedDocument);
     let token = scanner.scan();
 	while (token !== TokenType.EOS) {
 		switch (token) {
@@ -56,7 +79,7 @@ const getLanguageRegions = (document: vscode.TextDocument): LanguageRegion[] => 
                 languageRegions.push({
                     languageId: "javascript",
                     fileExtension: "js",
-                    content: blankOutSurrounding(document.getText(), scanner.getTokenOffset(), scanner.getTokenEnd()),
+                    content: blankOutSurrounding(clearedDocument, scanner.getTokenOffset(), scanner.getTokenEnd()),
                     start: scanner.getTokenOffset(),
                     end: scanner.getTokenEnd()
                 });
@@ -65,7 +88,7 @@ const getLanguageRegions = (document: vscode.TextDocument): LanguageRegion[] => 
                 languageRegions.push({
                     languageId: "css",
                     fileExtension: "css",
-                    content: blankOutSurrounding(document.getText(), scanner.getTokenOffset(), scanner.getTokenEnd()),
+                    content: blankOutSurrounding(clearedDocument, scanner.getTokenOffset(), scanner.getTokenEnd()),
                     start: scanner.getTokenOffset(),
                     end: scanner.getTokenEnd()
                 });
@@ -105,10 +128,18 @@ const defaultLanguageRegion = (document: vscode.TextDocument): LanguageRegion =>
     }
 }
 
-const blankOutSurrounding = (content: string, start: number, end: number) => 
-    content.slice(0, start).replace(/[^\n\r]/g, " ") +
-    content.slice(start, end) + 
-    content.slice(end).replace(/[^\n\r]/g, " ");
+const blankOutRegexp = /[^\n\r]/g;
 
-const replaceRange = (text: string, start: number, end: number, substitute: string) =>
+const blankOutLanguageRegions = (content: string, languageRegions: LanguageRegion[]): string =>
+    languageRegions.reduce((output, region) => blankOutRange(output, region.start, region.end), content);
+
+const blankOutRange = (content: string, start: number, end: number): string =>
+    replaceRange(content, start, end, content.slice(start, end).replace(blankOutRegexp, " "));
+
+const blankOutSurrounding = (content: string, start: number, end: number): string => 
+    content.slice(0, start).replace(blankOutRegexp, " ") +
+    content.slice(start, end) + 
+    content.slice(end).replace(blankOutRegexp, " ");
+
+const replaceRange = (text: string, start: number, end: number, substitute: string): string =>
     text.substring(0, start) + substitute + text.substring(end);
