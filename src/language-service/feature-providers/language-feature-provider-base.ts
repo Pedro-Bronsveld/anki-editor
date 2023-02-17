@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import { createVirtualUri, getLanguageRegionAtPosition, getLanguageRegionByLanguage, LanguageRegion } from './embedded-document';
-import VirtualDocumentProvider from "./virtual-documents-provider";
+import { createVirtualUri, getLanguageRegionAtPosition, getLanguageRegionByLanguage, LanguageRegion } from '../embedded-document';
+import VirtualDocumentProvider from "../virtual-documents-provider";
 
 export default abstract class LanguageFeatureProviderBase {
 
