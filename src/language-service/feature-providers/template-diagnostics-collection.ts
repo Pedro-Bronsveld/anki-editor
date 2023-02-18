@@ -1,9 +1,9 @@
 import * as vscode from 'vscode';
 import LanguageFeatureProviderBase from './language-feature-provider-base';
 import { getCSSLanguageService, TextDocument as CssTextDocument } from 'vscode-css-languageservice';
-import VirtualDocumentProvider from './virtual-documents-provider';
+import VirtualDocumentProvider from '../virtual-documents-provider';
 import { createProjectSync, Project, ts } from "@ts-morph/bootstrap";
-import { TEMPLATE_LANGUAGE_ID } from '../constants';
+import { TEMPLATE_LANGUAGE_ID } from '../../constants';
 
 export default class TemplateDiagnosticsProvider extends LanguageFeatureProviderBase {
 

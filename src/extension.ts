@@ -4,25 +4,26 @@ import * as vscode from 'vscode';
 import { AnkiEditorFs } from './anki-editor-filesystem';
 import { ANKI_EDITOR_EMBEDDED_SCHEME_BASE, ANKI_EDITOR_SCHEME, ANKI_EDITOR_SCHEME_BASE, TEMPLATE_SELECTOR } from './constants';
 import { runHoverProviderDummy } from './language-service/hover-provider-dummy';
-import TemplateCompletionItemProvider from './language-service/template-completion-item-provider';
-import TemplateDefinitionProvider from './language-service/template-definition-provider';
-import TemplateDiagnosticsProvider from './language-service/template-diagnostics-collection';
-import TemplateHighlightsProvider from './language-service/template-highlights-provider';
-import TemplateHoverProvider from './language-service/template-hover-provider';
-import TemplateDocumentChangeProvider from './language-service/template-document-change-provider';
-import TemplateRenameProvider from './language-service/template-rename-provider';
-import TemplateSemanticTokenProvider, { tsTokenLegend } from './language-service/template-semantic-token-provider';
-import TemplateSignatureHelpProvider from './language-service/template-signature-help-provider';
-import TemplateSymbolProvider from './language-service/template-symbol-provider';
+import TemplateCompletionItemProvider from './language-service/feature-providers/template-completion-item-provider';
+import TemplateDefinitionProvider from './language-service/feature-providers/template-definition-provider';
+import TemplateDiagnosticsProvider from './language-service/feature-providers/template-diagnostics-collection';
+import TemplateHighlightsProvider from './language-service/feature-providers/template-highlights-provider';
+import TemplateHoverProvider from './language-service/feature-providers/template-hover-provider';
+import TemplateDocumentChangeProvider from './language-service/feature-providers/template-document-change-provider';
+import TemplateRenameProvider from './language-service/feature-providers/template-rename-provider';
+import TemplateSemanticTokenProvider, { tsTokenLegend } from './language-service/feature-providers/template-semantic-token-provider';
+import TemplateSignatureHelpProvider from './language-service/feature-providers/template-signature-help-provider';
+import TemplateSymbolProvider from './language-service/feature-providers/template-symbol-provider';
 import VirtualDocumentProvider from './language-service/virtual-documents-provider';
 import { NoteTypesTreeProvider } from './note-types-tree-provider';
-import TemplateTypeHierarchyProvider from './language-service/template-type-hierarchy-provider';
-import TemplateReferenceProvider from './language-service/template-reference-provider';
-import TemplateCodeActionProvider from './language-service/template-code-action-provider';
-import TemplateDocumentColorProvider from './language-service/template-document-color-provider';
-import TemplateDocumentFormattingEditProvider from './language-service/template-document-formatting-edit-provider';
-import TemplateDocumentRangeFormattingEditProvider from './language-service/template-document-range-formatting-edit-provider';
-import TemplateFoldingRangeProvider from './language-service/template-folding-range-provider';
+import TemplateTypeHierarchyProvider from './language-service/feature-providers/template-type-hierarchy-provider';
+import TemplateReferenceProvider from './language-service/feature-providers/template-reference-provider';
+import TemplateCodeActionProvider from './language-service/feature-providers/template-code-action-provider';
+import TemplateDocumentColorProvider from './language-service/feature-providers/template-document-color-provider';
+import TemplateDocumentFormattingEditProvider from './language-service/feature-providers/template-document-formatting-edit-provider';
+import TemplateDocumentRangeFormattingEditProvider from './language-service/feature-providers/template-document-range-formatting-edit-provider';
+import TemplateFoldingRangeProvider from './language-service/feature-providers/template-folding-range-provider';
+import AnkiModelDataProvider from './language-service/anki-model-data-provider';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -76,10 +77,11 @@ export function activate(context: vscode.ExtensionContext) {
 	// Language service features
 	const virtualDocumentProvider = new VirtualDocumentProvider();
 	const diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection('anki');
+	const ankiModelDataProvider: AnkiModelDataProvider = new AnkiModelDataProvider();
 	
 	const templateSemanticTokenProvider = new TemplateSemanticTokenProvider(virtualDocumentProvider);
 	const templateHoverProvider = new TemplateHoverProvider(virtualDocumentProvider);
-	const templateCompletionItemProvider = new TemplateCompletionItemProvider(virtualDocumentProvider);
+	const templateCompletionItemProvider = new TemplateCompletionItemProvider(virtualDocumentProvider, ankiModelDataProvider);
 	const templateSignatureHelpProvider = new TemplateSignatureHelpProvider(virtualDocumentProvider);
 	const templateRenameProvider = new TemplateRenameProvider(virtualDocumentProvider);
 	const templateDiagnosticsProvider = new TemplateDiagnosticsProvider(virtualDocumentProvider);

@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import LanguageFeatureProviderBase from './language-feature-provider-base';
-import VirtualDocumentProvider from './virtual-documents-provider';
+import VirtualDocumentProvider from '../virtual-documents-provider';
 import { createProjectSync, Project, ts } from "@ts-morph/bootstrap";
 export default class TemplateSemanticTokenProvider extends LanguageFeatureProviderBase implements vscode.DocumentSemanticTokensProvider {
 

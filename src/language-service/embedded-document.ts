@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { getLanguageService, TokenType } from 'vscode-html-languageservice';
 import { ANKI_EDITOR_EMBEDDED_SCHEME, TEMPLATE_EXTENSION, TEMPLATE_LANGUAGE_ID } from '../constants';
+import { getReplacementMatches } from './parser/template-parser';
 
 export interface LanguageRegion {
     languageId: string;
@@ -43,19 +44,15 @@ export const getLanguageRegionByLanguage = (document: vscode.TextDocument, langu
     return combinedLanguageRegions.find(region => region.languageId === languageId);
 }
 
-const templateRegexp = /{{[^{}]*}}/g;
-
-export const getTemplateMatches = (documentText: string) => [...documentText.matchAll(templateRegexp)];
-
 const getLanguageRegions = (document: vscode.TextDocument): LanguageRegion[] => {
     const htmlLanguageService = getLanguageService();
     const documentText = document.getText();
     const languageRegions: LanguageRegion[] = [];
 
     // extract anki-template regions
-    const templateMatches = getTemplateMatches(documentText);
+    const replacementMatches = getReplacementMatches(documentText);
 
-    const templateRegions = templateMatches
+    const templateRegions = replacementMatches
         .map<LanguageRegion>(({ 0: text, index }) => 
             ({
                 languageId: TEMPLATE_LANGUAGE_ID,
