@@ -3,6 +3,7 @@ import { ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID } from '../../constants';
 import { uriPathToParts } from '../../note-types/uri-parser';
 import { specialFields } from '../anki-builtin';
 import AnkiModelDataProvider from '../anki-model-data-provider';
+import { AstItemType } from '../parser/ast-models';
 import { inItem } from '../parser/ast-utils';
 import { parseTemplateDocument } from '../parser/template-parser';
 import VirtualDocumentProvider from '../virtual-documents-provider';
@@ -50,7 +51,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                 }
 
                 // Show FrontSide suggestion only when in back side template
-                if(document.uri.path.split("/").slice(-1)[0]?.toLowerCase().startsWith("back"))
+                if(replacement.type === AstItemType.replacement && document.uri.path.split("/").slice(-1)[0]?.toLowerCase().startsWith("back"))
                     completionItemList.push(createCompletionItem("FrontSide", vscode.CompletionItemKind.Reference, "2"));
                 
                 return completionItemList;
