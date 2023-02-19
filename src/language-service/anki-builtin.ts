@@ -5,6 +5,17 @@ export const specialFields: readonly string[] = [
     "Subdeck",
     "Tags",
     "Type",
-] as const;
+];
 
-export const builtinFunctions: readonly string[] = [];
+export const builtinFilters: readonly string[] = [
+    "tts",
+    "tts-voices",
+    "cloze",
+    "cloze-only",
+    "hint",
+    "type",
+    "text",
+    "furigana",
+    "kana",
+    "kanji"
+];

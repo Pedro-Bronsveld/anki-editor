@@ -59,8 +59,8 @@ const parseReplacement = (replacementText: string, offset: number = 0): Replacem
     
     // Parse as a standard replacement
     const innerContent = replacementText.substring(2, replacementText.length - 2);
-    const filterSegmentsMatches = [...innerContent.matchAll(/[^:]+(?=:)/g)];
-    const fieldSegmentMatch = innerContent.match(/[^:]+(?=$)/);
+    const filterSegmentsMatches = [...innerContent.matchAll(/[^:]*(?=:)/g)];
+    const fieldSegmentMatch = innerContent.match(/[^:]*(?=$)/);
 
     const filterSegments = filterSegmentsMatches
         .map(match => createFilterSegment(match[0], offset + (match.index ?? 0) + 2));
