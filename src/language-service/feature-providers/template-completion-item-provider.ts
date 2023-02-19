@@ -57,8 +57,10 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
             
             if (replacement.type === AstItemType.replacement ) {
                 // Create builtin filter suggestions, ending with colon if not already followed by one
-                completionItemList.push(...builtinFilters.map(filterName => 
-                    createCompletionItem(filterName + (replacement.content.substring(offset - replacement.start).match(/^\s*(?=:)/) ? "" : ":"), vscode.CompletionItemKind.Function, "4")));
+                completionItemList.push(...builtinFilters.map(filterName => {
+                    const appendColon = !replacement.content.substring(offset - replacement.start).match(/^\s*(?=:)/)
+                    return createCompletionItem(filterName + (appendColon ? ":" : ""), vscode.CompletionItemKind.Function, "4")
+                }));
             }
             
             return completionItemList;
