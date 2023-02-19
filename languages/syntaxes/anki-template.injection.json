@@ -91,7 +91,7 @@
 			"name": "meta.anki.template.segment"
 		},
 		"anki-template-filter": {
-			"match": "(?<=(?::|(?:{{|^)\\s*))(?:(tts-voices|cloze(?:-only)?|hint|type|text|furigana|kana|kanji)|([^\"{}\\s:]+))(?=:)",
+			"match": "(?<=(?::|(?:{{|^)\\s*))(?:(tts|tts-voices|cloze(?:-only)?|hint|type|text|furigana|kana|kanji)|([^\"{}\\s:]+))(?=:)",
 			"name": "meta.anki.template.filter.$1",
 			"captures": {
 				"1": {
@@ -120,7 +120,7 @@
 			"name": "meta.anki.template.filter.tts"
 		},
 		"tts-language": {
-			"match": "((?<=tts\\s)[a-z]{1,2}(?:_[A-Z]{0,2})?)(\\S*)",
+			"match": "((?<=tts\\s)[a-z]{1,2}(?:_[A-Z]{0,2})?)([^\\s:]*)",
 			"name": "meta.anki.filter.tts.language",
 			"captures": {
 				"1": { "name": "string.anki.tts.language" },
