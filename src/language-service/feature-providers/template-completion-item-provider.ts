@@ -32,7 +32,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
             const completionItemList: vscode.CompletionItem[] = [];
                 
             // Check if the trigger position is currently at a field position
-            if (replacement.fieldSegment !== null && inItem(replacement.fieldSegment, offset)) {
+            if (inItem(replacement.fieldSegment, offset)) {
                 // Handle completions in a field segment
                 
                 // Suggest special fields
