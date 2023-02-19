@@ -70,7 +70,7 @@
 			"name": "meta.anki.conditional.block"
 		},
 		"anki-template-segment": {
-			"begin": "(?:(?<={{)|(:(?=[\\s\n]+))|(:))",
+			"begin": "(?:(:(?=[\\s\n]+))|(:)|(?<={{))",
 			"beginCaptures": {
 				"1": {
 					"name": "invalid.illegal.anki.template.separator"
