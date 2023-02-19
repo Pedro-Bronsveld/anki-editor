@@ -55,11 +55,9 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                     completionItemList.push(createCompletionItem("FrontSide", vscode.CompletionItemKind.Reference, "2"));
             }
             
-            if (replacement.type === AstItemType.replacement &&
-                (replacement.filterSegments.length === 0 || getItemAtOffset(replacement.filterSegments, offset))) {
-                // Create builtin filter suggestions
-                // Filter suggestions are only shown when triggering completion items inside a filter segment, or when there are no filter segments in the replacement
-                completionItemList.push(...builtinFilters.map(filterName => createCompletionItem(filterName, vscode.CompletionItemKind.Function, "4")));
+            if (replacement.type === AstItemType.replacement ) {
+                // Create builtin filter suggestions, ending witha ":"
+                completionItemList.push(...builtinFilters.map(filterName => createCompletionItem(filterName + ":", vscode.CompletionItemKind.Function, "4")));
             }
             
             return completionItemList;
