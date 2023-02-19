@@ -1,4 +1,4 @@
-import { AstItemBase, AstItemType, ConditionalType, Field, Filter, FilterArgument, FilterArgumentKeyValue, Replacement, ReplacementBase, ReplacementType, TemplateDocument } from "./ast-models";
+import { AstItemBase, AstItemType, ConditionalType, Field, FieldSegment, Filter, FilterArgDivider, FilterArgKey, FilterArgument, FilterArgumentKeyValue, FilterArgValue, FilterSegment, Replacement, ReplacementBase, TemplateDocument } from "./ast-models";
 
 export const parseTemplateDocument = (input: string): TemplateDocument => {
     
@@ -31,68 +31,62 @@ const parseReplacement = (replacementText: string, offset: number = 0): Replacem
     if (matchConditional) {
         // Parse as a conditional replacement
         const conditionalCharacter = matchConditional[1];
+        
+        // Field segment contains all text after the conidtional character, and before the 2 closing curly braces
+        const fieldSegmentOffset = matchConditional[0].length;
+        const fieldSegmentContent = replacementText.substring(fieldSegmentOffset, replacementText.length - 2);
 
-        const replacementType = conditionalCharacter === "/" ? ReplacementType.conditionalEnd : ReplacementType.conditionalStart;
+        const fieldSegment = createFieldSegment(fieldSegmentContent, offset + fieldSegmentOffset)
 
-        const field = parseField(replacementText.substring(matchConditional.length, replacementText.length - 2), offset + matchConditional.length);
-
-        const replacement: ReplacementBase = {
+        const replacementBase: ReplacementBase = {
             content: replacementText,
             start: offset,
-            end,
-            field
+            end
         }
         
-        return replacementType === ReplacementType.conditionalStart
+        return conditionalCharacter !== "/"
             ? {
-                ...replacement,
+                ...replacementBase,
                 type: AstItemType.conditionalStart,
-                field,
-                replacementType,
+                fieldSegment,
                 conditionalType: conditionalCharacter === "#" ? ConditionalType.filled : ConditionalType.empty
             } : {
-                ...replacement,
+                ...replacementBase,
                 type: AstItemType.conditionalEnd,
-                field,
-                replacementType
+                fieldSegment
             }
     }
     
     // Parse as a standard replacement
-
     const innerContent = replacementText.substring(2, replacementText.length - 2);
     const filterSegmentsMatches = [...innerContent.matchAll(/[^:]+(?=:)/g)];
     const fieldSegmentMatch = innerContent.match(/[^:]+(?=$)/);
 
-    const filters = filterSegmentsMatches
-        .map(match => parseFilter(match[0], offset + (match.index ?? 0) + 2))
-        .filter(<T>(f: T): f is Exclude<T | null, null> => f !== null);
+    const filterSegments = filterSegmentsMatches
+        .map(match => createFilterSegment(match[0], offset + (match.index ?? 0) + 2));
 
-    const field: Field | null = fieldSegmentMatch 
-        ? parseField(fieldSegmentMatch[0], offset + (fieldSegmentMatch.index ?? 0) + 2)
-        : null;
+    const fieldSegment = createFieldSegment(fieldSegmentMatch?.[0] ?? "", offset + (fieldSegmentMatch?.index ?? 0) + 2);
 
     return {
         content: replacementText,
         type: AstItemType.replacement,
         start: offset,
         end,
-        replacementType: ReplacementType.standard,
-        field,
-        filters
+        fieldSegment,
+        filterSegments
     }
 };
 
 const fieldRegexp = /[^#^/\s:{}\"]+([^:{}\s\"]|\s(?!\s*(}}|$)))*(?!.*:)/
 
-const parseField = (input: string, offset: number = 0): Field | null => {
+const parseField = (input: string, offset: number = 0): Field | undefined => {
     const fieldMatch = input.match(fieldRegexp);
 
     if (!fieldMatch)
-        return null;
+        return undefined;
 
     const start = offset + (fieldMatch.index ?? 0);
-    const end = start + (fieldMatch.length ?? 0)
+    const end = start + (fieldMatch[0].length ?? 0);
 
     return {
         content: fieldMatch[0],
@@ -102,12 +96,11 @@ const parseField = (input: string, offset: number = 0): Field | null => {
     };
 };
 
-const parseFilter = (input: string, offset: number = 0): Filter | null => {
-
+const parseFilter = (input: string, offset: number = 0): Filter | undefined => {    
     const filterPartsMatches = [...input.matchAll(/[^\s\r\n\t]+/g)];
 
     if (filterPartsMatches.length === 0)
-        return null;
+        return undefined;
     
     const filterNameMatch = filterPartsMatches[0];
     const filterArgMatches = filterPartsMatches.slice(1);
@@ -116,10 +109,9 @@ const parseFilter = (input: string, offset: number = 0): Filter | null => {
         .map(match => parseFilterArgument(match[0]))
         .filter(<T>(f: T): f is Exclude<T | null, null> => f !== null)
 
-    const filterStart = offset + (filterNameMatch.index ?? 0);;
+    const filterStart = offset + (filterNameMatch.index ?? 0);
     const filter: Filter = {
-        content: input,
-        name: filterNameMatch[0],
+        content: filterNameMatch[0],
         type: AstItemType.filter,
         start: filterStart,
         end: filterStart + filterNameMatch[0].length,
@@ -136,45 +128,67 @@ const parseFilterArgument = (input: string, offset: number = 0): FilterArgument 
     if (!argumentMatch)
         return null;
     
-    const start = offset + (argumentMatch.index ?? 0);
-    const end = start + input.length;
-
     const key: string | undefined = argumentMatch[1];
     const divider: string | undefined = argumentMatch[2];
     const value: string | undefined = argumentMatch[3];
 
-    return key !== undefined && divider !== undefined
-        ? {
-            content: input,
-            type: AstItemType.filterArgumentKeyValue,
-            start,
-            end,
-            key: {
-                ...createAstItemBase(key, offset),
-                type: AstItemType.filterArgKey
-            },
-            divider: {
-                ...createAstItemBase(divider, offset + key.length),
-                type: AstItemType.filterArgDivider
-            },
-            values: typeof value === "string"
-                ? [...value.matchAll(/[^,]+/g)].map(match => ({
-                    ...createAstItemBase(match[0], offset + key.length + divider.length + (match.index ?? 0)),
-                    type: AstItemType.filterArgValue
-                }))
-                : []
-        }
-        : {
-            content: value,
-            type: AstItemType.filterArgument,
-            start,
-            end
-        };
-    
+    const res = key !== undefined && divider !== undefined
+        ? createFilterArgumentKeyValue(input, key, divider, value, offset)
+        : createFilterArgument(value, offset);
+    return res;
 }
 
 const createAstItemBase = (content: string, offset: number = 0): AstItemBase => ({
     content,
     start: offset,
     end: content.length + offset
+});
+
+const createFilterSegment = (content: string, offset: number = 0): FilterSegment => ({
+    ...createAstItemBase(content, offset),
+    type: AstItemType.filterSegment,
+    filter: parseFilter(content, offset)
+});
+
+const createFieldSegment = (content: string, offset: number = 0): FieldSegment => ({
+    ...createAstItemBase(content, offset),
+    type: AstItemType.fieldSegment,
+    field: parseField(content, offset)
+});
+
+const createFilterArgumentKeyValue = (
+    content: string,
+    key: string,
+    divider: string,
+    value?: string,
+    offset: number = 0,
+    ): FilterArgumentKeyValue => ({
+        ...createAstItemBase(content, offset),
+        type: AstItemType.filterArgumentKeyValue,
+        key: createFilterArgKey(key, offset),
+        divider: createFilterArgDivider(divider, key.length),
+        values: value
+            ? [...value.matchAll(/[^,]+/g)].map(match => 
+                createFilterArgValue(match[0], offset + key.length + divider.length + (match.index ?? 0)))
+            : []
+    });
+
+const createFilterArgument = (content: string, offset: number = 0): FilterArgument => ({
+    ...createAstItemBase(content, offset),
+    type: AstItemType.filterArgument,
+});
+
+const createFilterArgKey = (content: string, offset: number = 0): FilterArgKey => ({
+    ...createAstItemBase(content, offset),
+    type: AstItemType.filterArgKey,
+});
+
+const createFilterArgDivider = (content: string, offset: number = 0): FilterArgDivider => ({
+    ...createAstItemBase(content, offset),
+    type: AstItemType.filterArgDivider,
+});
+
+const createFilterArgValue = (content: string, offset: number = 0): FilterArgValue => ({
+    ...createAstItemBase(content, offset),
+    type: AstItemType.filterArgValue,
 });

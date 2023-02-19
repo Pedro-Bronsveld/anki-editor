@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID } from '../../constants';
 import { uriPathToParts } from '../../note-types/uri-parser';
 import AnkiModelDataProvider from '../anki-model-data-provider';
+import { inItem } from '../parser/ast-utils';
 import { parseTemplateDocument } from '../parser/template-parser';
 import VirtualDocumentProvider from '../virtual-documents-provider';
 import LanguageFeatureProviderBase from './language-feature-provider-base';
@@ -18,25 +19,36 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
         if (embeddedDocument.languageId === TEMPLATE_LANGUAGE_ID) {
 
             const templateDocument = parseTemplateDocument(embeddedDocument.content);
+
+            const offset = document.offsetAt(position);
+            // Find template replacement at the trigger position
+            const replacement = templateDocument.replacements.find(replacement => inItem(replacement, offset));
             
-            // Anki template completion items handling
-            if (document.uri.scheme !== ANKI_EDITOR_SCHEME_BASE)
+            if (!replacement)
                 return undefined;
             
-            const uriParts = uriPathToParts(document.uri);
-
-            if (uriParts.length < 2)
-                return undefined;
-            
-            const modelName = uriParts[1];
-            
-            const fieldNames = await this.ankiModeldataProvider.getFieldNames(modelName);
-
-            const completionItemList: vscode.CompletionItem[] = fieldNames.map(fieldName => 
-                new vscode.CompletionItem(fieldName, vscode.CompletionItemKind.Field)
-            );
-
-            return completionItemList;
+            // Check if the trigger position is currently at a field position
+            if (replacement.fieldSegment !== null && inItem(replacement.fieldSegment, offset)) {
+                // Anki template completion items handling
+                if (document.uri.scheme !== ANKI_EDITOR_SCHEME_BASE)
+                    return undefined;
+                
+                const uriParts = uriPathToParts(document.uri);
+    
+                if (uriParts.length < 2)
+                    return undefined;
+                
+                const modelName = uriParts[1];
+                
+                const fieldNames = await this.ankiModeldataProvider.getFieldNames(modelName);
+    
+                const completionItemList: vscode.CompletionItem[] = fieldNames.map(fieldName => 
+                    new vscode.CompletionItem(fieldName, vscode.CompletionItemKind.Field)
+                );
+                
+                return completionItemList;
+            }
+            return undefined;
         }
 
         // Html, javascript and css forwarding

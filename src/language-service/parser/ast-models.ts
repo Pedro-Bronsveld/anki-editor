@@ -4,13 +4,15 @@ export enum AstItemType{
     replacement = 3,
     conditionalStart = 4,
     conditionalEnd = 5,
-    filter = 6,
-    field = 7,
-    filterArgument = 8,
-    filterArgumentKeyValue = 9,
-    filterArgKey = 10,
-    filterArgDivider = 11,
-    filterArgValue = 12
+    filterSegment = 6,
+    fieldSegment = 7,
+    filter = 8,
+    field = 9,
+    filterArgument = 10,
+    filterArgumentKeyValue = 11,
+    filterArgKey = 12,
+    filterArgDivider = 13,
+    filterArgValue = 14
 }
 
 export type AstItemBase = {
@@ -20,24 +22,16 @@ export type AstItemBase = {
 }
 
 export type TemplateDocument = AstItemBase & {
-    type: AstItemType.document,
+    type: AstItemType.document;
     replacements: Replacement[];
 }
 
-export enum ReplacementType {
-    standard = 1,
-    conditionalStart = 1,
-    conditionalEnd = 2
-}
-
-export type ReplacementBase = AstItemBase & {
-    field: Field | null;
-}
+export type ReplacementBase = AstItemBase & { }
 
 export type StandardReplacement = ReplacementBase & {
-    type: AstItemType.replacement,
-    replacementType: ReplacementType.standard;
-    filters: Filter[];
+    type: AstItemType.replacement;
+    filterSegments: FilterSegment[];
+    fieldSegment: FieldSegment;
 }
 
 export enum ConditionalType {
@@ -46,51 +40,60 @@ export enum ConditionalType {
 }
 
 export type ConditionalStart = ReplacementBase & {
-    type: AstItemType.conditionalStart,
-    replacementType: ReplacementType.conditionalStart;
+    type: AstItemType.conditionalStart;
     conditionalType: ConditionalType;
     endTag?: ConditionalEnd;
+    fieldSegment: FieldSegment;
 }
 
 export type ConditionalEnd = ReplacementBase & {
-    type: AstItemType.conditionalEnd,
-    replacementType: ReplacementType.conditionalEnd;
+    type: AstItemType.conditionalEnd;
     startTag?: ConditionalStart;
+    fieldSegment: FieldSegment;
 }
 
 export type Replacement = StandardReplacement | ConditionalStart | ConditionalEnd;
 
+export type FilterSegment = AstItemBase & {
+    type: AstItemType.filterSegment;
+    filter?: Filter;
+}
+
+export type FieldSegment = AstItemBase & {
+    type: AstItemType.fieldSegment;
+    field?: Field;
+}
+
 export type Filter = AstItemBase & {
-    type: AstItemType.filter,
-    name: string,
-    arguments: (FilterArgument | FilterArgumentKeyValue)[]
+    type: AstItemType.filter;
+    arguments: (FilterArgument | FilterArgumentKeyValue)[];
 };
 
 export type Field = AstItemBase & {
-    type: AstItemType.field
+    type: AstItemType.field;
 };
 
 export type FilterArgument = AstItemBase & {
-    type: AstItemType.filterArgument,
+    type: AstItemType.filterArgument;
 };
 
 export type FilterArgumentKeyValue = AstItemBase & {
-    type: AstItemType.filterArgumentKeyValue,
-    key: FilterArgKey,
-    divider: FilterArgDivider,
-    values: FilterArgValue[]
+    type: AstItemType.filterArgumentKeyValue;
+    key: FilterArgKey;
+    divider: FilterArgDivider;
+    values: FilterArgValue[];
 };
 
 export type FilterArgKey = AstItemBase & {
-    type: AstItemType.filterArgKey,
+    type: AstItemType.filterArgKey;
 };
 
 export type FilterArgDivider = AstItemBase & {
-    type: AstItemType.filterArgDivider,
+    type: AstItemType.filterArgDivider;
 }
 
 export type FilterArgValue = AstItemBase & {
-    type: AstItemType.filterArgValue,
+    type: AstItemType.filterArgValue;
 }
 
 export type FilterArgPart = FilterArgKey | FilterArgDivider | FilterArgValue;
