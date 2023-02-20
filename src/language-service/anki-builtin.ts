@@ -8,7 +8,6 @@ export const specialFields: readonly string[] = [
 ];
 
 export const builtinFilters: readonly string[] = [
-    "tts",
     "tts-voices",
     "cloze",
     "cloze-only",

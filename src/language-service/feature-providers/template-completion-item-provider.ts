@@ -57,10 +57,16 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
             
             if (replacement.type === AstItemType.replacement ) {
                 // Create builtin filter suggestions, ending with colon if not already followed by one
-                completionItemList.push(...builtinFilters.map(filterName => {
-                    const appendColon = !replacement.content.substring(offset - replacement.start).match(/^\s*(?=:)/)
-                    return createCompletionItem(filterName + (appendColon ? ":" : ""), vscode.CompletionItemKind.Function, "4")
-                }));
+                const appendColon = !replacement.content.substring(offset - replacement.start).match(/^\s*(?=:)/);
+                const suffix = (appendColon ? ":" : "");
+                completionItemList.push(...builtinFilters.map(filterName =>
+                    createCompletionItem(filterName + suffix, vscode.CompletionItemKind.Function, "4")
+                ));
+
+                // Suggest builtin tts filter as a snippet
+                const ttsCompletion = createCompletionItem("tts en_US" + suffix, vscode.CompletionItemKind.Function, "4");
+                ttsCompletion.insertText = new vscode.SnippetString("tts ${0:en_US}" + suffix);
+                completionItemList.push(ttsCompletion);
             }
             
             return completionItemList;
