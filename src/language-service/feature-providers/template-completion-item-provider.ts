@@ -59,13 +59,25 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                 const filterSegment = getItemAtOffset(replacement.filterSegments, offset);
                 
                 // Check if the trigger position was at the key value position inside a tts filter segment
-                if (filterSegment?.filter?.content === "tts" && filterSegment.filter.arguments[0]?.end < offset ) {
-                    completionItemList.push(...ttsKeyValueArgs.map(({ key, value }) => {
-                            const completion = createCompletionItem(key, vscode.CompletionItemKind.Property, "1")
-                            completion.insertText = new vscode.SnippetString(key + "=${0:" + value + "}");
-                            return completion;
-                        }
-                    ));
+                if (filterSegment?.filter?.content === "tts") {
+                    const { filter } = filterSegment;
+
+                    if (filter.arguments.length === 0 || 
+                        (filter.arguments[0].type === AstItemType.filterArgumentKeyValue && offset <= filter.arguments[0].start)) {
+                        const completion = createCompletionItem("en_US", vscode.CompletionItemKind.Property, "1")
+                        const suffix = offset === filter.arguments[0]?.start ? " " : "";
+                        completion.insertText = new vscode.SnippetString("${0:en_US}" + suffix);
+                        completionItemList.push(completion);
+                    }
+                    else if (offset > filter.arguments[0]?.end) {
+                        completionItemList.push(...ttsKeyValueArgs.map(({ key, value }) => {
+                                const completion = createCompletionItem(key, vscode.CompletionItemKind.Property, "1")
+                                completion.insertText = new vscode.SnippetString(key + "=${0:" + value + "}");
+                                return completion;
+                            }
+                        ));
+                    }
+                    
                 }
                 else {
                     // Create builtin filter suggestions, ending with colon if not already followed by one
