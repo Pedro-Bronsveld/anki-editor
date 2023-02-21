@@ -18,3 +18,8 @@ export const builtinFilters: readonly string[] = [
     "kana",
     "kanji"
 ];
+
+export const ttsKeyValueArgs: readonly { key: string, value: string }[] = [
+    { key: "voices", value: "Voice_Name" },
+    { key: "speed", value: "1.0" }
+];

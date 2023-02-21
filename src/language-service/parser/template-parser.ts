@@ -106,7 +106,7 @@ const parseFilter = (input: string, offset: number = 0): Filter | undefined => {
     const filterArgMatches = filterPartsMatches.slice(1);
 
     const filterArguments = filterArgMatches
-        .map(match => parseFilterArgument(match[0]))
+        .map(match => parseFilterArgument(match[0], offset + (match.index ?? 0)))
         .filter(<T>(f: T): f is Exclude<T | null, null> => f !== null)
 
     const filterStart = offset + (filterNameMatch.index ?? 0);

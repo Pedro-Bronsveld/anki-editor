@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID } from '../../constants';
 import { uriPathToParts } from '../../note-types/uri-parser';
-import { builtinFilters, specialFields } from '../anki-builtin';
+import { builtinFilters, specialFields, ttsKeyValueArgs } from '../anki-builtin';
 import AnkiModelDataProvider from '../anki-model-data-provider';
 import { AstItemType } from '../parser/ast-models';
 import { getItemAtOffset, inItem } from '../parser/ast-utils';
@@ -56,17 +56,31 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
             }
             
             if (replacement.type === AstItemType.replacement ) {
-                // Create builtin filter suggestions, ending with colon if not already followed by one
-                const appendColon = !replacement.content.substring(offset - replacement.start).match(/^\s*(?=:)/);
-                const suffix = (appendColon ? ":" : "");
-                completionItemList.push(...builtinFilters.map(filterName =>
-                    createCompletionItem(filterName + suffix, vscode.CompletionItemKind.Function, "4")
-                ));
-
-                // Suggest builtin tts filter as a snippet
-                const ttsCompletion = createCompletionItem("tts en_US" + suffix, vscode.CompletionItemKind.Function, "4");
-                ttsCompletion.insertText = new vscode.SnippetString("tts ${0:en_US}" + suffix);
-                completionItemList.push(ttsCompletion);
+                const filterSegment = getItemAtOffset(replacement.filterSegments, offset);
+                
+                // Check if the trigger position was at the key value position inside a tts filter segment
+                if (filterSegment?.filter?.content === "tts" && filterSegment.filter.arguments[0]?.end < offset ) {
+                    completionItemList.push(...ttsKeyValueArgs.map(({ key, value }) => {
+                            const completion = createCompletionItem(key, vscode.CompletionItemKind.Property, "1")
+                            completion.insertText = new vscode.SnippetString(key + "=${0:" + value + "}");
+                            return completion;
+                        }
+                    ));
+                }
+                else {
+                    // Create builtin filter suggestions, ending with colon if not already followed by one
+                    const appendColon = !replacement.content.substring(offset - replacement.start).match(/^\s*(?=:)/);
+                    const suffix = (appendColon ? ":" : "");
+                    completionItemList.push(...builtinFilters.map(filterName =>
+                        createCompletionItem(filterName + suffix, vscode.CompletionItemKind.Function, "4")
+                    ));
+    
+                    // Suggest builtin tts filter as a snippet
+                    const ttsCompletion = createCompletionItem("tts en_US" + suffix, vscode.CompletionItemKind.Function, "4");
+                    ttsCompletion.insertText = new vscode.SnippetString("tts ${0:en_US}" + suffix);
+                    completionItemList.push(ttsCompletion);
+                }
+                
             }
             
             return completionItemList;
