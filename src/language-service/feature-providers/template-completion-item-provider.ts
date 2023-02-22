@@ -63,6 +63,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                     const { filter } = filterSegment;
 
                     if (filter.arguments.length === 0 || 
+                        // tts language argument completion
                         (filter.arguments[0].type === AstItemType.filterArgumentKeyValue && offset <= filter.arguments[0].start)) {
                         const completion = createCompletionItem("en_US", vscode.CompletionItemKind.Property, "1")
                         const suffix = offset === filter.arguments[0]?.start ? " " : "";
@@ -70,9 +71,11 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                         completionItemList.push(completion);
                     }
                     else if (offset > filter.arguments[0]?.end) {
+                        // tts key value arguments completion
+                        const suffix = filter.arguments.some(argument => argument.start === offset) ? " " : "";
                         completionItemList.push(...ttsKeyValueArgs.map(({ key, value }) => {
-                                const completion = createCompletionItem(key, vscode.CompletionItemKind.Property, "1")
-                                completion.insertText = new vscode.SnippetString(key + "=${0:" + value + "}");
+                                const completion = createCompletionItem(key, vscode.CompletionItemKind.Property, "1");
+                                completion.insertText = new vscode.SnippetString(key + "=${0:" + value + "}" + suffix);
                                 return completion;
                             }
                         ));
