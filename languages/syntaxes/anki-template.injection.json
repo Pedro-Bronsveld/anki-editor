@@ -103,7 +103,7 @@
 			"name": "invalid.illegal.anki.template.filter.characters"
 		},
 		"anki-template-filter-invalid": {
-			"match": "(?<={{|^|\\s)(=[^{}\\s:]+)",
+			"match": "(?<={{|^|\\s)([=,][^{}\\s:]+)",
 			"name": "invalid.illegal.anki.template.filter"
 		},
 		"anki-template-filter-tts": {
@@ -145,7 +145,7 @@
 			"name": "meta.anki.tts.option"
 		},
 		"tts-invalid-argument": {
-			"match": "(?<=\\s)=[^\\s:{}]*",
+			"match": "(?<=\\s)[,=][^\\s:{}]*",
 			"name": "invalid.illegal.anki.tts.argument"
 		},
 		"tts-option-string-list": {
