@@ -76,7 +76,6 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// Language service features
 	const virtualDocumentProvider = new VirtualDocumentProvider();
-	const diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection('anki');
 	const ankiModelDataProvider: AnkiModelDataProvider = new AnkiModelDataProvider();
 	
 	const templateSemanticTokenProvider = new TemplateSemanticTokenProvider(virtualDocumentProvider);
@@ -84,7 +83,7 @@ export function activate(context: vscode.ExtensionContext) {
 	const templateCompletionItemProvider = new TemplateCompletionItemProvider(virtualDocumentProvider, ankiModelDataProvider);
 	const templateSignatureHelpProvider = new TemplateSignatureHelpProvider(virtualDocumentProvider);
 	const templateRenameProvider = new TemplateRenameProvider(virtualDocumentProvider);
-	const templateDiagnosticsProvider = new TemplateDiagnosticsProvider(virtualDocumentProvider);
+	const templateDiagnosticsProvider = new TemplateDiagnosticsProvider(virtualDocumentProvider, ankiModelDataProvider);
 	const templateDefinitionProvider = new TemplateDefinitionProvider(virtualDocumentProvider);
 	const templateHighlightsProvider = new TemplateHighlightsProvider(virtualDocumentProvider);
 	const templateSymbolProvider = new TemplateSymbolProvider(virtualDocumentProvider);
@@ -122,17 +121,17 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 	
 	if (vscode.window.activeTextEditor) {
-		templateDiagnosticsProvider.updateDiagnostics(vscode.window.activeTextEditor.document, diagnosticCollection);
+		templateDiagnosticsProvider.updateDiagnostics(vscode.window.activeTextEditor.document);
 		// running this twice because sometimes diagnostics aren't loaded if the file was already opened in the editor
-		templateDiagnosticsProvider.updateDiagnostics(vscode.window.activeTextEditor.document, diagnosticCollection);
+		templateDiagnosticsProvider.updateDiagnostics(vscode.window.activeTextEditor.document);
 	}
 	context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(editor => {
 		if (editor) {
-			templateDiagnosticsProvider.updateDiagnostics(editor.document, diagnosticCollection);
+			templateDiagnosticsProvider.updateDiagnostics(editor.document);
 		}
 	}));
 	context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(event => {
-			templateDiagnosticsProvider.updateDiagnostics(event.document, diagnosticCollection);
+			templateDiagnosticsProvider.updateDiagnostics(event.document);
 	}));
 
 	context.subscriptions.push(

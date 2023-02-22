@@ -3,13 +3,20 @@ import LanguageFeatureProviderBase from './language-feature-provider-base';
 import { getCSSLanguageService, TextDocument as CssTextDocument } from 'vscode-css-languageservice';
 import VirtualDocumentProvider from '../virtual-documents-provider';
 import { createProjectSync, Project, ts } from "@ts-morph/bootstrap";
-import { TEMPLATE_LANGUAGE_ID } from '../../constants';
+import { ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID } from '../../constants';
+import { parseTemplateDocument } from '../parser/template-parser';
+import { AstItemType } from '../parser/ast-models';
+import { specialFields } from '../anki-builtin';
+import { isBackSide } from '../template-util';
+import AnkiModelDataProvider from '../anki-model-data-provider';
+import { uriPathToParts } from '../../note-types/uri-parser';
 
 export default class TemplateDiagnosticsProvider extends LanguageFeatureProviderBase {
 
     private cssLanguageService = getCSSLanguageService();
     private project: Project;
     private tsLanguageService: ts.LanguageService;
+    private collection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection('anki');
 
     private severityMap = {
         [ts.DiagnosticCategory.Warning]: vscode.DiagnosticSeverity.Warning,
@@ -18,7 +25,7 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
         [ts.DiagnosticCategory.Message]: vscode.DiagnosticSeverity.Information
     } as const;
 
-    constructor(virtualDocumentProvider: VirtualDocumentProvider) {
+    constructor(virtualDocumentProvider: VirtualDocumentProvider, private ankiModelDataProvider: AnkiModelDataProvider) {
         super(virtualDocumentProvider);
 
         this.project = createProjectSync({
@@ -32,17 +39,57 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
         this.tsLanguageService = this.project.getLanguageService();
     }
     
-    async updateDiagnostics(document: vscode.TextDocument, collection: vscode.DiagnosticCollection): Promise<void> {
+    async updateDiagnostics(document: vscode.TextDocument): Promise<void> {
         
         if (document.languageId !== TEMPLATE_LANGUAGE_ID) {
-            collection.clear();
+            this.collection.clear();
             return;
         }
 
         const allDiagnostics: vscode.Diagnostic[] = [];
 
+        const templateEmbeddedDocument = this.getEmbeddedByLanguage(document, TEMPLATE_LANGUAGE_ID);
+        if (templateEmbeddedDocument) {
+            // anki template
+            const templateDocument = parseTemplateDocument(templateEmbeddedDocument.content);
+
+            const validFields: Set<string> = new Set();
+            const modelAvailable: boolean = document.uri.scheme === ANKI_EDITOR_SCHEME_BASE;
+            let modelName = "";
+
+            if (modelAvailable) {
+                specialFields.forEach(validFields.add, validFields);
+                if (isBackSide(document))
+                    validFields.add("FrontSide");
+                const uriParts = uriPathToParts(document.uri);
+                if (uriParts.length >= 2) {
+                    modelName = uriParts[1];
+                    (await this.ankiModelDataProvider.getFieldNames(modelName)).forEach(validFields.add, validFields);
+                }
+            }
+
+            for (const replacement of templateDocument.replacements) {
+
+                // Check if field exists in model
+                const { field } = replacement.fieldSegment;
+                if (modelAvailable && field && !validFields.has(field.content)) {
+                    allDiagnostics.push(new vscode.Diagnostic(
+                        new vscode.Range(document.positionAt(field.start), document.positionAt(field.end)),
+                        `"${field.content}" is not a field name in note type "${modelName}".`,
+                        vscode.DiagnosticSeverity.Error
+                    ));
+                }
+                
+                if (replacement.type === AstItemType.conditionalStart || replacement.type === AstItemType.conditionalEnd) {
+
+                }
+                
+            }
+            
+        }
+
         const cssEmbeddedDocument = this.getEmbeddedByLanguage(document, "css");
-        if (cssEmbeddedDocument){
+        if (cssEmbeddedDocument) {
             // css    
             const cssDocument = CssTextDocument.create(cssEmbeddedDocument.virtualUri.toString(), cssEmbeddedDocument.languageId, document.version, cssEmbeddedDocument.content);
             const stylesheet =this.cssLanguageService.parseStylesheet(cssDocument);
@@ -63,7 +110,7 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                 )
             }));
 
-            allDiagnostics.push(...allDiagnostics.concat(transformedDiagnostics));
+            allDiagnostics.push(...transformedDiagnostics);
         }
 
         const jsEmbeddedDocument = this.getEmbeddedByLanguage(document, "javascript");
@@ -97,7 +144,7 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
             
         }
 
-        collection.set(document.uri, allDiagnostics);
+        this.collection.set(document.uri, allDiagnostics);
     }
 
     private transformTsDiagnostics = (document: vscode.TextDocument, tsDiagnostics: ts.Diagnostic[]): vscode.Diagnostic[] => 

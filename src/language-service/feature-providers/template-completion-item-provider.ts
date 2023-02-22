@@ -6,6 +6,7 @@ import AnkiModelDataProvider from '../anki-model-data-provider';
 import { AstItemType, FilterArgumentKeyValue } from '../parser/ast-models';
 import { getItemAtOffset, inItem } from '../parser/ast-utils';
 import { parseTemplateDocument } from '../parser/template-parser';
+import { isBackSide } from '../template-util';
 import VirtualDocumentProvider from '../virtual-documents-provider';
 import LanguageFeatureProviderBase from './language-feature-provider-base';
 
@@ -51,7 +52,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                 }
 
                 // Show FrontSide suggestion only when in back side template
-                if(replacement.type === AstItemType.replacement && document.uri.path.split("/").slice(-1)[0]?.toLowerCase().startsWith("back"))
+                if(replacement.type === AstItemType.replacement && isBackSide(document))
                     completionItemList.push(createCompletionItem("FrontSide", vscode.CompletionItemKind.Reference, "2"));
             }
             
