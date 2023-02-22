@@ -81,8 +81,9 @@
 			},
 			"end": "(?=:|}})",
 			"patterns": [
-				{ "include": "#anki-template-filter" },
 				{ "include": "#anki-template-filter-invalid-characters" },
+				{ "include": "#anki-template-filter-invalid" },
+				{ "include": "#anki-template-filter" },
 				{ "include": "#anki-template-filter-tts" },
 				{ "include": "#anki-template-filter-invalid-start" },
 				{ "include": "#anki-template-filter-invalid-end" },
@@ -94,28 +95,28 @@
 			"match": "(?<=(?::|(?:{{|^)\\s*))(?:(tts|tts-voices|cloze(?:-only)?|hint|type|text|furigana|kana|kanji)|([^\"{}\\s:]+))(?=:)",
 			"name": "meta.anki.template.filter.$1",
 			"captures": {
-				"1": {
-					"name": "support.function.anki.filter.$1"
-				}
+				"1": { "name": "support.function.anki.filter.$1" }
 			}
 		},
 		"anki-template-filter-invalid-characters": {
 			"match": "[#^/\"{}]",
 			"name": "invalid.illegal.anki.template.filter.characters"
 		},
+		"anki-template-filter-invalid": {
+			"match": "(?<={{|^|\\s)(=[^{}\\s:]+)",
+			"name": "invalid.illegal.anki.template.filter"
+		},
 		"anki-template-filter-tts": {
-			"begin": "(?<=(?:{{|^)\\s*|:)(?:(tts(?=\\s\\S))|(tts(?=\\s{2,}\\S)))(?!\\s*(?:$|}}))",
+			"begin": "(?<=(?:{{|^)\\s*|:)(tts(?=\\s))",
 			"beginCaptures": {
-				"1": { "name": "support.function.anki.tts" },
-				"2": { "name": "invalid.illegal.anki.tts.spacing" }
+				"1": { "name": "support.function.anki.tts" }
 			},
 			"end": "(?=:)|(?=}})",
 			"patterns": [
 				{ "include": "#anki-template-filter-invalid-characters" },
-				{ "include": "#tts-spacing-invalid" },
-				{ "include": "#tts-language-invalid" },
 				{ "include": "#tts-language" },
-				{ "include": "#tts-language-option-value" }
+				{ "include": "#tts-language-option-value" },
+				{ "include": "#tts-invalid-argument" }
 			],
 			"name": "meta.anki.template.filter.tts"
 		},
@@ -124,16 +125,8 @@
 			"name": "meta.anki.filter.tts.language",
 			"captures": {
 				"1": { "name": "string.anki.tts.language" },
-				"2": { "name": "invalid.anki.tts.language.suffix" }
+				"2": { "name": "invalid.illegal.anki.tts.language.suffix" }
 			}
-		},
-		"tts-language-invalid": {
-			"match": "(?<=tts\\s)[^a-z]+",
-			"name": "invalid.illegal.anki.tts.language"
-		},
-		"tts-spacing-invalid": {
-			"match": "(?<=tts\\s{2,})[a-zA-Z_]+",
-			"name": "invalid.illegal.anki.tts.spacing"
 		},
 		"tts-language-option-value": {
 			"match": "([a-z]+)(=)([^:\\s={}\"]+)?([^:\\s{}\"]+)?",
@@ -147,9 +140,13 @@
 						{ "include": "#tts-option-string-list" }
 					]
 				},
-				"4": { "name": "invalid.anki.tts.option.suffix" }
+				"4": { "name": "invalid.illegal.anki.tts.option.suffix" }
 			},
 			"name": "meta.anki.tts.option"
+		},
+		"tts-invalid-argument": {
+			"match": "(?<=\\s)=[^\\s:{}]*",
+			"name": "invalid.illegal.anki.tts.argument"
 		},
 		"tts-option-string-list": {
 			"patterns": [
