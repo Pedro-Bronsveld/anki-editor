@@ -16,7 +16,7 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
         [ts.DiagnosticCategory.Error]: vscode.DiagnosticSeverity.Error,
         [ts.DiagnosticCategory.Suggestion]: vscode.DiagnosticSeverity.Hint,
         [ts.DiagnosticCategory.Message]: vscode.DiagnosticSeverity.Information
-    } as const
+    } as const;
 
     constructor(virtualDocumentProvider: VirtualDocumentProvider) {
         super(virtualDocumentProvider);
