@@ -115,16 +115,16 @@
 				{ "include": "#tts-spacing-invalid" },
 				{ "include": "#tts-language-invalid" },
 				{ "include": "#tts-language" },
-				{ "include": "#tts-language-options" }
+				{ "include": "#tts-language-option-value" }
 			],
 			"name": "meta.anki.template.filter.tts"
 		},
 		"tts-language": {
-			"match": "((?<=tts\\s)[a-z]{1,2}(?:_[A-Z]{0,2})?)([^\\s:]*)",
+			"match": "(?<=tts\\s+)([^\\s:=,{}]+)([^\\s:{}]+)?",
 			"name": "meta.anki.filter.tts.language",
 			"captures": {
 				"1": { "name": "string.anki.tts.language" },
-				"2": { "name": "invalid.illegal.anki.tts.language.suffix" }
+				"2": { "name": "invalid.anki.tts.language.suffix" }
 			}
 		},
 		"tts-language-invalid": {
@@ -135,17 +135,8 @@
 			"match": "(?<=tts\\s{2,})[a-zA-Z_]+",
 			"name": "invalid.illegal.anki.tts.spacing"
 		},
-		"tts-language-options": {
-			"begin": "(?<=tts\\s+[a-zA-Z_]+\\s*)",
-			"end": "(?=:)|(?=}})",
-			"patterns": [
-				{ "include": "#anki-template-filter-invalid-characters" },
-				{ "include": "#tts-language-option-value" }
-			],
-			"name": "meta.anki.tts.options"
-		},
 		"tts-language-option-value": {
-			"match": "([a-z]+)(=)([^:\\s={}\"]*)?",
+			"match": "([a-z]+)(=)([^:\\s={}\"]+)?([^:\\s{}\"]+)?",
 			"captures": {
 				"1": { "name": "variable.parameter.anki.tts" },
 				"2": { "name": "keyword.operator.assignment.anki" },
@@ -155,7 +146,8 @@
 						{ "include": "#tts-option-decimal" },
 						{ "include": "#tts-option-string-list" }
 					]
-				}
+				},
+				"4": { "name": "invalid.anki.tts.option.suffix" }
 			},
 			"name": "meta.anki.tts.option"
 		},
