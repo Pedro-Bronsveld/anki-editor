@@ -75,13 +75,18 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                 if (modelAvailable && field && !validFields.has(field.content)) {
                     allDiagnostics.push(new vscode.Diagnostic(
                         new vscode.Range(document.positionAt(field.start), document.positionAt(field.end)),
-                        `"${field.content}" is not a field name in note type "${modelName}".`,
-                        vscode.DiagnosticSeverity.Error
-                    ));
+                        `"${field.content}" is not a field name in note type "${modelName}".`));
                 }
                 
                 if (replacement.type === AstItemType.conditionalStart || replacement.type === AstItemType.conditionalEnd) {
-
+                    // Provide warning for filter syntax in a conditional replacement
+                    const invalidFilterMatch = replacement.fieldSegment.content.match(/.*:/);
+                    if (invalidFilterMatch) {
+                        allDiagnostics.push(new vscode.Diagnostic(
+                            new vscode.Range(document.positionAt(replacement.fieldSegment.start + (invalidFilterMatch.index ?? 0)), document.positionAt(replacement.fieldSegment.start + (invalidFilterMatch.index ?? 0) + invalidFilterMatch[0].length)),
+                            "Filters are not allowed in conditional opening or closing tags."
+                        ));
+                    }
                 }
                 
             }
