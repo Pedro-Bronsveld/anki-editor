@@ -70,12 +70,31 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
 
             for (const replacement of templateDocument.replacements) {
 
+                // Check for invalid characters
+                const invalidCharsMatches = [...replacement.content.substring(2, replacement.content.length - 2).matchAll(/["{}]/g)];
+                allDiagnostics.push(...invalidCharsMatches.map(match => new vscode.Diagnostic(
+                    new vscode.Range(document.positionAt(2 + replacement.start + (match.index ?? 0)), document.positionAt(2 + replacement.start + (match.index ?? 0) + match[0].length)),
+                    `${match[0]} is not a valid character inside a template replacement.`
+                )));
+                
                 // Check if field exists in model
                 const { field } = replacement.fieldSegment;
                 if (modelAvailable && field && !validFields.has(field.content)) {
+                    // Provide diagnostics based on field names from model
                     allDiagnostics.push(new vscode.Diagnostic(
                         new vscode.Range(document.positionAt(field.start), document.positionAt(field.end)),
                         `"${field.content}" is not a field name in note type "${modelName}".`));
+                }
+
+                {
+                    // Invalid field character matching
+                    const invalidStartChar = replacement.fieldSegment.content.match(/^[#^/]+/);
+                    if (invalidStartChar) {
+                        allDiagnostics.push(new vscode.Diagnostic(
+                            new vscode.Range(document.positionAt(replacement.fieldSegment.start + (invalidStartChar.index ?? 0)), document.positionAt(replacement.fieldSegment.start + (invalidStartChar.index ?? 0) + invalidStartChar[0].length)),
+                            "A field name can't start with '#', '^' or '/'."
+                        ));
+                    }
                 }
                 
                 if (replacement.type === AstItemType.conditionalStart || replacement.type === AstItemType.conditionalEnd) {

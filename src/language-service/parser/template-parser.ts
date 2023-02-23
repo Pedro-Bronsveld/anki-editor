@@ -17,7 +17,7 @@ export const parseTemplateDocument = (input: string): TemplateDocument => {
     }
 }
 
-const replacementRegexp = /{{[^{}]*}}/g;
+const replacementRegexp = /{{.*}}/g;
 
 export const getReplacementMatches = (documentText: string) => [...documentText.matchAll(replacementRegexp)];
 
