@@ -109,7 +109,28 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                         const endSpaceMatch = filterSegment.content.match(/\s+$/g)
                         if (endSpaceMatch && filterSegment.filter?.content !== "tts")
                             allDiagnostics.push(matchToDiagnostic(document, endSpaceMatch, filterSegment.end - endSpaceMatch[0].length, "Filters can't end with a space."));
+                        
+                        // Diagnostics for tts filter
+                        const { filter } = filterSegment;
+                        if (filter?.content === "tts") {
+                            const arg0 = filter.arguments[0];
+
+                            // Check if the first argument of the tts filter is the language argument
+                            if (arg0?.type === AstItemType.filterArgumentKeyValue) {
+                                allDiagnostics.push(new vscode.Diagnostic(
+                                    new vscode.Range(document.positionAt(arg0.start), document.positionAt(arg0.end)),
+                                    "The tts filter name must be followed be a language code such as 'en_US'.\nThe key value arguments 'voices' and 'speed' can only be used after this first argument."
+                                ));
+                            }
                             
+                            // Check if there is more than one space between the tts filter name and the language argument
+                            if (arg0?.type === AstItemType.filterArgument && arg0.start - filter.end > 1) {
+                                allDiagnostics.push(new vscode.Diagnostic(
+                                    new vscode.Range(document.positionAt(filter.end + 1), document.positionAt(arg0.start)),
+                                    "There must be exactly one space between the tts filtername and the language argument."
+                                ));
+                            }
+                        }
                     }
                 }
                 else if (replacement.type === AstItemType.conditionalStart || replacement.type === AstItemType.conditionalEnd) {
