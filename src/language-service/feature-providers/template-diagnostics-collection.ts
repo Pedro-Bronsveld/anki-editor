@@ -87,21 +87,29 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
 
                 {
                     // Invalid field character matching
-                    const invalidStartChar = replacement.fieldSegment.content.match(/^[#^/]+/);
-                    if (invalidStartChar)
-                        allDiagnostics.push(matchToDiagnostic(document, invalidStartChar, replacement.fieldSegment.start, "A field name can't start with '#', '^' or '/'."));
+                    const invalidStartCharMatch = replacement.fieldSegment.content.match(/^[#^/]+/);
+                    if (invalidStartCharMatch)
+                        allDiagnostics.push(matchToDiagnostic(document, invalidStartCharMatch, replacement.fieldSegment.start, "A field name can't start with '#', '^' or '/'."));
                 }
                 
                 if (replacement.type === AstItemType.replacement) {
                     // Provide diagnostics for standard replacement
+                    const invalidStartSpaceMatch = replacement.fieldSegment.content.match(/^\s+/);
+                    if (invalidStartSpaceMatch && replacement.filterSegments.length > 0)
+                        allDiagnostics.push(matchToDiagnostic(document, invalidStartSpaceMatch, replacement.fieldSegment.start, "A field name can't be preceded by a space when the replacement contains ':' characters."));
+                    
                     for (const [i, filterSegment] of replacement.filterSegments.entries()) {
 
                         // Check for invalid spacing at the start of filter segment
-                        // if (i > 0)
-                        //     allDiagnostics.push(new vscode.Diagnostic(
-                        //         new vscode.Range(document.positionAt(filterSegment.start), document.positionAt())
-                        //     ))
-                        
+                        const startSpaceMatch = filterSegment.content.match(/^\s+/);
+                        if (i > 0 && startSpaceMatch)
+                            allDiagnostics.push(matchToDiagnostic(document, startSpaceMatch, filterSegment.start, "Consecutive filters can't start with a space."));
+
+                        // Check for invalid spacing at the end of filter segment
+                        const endSpaceMatch = filterSegment.content.match(/\s+$/g)
+                        if (endSpaceMatch && filterSegment.filter?.content !== "tts")
+                            allDiagnostics.push(matchToDiagnostic(document, endSpaceMatch, filterSegment.end - endSpaceMatch[0].length, "Filters can't end with a space."));
+                            
                     }
                 }
                 else if (replacement.type === AstItemType.conditionalStart || replacement.type === AstItemType.conditionalEnd) {
