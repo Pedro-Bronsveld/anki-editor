@@ -72,10 +72,9 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
 
                 // Check for invalid characters
                 const invalidCharsMatches = [...replacement.content.substring(2, replacement.content.length - 2).matchAll(/["{}]/g)];
-                allDiagnostics.push(...invalidCharsMatches.map(match => new vscode.Diagnostic(
-                    new vscode.Range(document.positionAt(2 + replacement.start + (match.index ?? 0)), document.positionAt(2 + replacement.start + (match.index ?? 0) + match[0].length)),
-                    `${match[0]} is not a valid character inside a template replacement.`
-                )));
+                allDiagnostics.push(...invalidCharsMatches.map(match =>
+                    matchToDiagnostic(document, match, 2 + replacement.start, `${match[0]} is not a valid character inside a template replacement.`)
+                ));
                 
                 // Check if field exists in model
                 const { field } = replacement.fieldSegment;
@@ -89,23 +88,27 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                 {
                     // Invalid field character matching
                     const invalidStartChar = replacement.fieldSegment.content.match(/^[#^/]+/);
-                    if (invalidStartChar) {
-                        allDiagnostics.push(new vscode.Diagnostic(
-                            new vscode.Range(document.positionAt(replacement.fieldSegment.start + (invalidStartChar.index ?? 0)), document.positionAt(replacement.fieldSegment.start + (invalidStartChar.index ?? 0) + invalidStartChar[0].length)),
-                            "A field name can't start with '#', '^' or '/'."
-                        ));
-                    }
+                    if (invalidStartChar)
+                        allDiagnostics.push(matchToDiagnostic(document, invalidStartChar, replacement.fieldSegment.start, "A field name can't start with '#', '^' or '/'."));
                 }
                 
-                if (replacement.type === AstItemType.conditionalStart || replacement.type === AstItemType.conditionalEnd) {
-                    // Provide warning for filter syntax in a conditional replacement
-                    const invalidFilterMatch = replacement.fieldSegment.content.match(/.*:/);
-                    if (invalidFilterMatch) {
-                        allDiagnostics.push(new vscode.Diagnostic(
-                            new vscode.Range(document.positionAt(replacement.fieldSegment.start + (invalidFilterMatch.index ?? 0)), document.positionAt(replacement.fieldSegment.start + (invalidFilterMatch.index ?? 0) + invalidFilterMatch[0].length)),
-                            "Filters are not allowed in conditional opening or closing tags."
-                        ));
+                if (replacement.type === AstItemType.replacement) {
+                    // Provide diagnostics for standard replacement
+                    for (const [i, filterSegment] of replacement.filterSegments.entries()) {
+
+                        // Check for invalid spacing at the start of filter segment
+                        // if (i > 0)
+                        //     allDiagnostics.push(new vscode.Diagnostic(
+                        //         new vscode.Range(document.positionAt(filterSegment.start), document.positionAt())
+                        //     ))
+                        
                     }
+                }
+                else if (replacement.type === AstItemType.conditionalStart || replacement.type === AstItemType.conditionalEnd) {
+                    // Provide error diagnostic for filter syntax in a conditional replacement
+                    const invalidFilterMatch = replacement.fieldSegment.content.match(/.*:/);
+                    if (invalidFilterMatch)
+                        allDiagnostics.push(matchToDiagnostic(document, invalidFilterMatch, replacement.fieldSegment.start, "Filters are not allowed in conditional opening or closing tags."));
                 }
                 
             }
@@ -198,3 +201,8 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
         [chain].concat(chain.next ? chain.next.flatMap(this.flattenDiagnosticMessageChain) : []);
     
 }
+
+const matchToDiagnostic = (document: vscode.TextDocument, match: RegExpMatchArray, offset: number, message: string): vscode.Diagnostic => new vscode.Diagnostic(
+    new vscode.Range(document.positionAt(offset + (match.index ?? 0)), document.positionAt(offset + (match.index ?? 0) + match[0].length)),
+    message
+);
