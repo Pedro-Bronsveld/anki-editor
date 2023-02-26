@@ -166,6 +166,12 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                                                 new vscode.Range(document.positionAt(arg.values[0].end), document.positionAt(arg.end)),
                                                 `Only one value must be given for option '${ttsKeyValueArg.key}'.`
                                             ));
+                                        else if (arg.values.length === 0)
+                                            allDiagnostics.push(new vscode.Diagnostic(
+                                                new vscode.Range(document.positionAt(arg.divider.end), document.positionAt(arg.divider.end)),
+                                                `No value given for option '${arg.key}'.`,
+                                                vscode.DiagnosticSeverity.Warning
+                                            ));
                                         
                                         // Check formatting of values for this option
                                         for (const value of arg.values.slice(0, ttsKeyValueArg.multiple ? arg.values.length : 1)) {
