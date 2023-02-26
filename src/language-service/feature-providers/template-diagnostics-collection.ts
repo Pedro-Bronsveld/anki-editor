@@ -119,7 +119,7 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                             if (arg0?.type === AstItemType.filterArgumentKeyValue) {
                                 allDiagnostics.push(new vscode.Diagnostic(
                                     new vscode.Range(document.positionAt(arg0.start), document.positionAt(arg0.end)),
-                                    "The tts filter name must be followed be a language code such as 'en_US'.\nThe key value arguments 'voices' and 'speed' can only be used after this first argument."
+                                    "The tts filter name must be followed be a language code such as 'en_US'.\nKey value arguments can only be used after this first argument."
                                 ));
                             }
                             

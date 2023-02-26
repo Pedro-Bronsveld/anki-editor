@@ -81,7 +81,8 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                                 .filter(({ key, value }) => !usedOptions.has(key))
                                 .map(({ key, value }) => {
                                 const completion = createCompletionItem(key, vscode.CompletionItemKind.Property, "1");
-                                completion.insertText = new vscode.SnippetString(key + "=${0:" + value + "}" + suffix);
+                                const prefix = filterSegment.content[offset - filterSegment.start - 1] === " " ? "" : " ";
+                                completion.insertText = new vscode.SnippetString(prefix + key + "=${0:" + value + "}" + suffix);
                                 return completion;
                             }
                         ));
