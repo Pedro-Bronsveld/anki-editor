@@ -6,7 +6,7 @@ import { createProjectSync, Project, ts } from "@ts-morph/bootstrap";
 import { ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID } from '../../constants';
 import { parseTemplateDocument } from '../parser/template-parser';
 import { AstItemType } from '../parser/ast-models';
-import { specialFields } from '../anki-builtin';
+import { specialFields, ttsKeyValueArgs, ttsKeyValueArgsMap } from '../anki-builtin';
 import { isBackSide } from '../template-util';
 import AnkiModelDataProvider from '../anki-model-data-provider';
 import { uriPathToParts } from '../../note-types/uri-parser';
@@ -129,6 +129,57 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                                     new vscode.Range(document.positionAt(filter.end + 1), document.positionAt(arg0.start)),
                                     "There must be exactly one space between the tts filtername and the language argument."
                                 ));
+                            }
+
+                            if (filter.arguments.length > 1) {
+                                // Check any argument after the language argument
+                                for (const arg of filter.arguments.slice(1)) {
+                                    if (arg.type === AstItemType.filterArgument)
+                                        allDiagnostics.push(new vscode.Diagnostic(
+                                            new vscode.Range(document.positionAt(arg.start), document.positionAt(arg.end)),
+                                            "Invalid argument for tts filter.\nArguments after the first argument of the tts filter must be key value options.\nFor example: 'speed=1.5'."
+                                        ));
+                                    else if (arg.type === AstItemType.filterArgumentKeyValue) {
+                                        const ttsKeyValueArg = ttsKeyValueArgsMap.get(arg.key.content);
+                                        // Check if argument key is a vlaid option for tts filter
+                                        if (!ttsKeyValueArg) {
+                                            allDiagnostics.push(new vscode.Diagnostic(
+                                                new vscode.Range(document.positionAt(arg.start), document.positionAt(arg.end)),
+                                                `'${arg.key.content}' is not a valid option for the tts filter.\n Valid options are: ${
+                                                    ttsKeyValueArgs.map(arg => `'${arg.key}'`).join(", ")
+                                                }`
+                                            ));
+                                            continue;
+                                        }
+                                        
+                                        // Check if the divider character between the key and value is exactly one '='
+                                        if (arg.divider.content.length > 1) {
+                                            allDiagnostics.push(new vscode.Diagnostic(
+                                                new vscode.Range(document.positionAt(arg.divider.start + 1), document.positionAt(arg.divider.end)),
+                                                "The character between key and value for a tts filter argument must be exactly one '=' character."
+                                            ));
+                                        }
+
+                                        // Check if option is allowed to contain multiple comma separated values
+                                        if (!ttsKeyValueArg.multiple && (arg.values.length > 1 || arg.content.endsWith(",")))
+                                            allDiagnostics.push(new vscode.Diagnostic(
+                                                new vscode.Range(document.positionAt(arg.values[0].end), document.positionAt(arg.end)),
+                                                `Only one value must be given for option '${ttsKeyValueArg.key}'.`
+                                            ));
+                                        
+                                        // Check formatting of values for this option
+                                        for (const value of arg.values.slice(0, ttsKeyValueArg.multiple ? arg.values.length : 1)) {
+                                            const validMatch = value.content.match(ttsKeyValueArg.validMatch);
+                                            if (validMatch)
+                                                continue;
+                                            
+                                            allDiagnostics.push(new vscode.Diagnostic(
+                                                new vscode.Range(document.positionAt(value.start), document.positionAt(value.end)),
+                                                ttsKeyValueArg.invalidMessage
+                                            ));
+                                        }
+                                    }
+                                }
                             }
                         }
                     }

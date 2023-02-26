@@ -123,7 +123,7 @@ const parseFilter = (input: string, offset: number = 0): Filter | undefined => {
 
 const parseFilterArgument = (input: string, offset: number = 0): FilterArgument | FilterArgumentKeyValue | null => {
 
-    const argumentMatch = input.match(/(?:([^=\s]+)(=)+)?([^\s\r\n\t=]*)/);
+    const argumentMatch = input.match(/(?:([^=\s]+)(=+))?([^\s\r\n\t=]*)/);
 
     if (!argumentMatch)
         return null;
@@ -166,7 +166,7 @@ const createFilterArgumentKeyValue = (
         ...createAstItemBase(content, offset),
         type: AstItemType.filterArgumentKeyValue,
         key: createFilterArgKey(key, offset),
-        divider: createFilterArgDivider(divider, key.length),
+        divider: createFilterArgDivider(divider, offset + key.length),
         values: value
             ? [...value.matchAll(/[^,]+/g)].map(match => 
                 createFilterArgValue(match[0], offset + key.length + divider.length + (match.index ?? 0)))
