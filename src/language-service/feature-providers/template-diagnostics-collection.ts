@@ -73,7 +73,8 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                 // Check for invalid characters
                 const invalidCharsMatches = [...replacement.content.substring(2, replacement.content.length - 2).matchAll(/["{}]/g)];
                 allDiagnostics.push(...invalidCharsMatches.map(match =>
-                    matchToDiagnostic(document, match, 2 + replacement.start, `${match[0]} is not a valid character inside a template replacement.`)
+                    matchToDiagnostic(document, match, 2 + replacement.start,
+                        `${match[0]} is not a valid character inside a template replacement.`)
                 ));
                 
                 // Check if field exists in model
@@ -89,26 +90,30 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                     // Invalid field character matching
                     const invalidStartCharMatch = replacement.fieldSegment.content.match(/^[#^/]+/);
                     if (invalidStartCharMatch)
-                        allDiagnostics.push(matchToDiagnostic(document, invalidStartCharMatch, replacement.fieldSegment.start, "A field name can't start with '#', '^' or '/'."));
+                        allDiagnostics.push(matchToDiagnostic(document, invalidStartCharMatch, replacement.fieldSegment.start,
+                            "A field name can't start with '#', '^' or '/'."));
                 }
                 
                 if (replacement.type === AstItemType.replacement) {
                     // Provide diagnostics for standard replacement
                     const invalidStartSpaceMatch = replacement.fieldSegment.content.match(/^\s+/);
                     if (invalidStartSpaceMatch && replacement.filterSegments.length > 0)
-                        allDiagnostics.push(matchToDiagnostic(document, invalidStartSpaceMatch, replacement.fieldSegment.start, "A field name can't be preceded by a space when the replacement contains ':' characters."));
+                        allDiagnostics.push(matchToDiagnostic(document, invalidStartSpaceMatch, replacement.fieldSegment.start,
+                            "A field name can't be preceded by a space when the replacement contains ':' characters."));
                     
                     for (const [i, filterSegment] of replacement.filterSegments.entries()) {
 
                         // Check for invalid spacing at the start of filter segment
                         const startSpaceMatch = filterSegment.content.match(/^\s+/);
                         if (i > 0 && startSpaceMatch)
-                            allDiagnostics.push(matchToDiagnostic(document, startSpaceMatch, filterSegment.start, "Consecutive filters can't start with a space."));
+                            allDiagnostics.push(matchToDiagnostic(document, startSpaceMatch, filterSegment.start,
+                                "Consecutive filters can't start with a space."));
 
                         // Check for invalid spacing at the end of filter segment
                         const endSpaceMatch = filterSegment.content.match(/\s+$/g)
                         if (endSpaceMatch && filterSegment.filter?.content !== "tts")
-                            allDiagnostics.push(matchToDiagnostic(document, endSpaceMatch, filterSegment.end - endSpaceMatch[0].length, "Filters can't end with a space."));
+                            allDiagnostics.push(matchToDiagnostic(document, endSpaceMatch, filterSegment.end - endSpaceMatch[0].length,
+                                "Filters can't end with a space."));
                         
                         // Diagnostics for tts filter
                         const { filter } = filterSegment;
@@ -116,12 +121,11 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                             const arg0 = filter.arguments[0];
 
                             // Check if the required language argument is set for the tts filter
-                            if (!arg0) {
+                            if (!arg0)
                                 allDiagnostics.push(new vscode.Diagnostic(
                                     new vscode.Range(document.positionAt(filter.start), document.positionAt(filterSegment.end)),
                                     "The tts filter name must be followed be a language code.\nFor example: 'en_US'."
                                 ));
-                            }
                             // Check if the first argument of the tts filter is the language argument
                             else if (arg0.type === AstItemType.filterArgumentKeyValue) {
                                 allDiagnostics.push(new vscode.Diagnostic(
@@ -205,7 +209,8 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                     // Provide error diagnostic for filter syntax in a conditional replacement
                     const invalidFilterMatch = replacement.fieldSegment.content.match(/.*:/);
                     if (invalidFilterMatch)
-                        allDiagnostics.push(matchToDiagnostic(document, invalidFilterMatch, replacement.fieldSegment.start, "Filters are not allowed in conditional opening or closing tags."));
+                        allDiagnostics.push(matchToDiagnostic(document, invalidFilterMatch, replacement.fieldSegment.start,
+                            "Filters are not allowed in conditional opening or closing tags."));
                 }
                 
             }
@@ -215,7 +220,8 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
         const cssEmbeddedDocument = this.getEmbeddedByLanguage(document, "css");
         if (cssEmbeddedDocument) {
             // css    
-            const cssDocument = CssTextDocument.create(cssEmbeddedDocument.virtualUri.toString(), cssEmbeddedDocument.languageId, document.version, cssEmbeddedDocument.content);
+            const cssDocument = CssTextDocument.create(cssEmbeddedDocument.virtualUri.toString(),
+                cssEmbeddedDocument.languageId, document.version, cssEmbeddedDocument.content);
             const stylesheet =this.cssLanguageService.parseStylesheet(cssDocument);
             const diagnostics = this.cssLanguageService.doValidation(cssDocument, stylesheet);
 
