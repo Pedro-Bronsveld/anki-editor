@@ -70,12 +70,9 @@
 			"name": "meta.anki.conditional.block"
 		},
 		"anki-template-segment": {
-			"begin": "(?:(:(?=[\\s\n]+))|(:)|(?<={{))",
+			"begin": "(?:(:)|(?<={{))",
 			"beginCaptures": {
 				"1": {
-					"name": "invalid.illegal.anki.template.separator"
-				},
-				"2": {
 					"name": "punctuation.separator.anki.segment"
 				}
 			},
@@ -85,14 +82,12 @@
 				{ "include": "#anki-template-filter-invalid" },
 				{ "include": "#anki-template-filter" },
 				{ "include": "#anki-template-filter-tts" },
-				{ "include": "#anki-template-filter-invalid-start" },
-				{ "include": "#anki-template-filter-invalid-end" },
 				{ "include": "#anki-field" }
 			],
 			"name": "meta.anki.template.segment"
 		},
 		"anki-template-filter": {
-			"match": "(?<=(?::|(?:{{|^)\\s*))(?:(tts|tts-voices|cloze(?:-only)?|hint|type|text|furigana|kana|kanji)|([^\"{}\\s:]+))(?=:)",
+			"match": "(?<=(?::|{{|^)\\s*)(?:(tts|tts-voices|cloze(?:-only)?|hint|type|text|furigana|kana|kanji)|([^\"{}\\s:]+))(?=\\s*:)",
 			"name": "meta.anki.template.filter.$1",
 			"captures": {
 				"1": { "name": "support.function.anki.filter.$1" }
@@ -163,16 +158,6 @@
 		"tts-option-decimal": {
 			"match": "(?<==)\\d*\\.?\\d*(?=[:}\\s\n]|$)",
 			"name": "constant.numeric.anki.tts.option.decimal"
-		},
-		"anki-template-filter-invalid-start": {
-			"begin": "(?<=:)(?:\\s|$)",
-			"end": "(?=:)|(?=}})",
-			"name": "invalid.illegal.anki.template.filter.start"
-		},
-		"anki-template-filter-invalid-end": {
-			"begin": "(?<=:|(?:^|{{)\\s*)[^\"{}\\s]+\\s+(?=:)",
-			"end": ":|(?=}})",
-			"name": "invalid.illegal.anki.template.filter.end"
 		},
 		"anki-field-special": {
 			"name": "variable.other.constant.anki.special-field",

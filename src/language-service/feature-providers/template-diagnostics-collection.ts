@@ -99,7 +99,7 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                     const invalidStartSpaceMatch = replacement.fieldSegment.content.match(/^\s+/);
                     if (invalidStartSpaceMatch && replacement.filterSegments.length > 0)
                         allDiagnostics.push(matchToDiagnostic(document, invalidStartSpaceMatch, replacement.fieldSegment.start,
-                            "A field name can't be preceded by a space when the replacement contains ':' characters."));
+                            "A field name can't be preceded by a space when the replacement contains one or more ':' characters."));
                     
                     for (const [i, filterSegment] of replacement.filterSegments.entries()) {
 
@@ -113,7 +113,7 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                         const endSpaceMatch = filterSegment.content.match(/\s+$/g)
                         if (endSpaceMatch && filterSegment.filter?.content !== "tts")
                             allDiagnostics.push(matchToDiagnostic(document, endSpaceMatch, filterSegment.end - endSpaceMatch[0].length,
-                                "Filters can't end with a space."));
+                                "Filters can't end with a space, tab or new line character."));
                         
                         // Diagnostics for tts filter
                         const { filter } = filterSegment;
@@ -124,13 +124,13 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                             if (!arg0)
                                 allDiagnostics.push(new vscode.Diagnostic(
                                     new vscode.Range(document.positionAt(filter.start), document.positionAt(filterSegment.end)),
-                                    "The tts filter name must be followed by a language code.\nFor example: en_US."
+                                    "The tts filter name must be followed by a language code.\nFor example: en_US"
                                 ));
                             // Check if the first argument of the tts filter is the language argument
                             else if (arg0.type === AstItemType.filterArgumentKeyValue) {
                                 allDiagnostics.push(new vscode.Diagnostic(
                                     new vscode.Range(document.positionAt(arg0.start), document.positionAt(arg0.end)),
-                                    "The tts filter name must be followed by a language code.\nFor example: en_US.\n" + 
+                                    "The tts filter name must be followed by a language code.\nFor example: en_US\n" + 
                                     "Key value arguments can only be used after the language code argument."
                                 ));
                             }
