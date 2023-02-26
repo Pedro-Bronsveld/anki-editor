@@ -115,11 +115,19 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                         if (filter?.content === "tts") {
                             const arg0 = filter.arguments[0];
 
+                            // Check if the required language argument is set for the tts filter
+                            if (!arg0) {
+                                allDiagnostics.push(new vscode.Diagnostic(
+                                    new vscode.Range(document.positionAt(filter.start), document.positionAt(filterSegment.end)),
+                                    "The tts filter name must be followed be a language code.\nFor example: 'en_US'."
+                                ));
+                            }
                             // Check if the first argument of the tts filter is the language argument
-                            if (arg0?.type === AstItemType.filterArgumentKeyValue) {
+                            else if (arg0.type === AstItemType.filterArgumentKeyValue) {
                                 allDiagnostics.push(new vscode.Diagnostic(
                                     new vscode.Range(document.positionAt(arg0.start), document.positionAt(arg0.end)),
-                                    "The tts filter name must be followed be a language code such as 'en_US'.\nKey value arguments can only be used after this first argument."
+                                    "The tts filter name must be followed be a language code.\nFor example: 'en_US'.\n" + 
+                                    "Key value arguments can only be used after the language code argument."
                                 ));
                             }
                             
@@ -137,7 +145,9 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                                     if (arg.type === AstItemType.filterArgument)
                                         allDiagnostics.push(new vscode.Diagnostic(
                                             new vscode.Range(document.positionAt(arg.start), document.positionAt(arg.end)),
-                                            "Invalid argument for tts filter.\nArguments after the first argument of the tts filter must be key value options.\nFor example: 'speed=1.5'."
+                                            "Invalid argument for tts filter.\n" +
+                                            "Arguments after the first argument of the tts filter must be key value options.\n" +
+                                            "For example: 'speed=1.5'."
                                         ));
                                     else if (arg.type === AstItemType.filterArgumentKeyValue) {
                                         const ttsKeyValueArg = ttsKeyValueArgsMap.get(arg.key.content);
@@ -166,6 +176,7 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                                                 new vscode.Range(document.positionAt(arg.values[0].end), document.positionAt(arg.end)),
                                                 `Only one value must be given for option '${ttsKeyValueArg.key}'.`
                                             ));
+                                        // Check if key value argument contains at least one value
                                         else if (arg.values.length === 0)
                                             allDiagnostics.push(new vscode.Diagnostic(
                                                 new vscode.Range(document.positionAt(arg.divider.end), document.positionAt(arg.divider.end)),
