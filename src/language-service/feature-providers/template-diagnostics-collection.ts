@@ -10,6 +10,7 @@ import { specialFields, ttsKeyValueArgs, ttsKeyValueArgsMap } from '../anki-buil
 import { isBackSide } from '../template-util';
 import AnkiModelDataProvider from '../anki-model-data-provider';
 import { uriPathToParts } from '../../note-types/uri-parser';
+import { DiagnosticCode } from '../diagnostic-codes';
 
 export default class TemplateDiagnosticsProvider extends LanguageFeatureProviderBase {
 
@@ -81,8 +82,7 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                 const { field } = replacement.fieldSegment;
                 if (modelAvailable && field && !validFields.has(field.content)) {
                     // Provide diagnostics based on field names from model
-                    allDiagnostics.push(new vscode.Diagnostic(
-                        new vscode.Range(document.positionAt(field.start), document.positionAt(field.end)),
+                    allDiagnostics.push(createDiagnostic(document, field.start, field.end,
                         `"${field.content}" is not a field name in note type "${modelName}".`));
                 }
 
@@ -99,7 +99,8 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                     const invalidStartSpaceMatch = replacement.fieldSegment.content.match(/^\s+/);
                     if (invalidStartSpaceMatch && replacement.filterSegments.length > 0)
                         allDiagnostics.push(matchToDiagnostic(document, invalidStartSpaceMatch, replacement.fieldSegment.start,
-                            "A field name can't be preceded by a space when the replacement contains one or more ':' characters."));
+                            "A field name can't be preceded by a space when the replacement contains one or more ':' characters.",
+                            DiagnosticCode.invalidSpace));
                     
                     for (const [i, filterSegment] of replacement.filterSegments.entries()) {
 
@@ -107,13 +108,15 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                         const startSpaceMatch = filterSegment.content.match(/^\s+/);
                         if (i > 0 && startSpaceMatch)
                             allDiagnostics.push(matchToDiagnostic(document, startSpaceMatch, filterSegment.start,
-                                "Consecutive filters can't start with a space."));
+                                "Consecutive filters can't start with a space.",
+                                DiagnosticCode.invalidSpace));
 
                         // Check for invalid spacing at the end of filter segment
                         const endSpaceMatch = filterSegment.content.match(/\s+$/g)
                         if (endSpaceMatch && filterSegment.filter?.content !== "tts")
                             allDiagnostics.push(matchToDiagnostic(document, endSpaceMatch, filterSegment.end - endSpaceMatch[0].length,
-                                "Filters can't end with a space, tab or new line character."));
+                                "Filters can't end with a space, tab or new line character.",
+                                DiagnosticCode.invalidSpace));
                         
                         // Diagnostics for tts filter
                         const { filter } = filterSegment;
@@ -122,14 +125,12 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
 
                             // Check if the required language argument is set for the tts filter
                             if (!arg0)
-                                allDiagnostics.push(new vscode.Diagnostic(
-                                    new vscode.Range(document.positionAt(filter.start), document.positionAt(filterSegment.end)),
+                                allDiagnostics.push(createDiagnostic(document, filter.start, filterSegment.end,
                                     "The tts filter name must be followed by a language code.\nFor example: en_US"
                                 ));
                             // Check if the first argument of the tts filter is the language argument
                             else if (arg0.type === AstItemType.filterArgumentKeyValue) {
-                                allDiagnostics.push(new vscode.Diagnostic(
-                                    new vscode.Range(document.positionAt(arg0.start), document.positionAt(arg0.end)),
+                                allDiagnostics.push(createDiagnostic(document, arg0.start, arg0.end,
                                     "The tts filter name must be followed by a language code.\nFor example: en_US\n" + 
                                     "Key value arguments can only be used after the language code argument."
                                 ));
@@ -137,9 +138,9 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                             
                             // Check if there is more than one space between the tts filter name and the language argument
                             if (arg0?.type === AstItemType.filterArgument && arg0.start - filter.end > 1) {
-                                allDiagnostics.push(new vscode.Diagnostic(
-                                    new vscode.Range(document.positionAt(filter.end + 1), document.positionAt(arg0.start)),
-                                    "There must be exactly one space between the tts filtername and the language argument."
+                                allDiagnostics.push(createDiagnostic(document, filter.end + 1, arg0.start,
+                                    "There must be exactly one space between the tts filtername and the language argument.",
+                                    DiagnosticCode.invalidSpace
                                 ));
                             }
 
@@ -147,8 +148,7 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                                 // Check any argument after the language argument
                                 for (const arg of filter.arguments.slice(1)) {
                                     if (arg.type === AstItemType.filterArgument)
-                                        allDiagnostics.push(new vscode.Diagnostic(
-                                            new vscode.Range(document.positionAt(arg.start), document.positionAt(arg.end)),
+                                        allDiagnostics.push(createDiagnostic(document, arg.start, arg.end,
                                             "Invalid argument for tts filter.\n" +
                                             "Arguments after the first argument of the tts filter must be key value options.\n" +
                                             "For example: 'speed=1.5'."
@@ -157,8 +157,7 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                                         const ttsKeyValueArg = ttsKeyValueArgsMap.get(arg.key.content);
                                         // Check if argument key is a vlaid option for tts filter
                                         if (!ttsKeyValueArg) {
-                                            allDiagnostics.push(new vscode.Diagnostic(
-                                                new vscode.Range(document.positionAt(arg.start), document.positionAt(arg.end)),
+                                            allDiagnostics.push(createDiagnostic(document, arg.start, arg.end,
                                                 `'${arg.key.content}' is not a valid option for the tts filter.\n Valid options are: ${
                                                     ttsKeyValueArgs.map(arg => `${arg.key}`).join(", ")
                                                 }`
@@ -168,23 +167,21 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                                         
                                         // Check if the divider character between the key and value is exactly one '='
                                         if (arg.divider.content.length > 1) {
-                                            allDiagnostics.push(new vscode.Diagnostic(
-                                                new vscode.Range(document.positionAt(arg.divider.start + 1), document.positionAt(arg.divider.end)),
+                                            allDiagnostics.push(createDiagnostic(document, arg.divider.start + 1, arg.divider.end,
                                                 "The character between key and value for a tts filter argument must be exactly one '=' character."
                                             ));
                                         }
 
                                         // Check if option is allowed to contain multiple comma separated values
                                         if (!ttsKeyValueArg.multiple && (arg.values.length > 1 || arg.content.endsWith(",")))
-                                            allDiagnostics.push(new vscode.Diagnostic(
-                                                new vscode.Range(document.positionAt(arg.values[0].end), document.positionAt(arg.end)),
+                                            allDiagnostics.push(createDiagnostic(document, arg.values[0].end, arg.end,
                                                 `Only one value must be given for option '${ttsKeyValueArg.key}'.`
                                             ));
                                         // Check if key value argument contains at least one value
                                         else if (arg.values.length === 0)
-                                            allDiagnostics.push(new vscode.Diagnostic(
-                                                new vscode.Range(document.positionAt(arg.divider.end), document.positionAt(arg.divider.end)),
+                                            allDiagnostics.push(createDiagnostic(document, arg.divider.end, arg.divider.end,
                                                 `No value given for option '${arg.key}'.`,
+                                                undefined,
                                                 vscode.DiagnosticSeverity.Warning
                                             ));
                                         
@@ -194,8 +191,7 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                                             if (validMatch)
                                                 continue;
                                             
-                                            allDiagnostics.push(new vscode.Diagnostic(
-                                                new vscode.Range(document.positionAt(value.start), document.positionAt(value.end)),
+                                            allDiagnostics.push(createDiagnostic(document, value.start, value.end,
                                                 ttsKeyValueArg.invalidMessage
                                             ));
                                         }
@@ -305,7 +301,27 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
     
 }
 
-const matchToDiagnostic = (document: vscode.TextDocument, match: RegExpMatchArray, offset: number, message: string): vscode.Diagnostic => new vscode.Diagnostic(
-    new vscode.Range(document.positionAt(offset + (match.index ?? 0)), document.positionAt(offset + (match.index ?? 0) + match[0].length)),
-    message
-);
+const matchToDiagnostic = (
+    document: vscode.TextDocument, 
+    match: RegExpMatchArray, 
+    offset: number, 
+    message: string, 
+    actionCode?: DiagnosticCode,
+    severity?: vscode.DiagnosticSeverity): vscode.Diagnostic =>
+    createDiagnostic(document, offset + (match.index ?? 0), offset + (match.index ?? 0) + match[0].length, message, actionCode, severity);
+
+const createDiagnostic = (
+    document: vscode.TextDocument,
+    start: number,
+    end: number,
+    message: string,
+    actionCode?: DiagnosticCode,
+    severity?: vscode.DiagnosticSeverity): vscode.Diagnostic => {
+        const diagnostic = new vscode.Diagnostic(
+            new vscode.Range(document.positionAt(start), document.positionAt(end)),
+            message,
+            severity
+        );
+        diagnostic.code = actionCode;
+        return diagnostic;
+    }
