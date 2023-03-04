@@ -1,4 +1,4 @@
-import { AstItemBase, AstItemType, ConditionalType, Field, FieldSegment, Filter, FilterArgDivider, FilterArgKey, FilterArgument, FilterArgumentKeyValue, FilterArgValue, FilterSegment, Replacement, ReplacementBase, TemplateDocument } from "./ast-models";
+import { AstItemBase, AstItemType, ConditionalStart, ConditionalType, Field, FieldSegment, Filter, FilterArgDivider, FilterArgKey, FilterArgument, FilterArgumentKeyValue, FilterArgValue, FilterSegment, Replacement, ReplacementBase, TemplateDocument } from "./ast-models";
 
 export const parseTemplateDocument = (input: string): TemplateDocument => {
     
@@ -7,6 +7,9 @@ export const parseTemplateDocument = (input: string): TemplateDocument => {
     const replacements = replacementMatches.map(replacementMatch =>
         parseReplacement(replacementMatch[0], replacementMatch.index)
     );
+
+    // link conditional opening and closing tags
+    linkConditionalTags(replacements);
     
     return {
         content: input,
@@ -76,6 +79,37 @@ const parseReplacement = (replacementText: string, offset: number = 0): Replacem
         filterSegments
     }
 };
+
+const linkConditionalTags = (replacements: Replacement[]): Replacement[] => {
+    
+    const nestedStartTags: ConditionalStart[] = [];
+    for (const replacement of replacements) {
+        if (replacement.type === AstItemType.replacement)
+            continue;
+
+        if (replacement.type === AstItemType.conditionalStart) {
+            if (replacement.fieldSegment.field)
+                nestedStartTags.unshift(replacement);
+        }
+        else if (replacement.type === AstItemType.conditionalEnd) {
+
+            const startIndex = nestedStartTags
+                .findIndex(conditionalStart => conditionalStart.fieldSegment.field?.content === replacement.fieldSegment.field?.content);
+
+            if (startIndex === -1)
+                continue;
+            
+            const startTag = nestedStartTags[startIndex];
+            startTag.endTag = replacement;
+            replacement.startTag = startTag;
+
+            nestedStartTags.splice(0, startIndex);
+        }
+
+    }
+    
+    return replacements;
+}
 
 const fieldRegexp = /[^#^/\s:{}\"]+([^:{}\s\"]|\s(?!\s*(}}|$)))*(?!.*:)/
 

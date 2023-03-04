@@ -1,13 +1,22 @@
 import * as vscode from 'vscode';
+import { TEMPLATE_LANGUAGE_ID } from '../../constants';
 import LanguageFeatureProviderBase from './language-feature-provider-base';
 
 export default class TemplateDefinitionProvider extends LanguageFeatureProviderBase implements vscode.DefinitionProvider {
     
     async provideDefinition(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Promise<vscode.Definition | vscode.LocationLink[] | null | undefined> {
-        const embeddedDocument = this.getEmbeddedByLanguage(document, "html");
+        const embeddedDocument = this.getEmbeddedByPosition(document, position);
         
         if (!embeddedDocument)
             return;
+        
+        
+        // anki template
+        if (embeddedDocument.languageId === TEMPLATE_LANGUAGE_ID) {
+            return;
+        }
+
+        // html, javascript, css
         
         const definition = await vscode.commands.executeCommand<vscode.Definition | vscode.LocationLink[]>(
             'vscode.executeDefinitionProvider',
