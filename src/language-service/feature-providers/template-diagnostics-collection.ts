@@ -140,9 +140,10 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                                 ));
                             // Check if the first argument of the tts filter is the language argument
                             else if (arg0.type === AstItemType.filterArgumentKeyValue) {
-                                allDiagnostics.push(createDiagnostic(document, arg0.start, arg0.end,
+                                allDiagnostics.push(createDiagnostic(document, filter.end + 1, arg0.end,
                                     "The tts filter name must be followed by a language code.\nFor example: en_US\n" + 
-                                    "Key value arguments can only be used after the language code argument."
+                                    "Key value arguments can only be used after the language code argument.",
+                                    DiagnosticCode.invalidTtsLanguageArg
                                 ));
                             }
                             

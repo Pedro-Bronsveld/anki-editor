@@ -4,6 +4,7 @@ import { uriPathToParts } from '../../note-types/uri-parser';
 import { specialFields } from '../anki-builtin';
 import AnkiModelDataProvider from '../anki-model-data-provider';
 import { DiagnosticCode } from '../diagnostic-codes';
+import { documentRange } from '../document-util';
 import { findSimilarStartEnd } from '../find-similar';
 import { isBackSide } from '../template-util';
 import VirtualDocumentProvider from '../virtual-documents-provider';
@@ -40,7 +41,7 @@ export default class TemplateCodeActionProvider extends LanguageFeatureProviderB
                         {
                             const workspaceEdit = new vscode.WorkspaceEdit();
                             workspaceEdit.delete(document.uri, diagnostic.range);
-                            return [createCodeAction(`Remove invalid ${diagnostic.code === DiagnosticCode.invalidSpace ? "space" : "character"}`, workspaceEdit)];
+                            return createCodeAction(`Remove invalid ${diagnostic.code === DiagnosticCode.invalidSpace ? "space" : "character"}`, workspaceEdit);
                         }
                     case DiagnosticCode.invalidField:
                         {
@@ -52,6 +53,18 @@ export default class TemplateCodeActionProvider extends LanguageFeatureProviderB
                                     return createCodeAction(`Replace with '${fieldName}'`, workspaceEdit);
                                 });
                         }
+                    case DiagnosticCode.invalidTtsLanguageArg:
+                        {
+                            const diagnosticContent = embeddedDocument.content.substring(document.offsetAt(diagnostic.range.start), document.offsetAt(diagnostic.range.end));
+                            const spaceMatch = diagnosticContent.match(/^[\s\r\n]*/);
+                            const workspaceEdit = new vscode.WorkspaceEdit();
+                            const start = document.offsetAt(diagnostic.range.start);
+                            workspaceEdit.replace(document.uri, documentRange(document,
+                                start, start + (spaceMatch?.[0].length ?? 0 )),
+                                "en_US ");
+                            return createCodeAction("Insert default language argument 'en_US'", workspaceEdit);
+                        }
+                        break;
                     default:
                         return;
                 }
