@@ -81,7 +81,12 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                 
                 // Check if field exists in model
                 const { field } = replacement.fieldSegment;
-                if (modelAvailable && field && !validFields.has(field.content)) {
+                if (!field) {
+                    // Provide diagnostic for missing field name
+                    allDiagnostics.push(createDiagnostic(document, replacement.fieldSegment.start, replacement.fieldSegment.end,
+                        "Missing field name."));
+                }
+                else if (modelAvailable && field && !validFields.has(field.content)) {
                     // Provide diagnostics based on field names from model
                     allDiagnostics.push(createDiagnostic(document, field.start, field.end,
                         `"${field.content}" is not a field name in note type "${modelName}".`,
@@ -99,11 +104,13 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                 
                 if (replacement.type === AstItemType.replacement) {
                     // Provide diagnostics for standard replacement
-                    const invalidStartSpaceMatch = replacement.fieldSegment.content.match(/^\s+/);
-                    if (invalidStartSpaceMatch && replacement.filterSegments.length > 0)
-                        allDiagnostics.push(matchToDiagnostic(document, invalidStartSpaceMatch, replacement.fieldSegment.start,
-                            "A field name can't be preceded by a space when the replacement contains one or more ':' characters.",
-                            DiagnosticCode.invalidSpace));
+                    if (field) {
+                        const invalidStartSpaceMatch = replacement.fieldSegment.content.match(/^\s+/);
+                        if (invalidStartSpaceMatch && replacement.filterSegments.length > 0)
+                            allDiagnostics.push(matchToDiagnostic(document, invalidStartSpaceMatch, replacement.fieldSegment.start,
+                                "A field name can't be preceded by a space when the replacement contains one or more ':' characters.",
+                                DiagnosticCode.invalidSpace));
+                    }
                     
                     for (const [i, filterSegment] of replacement.filterSegments.entries()) {
 
