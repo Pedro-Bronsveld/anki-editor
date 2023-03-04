@@ -161,17 +161,18 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                                     if (arg.type === AstItemType.filterArgument)
                                         allDiagnostics.push(createDiagnostic(document, arg.start, arg.end,
                                             "Invalid argument for tts filter.\n" +
-                                            "Arguments after the first argument of the tts filter must be key value options.\n" +
+                                            "Arguments following the first argument must be key value options.\n" +
                                             "For example: 'speed=1.5'."
                                         ));
                                     else if (arg.type === AstItemType.filterArgumentKeyValue) {
                                         const ttsKeyValueArg = ttsKeyValueArgsMap.get(arg.key.content);
                                         // Check if argument key is a vlaid option for tts filter
                                         if (!ttsKeyValueArg) {
-                                            allDiagnostics.push(createDiagnostic(document, arg.start, arg.end,
+                                            allDiagnostics.push(createDiagnostic(document, arg.key.start, arg.key.end,
                                                 `'${arg.key.content}' is not a valid option for the tts filter.\n Valid options are: ${
                                                     ttsKeyValueArgs.map(arg => `${arg.key}`).join(", ")
-                                                }`
+                                                }`,
+                                                DiagnosticCode.invalidTtsOption
                                             ));
                                             continue;
                                         }

@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID } from '../../constants';
 import { uriPathToParts } from '../../note-types/uri-parser';
-import { specialFields } from '../anki-builtin';
+import { builtinFilters, specialFields, ttsKeyValueArgs } from '../anki-builtin';
 import AnkiModelDataProvider from '../anki-model-data-provider';
 import { DiagnosticCode } from '../diagnostic-codes';
 import { documentRange } from '../document-util';
@@ -41,16 +41,21 @@ export default class TemplateCodeActionProvider extends LanguageFeatureProviderB
                         {
                             const workspaceEdit = new vscode.WorkspaceEdit();
                             workspaceEdit.delete(document.uri, diagnostic.range);
-                            return createCodeAction(`Remove invalid ${diagnostic.code === DiagnosticCode.invalidSpace ? "space" : "character"}`, workspaceEdit);
+                            const rangeLength = document.offsetAt(diagnostic.range.end) - document.offsetAt(diagnostic.range.start);
+                            return createCodeAction(`Remove invalid ${diagnostic.code === DiagnosticCode.invalidSpace ? "space" : "character"}${rangeLength > 1 ? "s" : ""}`, workspaceEdit);
                         }
                     case DiagnosticCode.invalidField:
+                    case DiagnosticCode.invalidTtsOption:
                         {
-                            const invalidField = embeddedDocument.content.substring(document.offsetAt(diagnostic.range.start), document.offsetAt(diagnostic.range.end));
-                            return findSimilarStartEnd(fieldNames, invalidField.toLowerCase(), false)
-                                .map(fieldName => {
+                            const diagnosticContent = embeddedDocument.content.substring(document.offsetAt(diagnostic.range.start), document.offsetAt(diagnostic.range.end));
+                            return findSimilarStartEnd(diagnostic.code === DiagnosticCode.invalidField
+                                    ? fieldNames
+                                    : ttsKeyValueArgs.map(arg => arg.key),
+                                diagnosticContent.toLowerCase(), false)
+                                .map(similarValue => {
                                     const workspaceEdit = new vscode.WorkspaceEdit();
-                                    workspaceEdit.replace(document.uri, diagnostic.range, fieldName);
-                                    return createCodeAction(`Replace with '${fieldName}'`, workspaceEdit);
+                                    workspaceEdit.replace(document.uri, diagnostic.range, similarValue);
+                                    return createCodeAction(`Replace with '${similarValue}'`, workspaceEdit);
                                 });
                         }
                     case DiagnosticCode.invalidTtsLanguageArg:
