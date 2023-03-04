@@ -107,8 +107,8 @@ const linkConditionalTags = (replacements: Replacement[]): Replacement[] => {
                 continue;
             
             const startTag = nestedStartTags[startIndex];
-            startTag.endTag = replacement;
-            replacement.startTag = startTag;
+            startTag.linkedTag = replacement;
+            replacement.linkedTag = startTag;
 
             nestedStartTags.splice(0, startIndex);
         }

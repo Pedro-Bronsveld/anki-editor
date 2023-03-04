@@ -44,14 +44,14 @@ export enum ConditionalType {
 export type ConditionalStart = ReplacementBase & {
     type: AstItemType.conditionalStart;
     conditionalType: ConditionalType;
-    endTag?: ConditionalEnd;
+    linkedTag?: ConditionalEnd;
     fieldSegment: FieldSegment;
     childReplacements: Replacement[];
 }
 
 export type ConditionalEnd = ReplacementBase & {
     type: AstItemType.conditionalEnd;
-    startTag?: ConditionalStart;
+    linkedTag?: ConditionalStart;
     fieldSegment: FieldSegment;
 }
 

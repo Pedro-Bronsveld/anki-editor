@@ -226,13 +226,13 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                     }
 
                     // Provide diagnostics for conditional start tags without closing tags
-                    if (replacement.type === AstItemType.conditionalStart && !replacement.endTag) {
+                    if (replacement.type === AstItemType.conditionalStart && !replacement.linkedTag) {
                         allDiagnostics.push(createDiagnostic(document, replacement.start, replacement.end,
                             "Conditional opening tag does not have a matching closing tag.",
                             DiagnosticCode.missingClosingTag));
                     }
                     // Provide diagnostics for conditional end tags without opening tags
-                    else if (replacement.type === AstItemType.conditionalEnd && !replacement.startTag) {
+                    else if (replacement.type === AstItemType.conditionalEnd && !replacement.linkedTag) {
                         allDiagnostics.push(createDiagnostic(document, replacement.start, replacement.end,
                             "Conditional closing tag does not have a matching opening tag.",
                             DiagnosticCode.missingOpeningTag));
