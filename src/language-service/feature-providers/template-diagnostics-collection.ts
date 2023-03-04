@@ -180,7 +180,8 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                                         // Check if the divider character between the key and value is exactly one '='
                                         if (arg.divider.content.length > 1) {
                                             allDiagnostics.push(createDiagnostic(document, arg.divider.start + 1, arg.divider.end,
-                                                "The character between key and value for a tts filter argument must be exactly one '=' character."
+                                                "The character between key and value must be exactly one '=' character.",
+                                                DiagnosticCode.invalidCharacter
                                             ));
                                         }
 

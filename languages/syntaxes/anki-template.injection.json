@@ -124,18 +124,18 @@
 			}
 		},
 		"tts-language-option-value": {
-			"match": "([a-z]+)(=)([^:\\s={}\"]+)?([^:\\s{}\"]+)?",
+			"match": "([a-z]+)(=)([=]*)([^:\\s={}\"]+)?",
 			"captures": {
 				"1": { "name": "variable.parameter.anki.tts" },
 				"2": { "name": "keyword.operator.assignment.anki" },
-				"3": {
+				"3": { "name": "invalid.illegal.anki.tts.option.assignment" },
+				"4": {
 					"name": "meta.anki.tts.option.value",
 					"patterns": [
 						{ "include": "#tts-option-decimal" },
 						{ "include": "#tts-option-string-list" }
 					]
-				},
-				"4": { "name": "invalid.illegal.anki.tts.option.suffix" }
+				}
 			},
 			"name": "meta.anki.tts.option"
 		},
