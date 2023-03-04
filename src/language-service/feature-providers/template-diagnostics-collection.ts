@@ -220,7 +220,8 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                     const invalidFilterMatch = replacement.fieldSegment.content.match(/.*:/);
                     if (invalidFilterMatch)
                         allDiagnostics.push(matchToDiagnostic(document, invalidFilterMatch, replacement.fieldSegment.start,
-                            "Filters are not allowed in conditional opening or closing tags."));
+                            "Filters are not allowed in conditional opening or closing tags.",
+                            DiagnosticCode.invalidFilter));
                 }
                 
             }

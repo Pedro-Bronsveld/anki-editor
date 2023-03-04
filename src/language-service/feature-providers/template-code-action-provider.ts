@@ -41,12 +41,17 @@ export default class TemplateCodeActionProvider extends LanguageFeatureProviderB
                     case DiagnosticCode.invalidTtsOptionValue:
                         {
                             const rangeLength = document.offsetAt(diagnostic.range.end) - document.offsetAt(diagnostic.range.start);
-                            return createRemovalCodeAction(document, diagnostic.code, diagnostic.range, rangeLength > 1)
+                            return createRemovalCodeAction(document, diagnostic.code, diagnostic.range, rangeLength > 1);
+                        }
+                    case DiagnosticCode.invalidFilter:
+                        {
+                            const diagnosticContent = getDiagnosticContent(document, embeddedDocument.content, diagnostic);
+                            return createRemovalCodeAction(document, diagnostic.code, diagnostic.range, [...diagnosticContent.matchAll(/:/g)].length > 1);
                         }
                     case DiagnosticCode.invalidField:
                     case DiagnosticCode.invalidTtsOption:
                         {
-                            const diagnosticContent = embeddedDocument.content.substring(document.offsetAt(diagnostic.range.start), document.offsetAt(diagnostic.range.end));
+                            const diagnosticContent = getDiagnosticContent(document, embeddedDocument.content, diagnostic);
                             return findSimilarStartEnd(diagnostic.code === DiagnosticCode.invalidField
                                     ? fieldNames
                                     : ttsKeyValueArgs.map(arg => arg.key),
@@ -59,7 +64,7 @@ export default class TemplateCodeActionProvider extends LanguageFeatureProviderB
                         }
                     case DiagnosticCode.invalidTtsLanguageArg:
                         {
-                            const diagnosticContent = embeddedDocument.content.substring(document.offsetAt(diagnostic.range.start), document.offsetAt(diagnostic.range.end));
+                            const diagnosticContent = getDiagnosticContent(document, embeddedDocument.content, diagnostic);
                             const spaceMatch = diagnosticContent.match(/^[\s\r\n]*/);
                             const workspaceEdit = new vscode.WorkspaceEdit();
                             const start = document.offsetAt(diagnostic.range.start);
@@ -68,7 +73,6 @@ export default class TemplateCodeActionProvider extends LanguageFeatureProviderB
                                 "en_US ");
                             return createCodeAction("Insert default language argument 'en_US'", workspaceEdit);
                         }
-                        break;
                     default:
                         return;
                 }
@@ -95,6 +99,10 @@ export default class TemplateCodeActionProvider extends LanguageFeatureProviderB
         // }
     }
 }
+
+const getDiagnosticContent = (document: vscode.TextDocument, content: string, diagnostic: vscode.Diagnostic) => 
+    content.substring(document.offsetAt(diagnostic.range.start), document.offsetAt(diagnostic.range.end));
+
 
 const createCodeAction = (title: string, workspaceEdit: vscode.WorkspaceEdit, kind: vscode.CodeActionKind = vscode.CodeActionKind.QuickFix): vscode.CodeAction => {
     const action = new vscode.CodeAction(title, kind);
@@ -125,5 +133,9 @@ const removalName = {
     [DiagnosticCode.invalidTtsOptionValue]: {
         single: "character",
         multiple: "values"
+    },
+    [DiagnosticCode.invalidFilter]: {
+        single: "filter",
+        multiple: "filters"
     }
 } as const

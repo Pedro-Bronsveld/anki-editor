@@ -4,5 +4,6 @@ export enum DiagnosticCode {
     invalidField = 3,
     invalidTtsLanguageArg = 4,
     invalidTtsOption = 5,
-    invalidTtsOptionValue = 6
+    invalidTtsOptionValue = 6,
+    invalidFilter = 7
 }
