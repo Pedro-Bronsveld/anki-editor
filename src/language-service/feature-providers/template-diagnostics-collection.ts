@@ -89,7 +89,9 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                 else if (modelAvailable && field && !validFields.has(field.content)) {
                     // Provide diagnostics based on field names from model
                     allDiagnostics.push(createDiagnostic(document, field.start, field.end,
-                        `"${field.content}" is not a field name in note type "${modelName}".`,
+                        field.content === "FrontSide"
+                            ? "The special field 'FrontSide' can only be used on the back template of a card."
+                            : `"${field.content}" is not a field name in note type "${modelName}" or a special built-in field name.`,
                         DiagnosticCode.invalidField));
                 }
 
@@ -216,6 +218,13 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                     }
                 }
                 else if (replacement.type === AstItemType.conditionalStart || replacement.type === AstItemType.conditionalEnd) {                    
+                    // Provide diagnostic when the special field 'FrontSide' is used in a conditional tag
+                    if (field?.content === "FrontSide") {
+                        allDiagnostics.push(createDiagnostic(document, field.start, field.end,
+                            "The special field 'FrontSide' can't be used in a conditional opening or closing tag.",
+                            DiagnosticCode.invalidField));
+                    }
+
                     // Provide diagnostics for conditional start tags without closing tags
                     if (replacement.type === AstItemType.conditionalStart && !replacement.endTag) {
                         allDiagnostics.push(createDiagnostic(document, replacement.start, replacement.end,
