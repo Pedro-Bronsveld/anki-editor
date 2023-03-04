@@ -35,36 +35,28 @@ export default class TemplateCodeActionProvider extends LanguageFeatureProviderB
             .filter((diagnostic: vscode.Diagnostic | undefined): diagnostic is Exclude<vscode.Diagnostic, undefined> => typeof diagnostic?.code === "number")
             .flatMap(diagnostic => {
 
+                const diagnosticContent = getDiagnosticContent(document, embeddedDocument.content, diagnostic);
+
                 switch(diagnostic.code) {
                     case DiagnosticCode.invalidSpace:
                     case DiagnosticCode.invalidCharacter:
                     case DiagnosticCode.invalidTtsOptionValue:
-                        {
-                            const rangeLength = document.offsetAt(diagnostic.range.end) - document.offsetAt(diagnostic.range.start);
-                            return createRemovalCodeAction(document, diagnostic.code, diagnostic.range, rangeLength > 1);
-                        }
+                        return createRemovalCodeAction(document, diagnostic.code, diagnostic.range, diagnosticContent.length > 1);
                     case DiagnosticCode.invalidFilter:
-                        {
-                            const diagnosticContent = getDiagnosticContent(document, embeddedDocument.content, diagnostic);
-                            return createRemovalCodeAction(document, diagnostic.code, diagnostic.range, [...diagnosticContent.matchAll(/:/g)].length > 1);
-                        }
+                        return createRemovalCodeAction(document, diagnostic.code, diagnostic.range, [...diagnosticContent.matchAll(/:/g)].length > 1);
                     case DiagnosticCode.invalidField:
                     case DiagnosticCode.invalidTtsOption:
-                        {
-                            const diagnosticContent = getDiagnosticContent(document, embeddedDocument.content, diagnostic);
-                            return findSimilarStartEnd(diagnostic.code === DiagnosticCode.invalidField
-                                    ? fieldNames
-                                    : ttsKeyValueArgs.map(arg => arg.key),
-                                diagnosticContent.toLowerCase(), false)
-                                .map(similarValue => {
-                                    const workspaceEdit = new vscode.WorkspaceEdit();
-                                    workspaceEdit.replace(document.uri, diagnostic.range, similarValue);
-                                    return createCodeAction(`Replace with '${similarValue}'`, workspaceEdit);
-                                });
-                        }
+                        return findSimilarStartEnd(diagnostic.code === DiagnosticCode.invalidField
+                                ? fieldNames
+                                : ttsKeyValueArgs.map(arg => arg.key),
+                            diagnosticContent.toLowerCase(), false)
+                            .map(similarValue => {
+                                const workspaceEdit = new vscode.WorkspaceEdit();
+                                workspaceEdit.replace(document.uri, diagnostic.range, similarValue);
+                                return createCodeAction(`Replace with '${similarValue}'`, workspaceEdit);
+                            });
                     case DiagnosticCode.invalidTtsLanguageArg:
                         {
-                            const diagnosticContent = getDiagnosticContent(document, embeddedDocument.content, diagnostic);
                             const spaceMatch = diagnosticContent.match(/^[\s\r\n]*/);
                             const workspaceEdit = new vscode.WorkspaceEdit();
                             const start = document.offsetAt(diagnostic.range.start);
@@ -72,6 +64,25 @@ export default class TemplateCodeActionProvider extends LanguageFeatureProviderB
                                 start, start + (spaceMatch?.[0].length ?? 0 )),
                                 "en_US ");
                             return createCodeAction("Insert default language argument 'en_US'", workspaceEdit);
+                        }
+                    case DiagnosticCode.missingOpeningTag:
+                    case DiagnosticCode.missingClosingTag:
+                        {
+                            const isOpening = diagnostic.code === DiagnosticCode.missingClosingTag;
+                            const oppositeChars = isOpening ? ["/"] : ["#", "^"];
+                            return oppositeChars.map(oppositeChar => {
+                                const workspaceEdit = new vscode.WorkspaceEdit();
+                                const space = " ".repeat(diagnostic.range.start.character);
+                                const content = diagnosticContent.replace(isOpening ? /[#^]/ : /\//, oppositeChar);
+                                workspaceEdit.insert(document.uri,
+                                    isOpening 
+                                        ? diagnostic.range.end
+                                        : diagnostic.range.start,
+                                    isOpening
+                                        ? "\n" + space + content
+                                        : content + "\n" + space);
+                                return createCodeAction(`Create matching ${oppositeChar} ${isOpening ? "closing" : "opening"} tag.`, workspaceEdit);
+                            });
                         }
                     default:
                         return;

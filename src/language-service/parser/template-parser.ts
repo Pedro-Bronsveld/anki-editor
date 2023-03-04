@@ -16,7 +16,7 @@ export const parseTemplateDocument = (input: string): TemplateDocument => {
         start: 0,
         end: input.length,
         type: AstItemType.document,
-        replacements: replacements
+        replacements
     }
 }
 
@@ -52,7 +52,8 @@ const parseReplacement = (replacementText: string, offset: number = 0): Replacem
                 ...replacementBase,
                 type: AstItemType.conditionalStart,
                 fieldSegment,
-                conditionalType: conditionalCharacter === "#" ? ConditionalType.filled : ConditionalType.empty
+                conditionalType: conditionalCharacter === "#" ? ConditionalType.filled : ConditionalType.empty,
+                childReplacements: []
             } : {
                 ...replacementBase,
                 type: AstItemType.conditionalEnd,
@@ -85,8 +86,10 @@ const linkConditionalTags = (replacements: Replacement[]): Replacement[] => {
     const nestedStartTags: ConditionalStart[] = [];
     for (const replacement of replacements) {
 
-        if (nestedStartTags.length > 0)
+        if (nestedStartTags.length > 0) {
             replacement.parentConditional = nestedStartTags[0];
+            nestedStartTags[0].childReplacements.push(replacement);
+        }
         
         if (replacement.type === AstItemType.replacement)
             continue;

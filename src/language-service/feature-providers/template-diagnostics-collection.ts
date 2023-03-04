@@ -215,7 +215,20 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                         }
                     }
                 }
-                else if (replacement.type === AstItemType.conditionalStart || replacement.type === AstItemType.conditionalEnd) {
+                else if (replacement.type === AstItemType.conditionalStart || replacement.type === AstItemType.conditionalEnd) {                    
+                    // Provide diagnostics for conditional start tags without closing tags
+                    if (replacement.type === AstItemType.conditionalStart && !replacement.endTag) {
+                        allDiagnostics.push(createDiagnostic(document, replacement.start, replacement.end,
+                            "Conditional opening tag does not have a matching closing tag.",
+                            DiagnosticCode.missingClosingTag));
+                    }
+                    // Provide diagnostics for conditional end tags without opening tags
+                    else if (replacement.type === AstItemType.conditionalEnd && !replacement.startTag) {
+                        allDiagnostics.push(createDiagnostic(document, replacement.start, replacement.end,
+                            "Conditional closing tag does not have a matching opening tag.",
+                            DiagnosticCode.missingOpeningTag));
+                    }
+
                     // Provide error diagnostic for filter syntax in a conditional replacement
                     const invalidFilterMatch = replacement.fieldSegment.content.match(/.*:/);
                     if (invalidFilterMatch)

@@ -46,6 +46,7 @@ export type ConditionalStart = ReplacementBase & {
     conditionalType: ConditionalType;
     endTag?: ConditionalEnd;
     fieldSegment: FieldSegment;
+    childReplacements: Replacement[];
 }
 
 export type ConditionalEnd = ReplacementBase & {
