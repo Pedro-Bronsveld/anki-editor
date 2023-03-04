@@ -26,7 +26,9 @@ export type TemplateDocument = AstItemBase & {
     replacements: Replacement[];
 }
 
-export type ReplacementBase = AstItemBase & { }
+export type ReplacementBase = AstItemBase & {
+    parentConditional?: ConditionalStart;
+}
 
 export type StandardReplacement = ReplacementBase & {
     type: AstItemType.replacement;

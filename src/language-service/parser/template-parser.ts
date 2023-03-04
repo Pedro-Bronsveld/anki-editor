@@ -84,6 +84,10 @@ const linkConditionalTags = (replacements: Replacement[]): Replacement[] => {
     
     const nestedStartTags: ConditionalStart[] = [];
     for (const replacement of replacements) {
+
+        if (nestedStartTags.length > 0)
+            replacement.parentConditional = nestedStartTags[0];
+        
         if (replacement.type === AstItemType.replacement)
             continue;
 
