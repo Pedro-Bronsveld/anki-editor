@@ -72,10 +72,11 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
             for (const replacement of templateDocument.replacements) {
 
                 // Check for invalid characters
-                const invalidCharsMatches = [...replacement.content.substring(2, replacement.content.length - 2).matchAll(/["{}]/g)];
+                const invalidCharsMatches = [...replacement.content.substring(2, replacement.content.length - 2).matchAll(/["{}]+/g)];
                 allDiagnostics.push(...invalidCharsMatches.map(match =>
                     matchToDiagnostic(document, match, 2 + replacement.start,
-                        `${match[0]} is not a valid character inside a template replacement.`)
+                        `${match[0]} is not a valid character inside a template replacement.`,
+                        DiagnosticCode.invalidCharacter)
                 ));
                 
                 // Check if field exists in model
@@ -83,7 +84,8 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                 if (modelAvailable && field && !validFields.has(field.content)) {
                     // Provide diagnostics based on field names from model
                     allDiagnostics.push(createDiagnostic(document, field.start, field.end,
-                        `"${field.content}" is not a field name in note type "${modelName}".`));
+                        `"${field.content}" is not a field name in note type "${modelName}".`,
+                        DiagnosticCode.invalidField));
                 }
 
                 {
@@ -91,7 +93,8 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                     const invalidStartCharMatch = replacement.fieldSegment.content.match(/^[#^/]+/);
                     if (invalidStartCharMatch)
                         allDiagnostics.push(matchToDiagnostic(document, invalidStartCharMatch, replacement.fieldSegment.start,
-                            "A field name can't start with '#', '^' or '/'."));
+                            "A field name can't start with '#', '^' or '/'.",
+                            DiagnosticCode.invalidCharacter));
                 }
                 
                 if (replacement.type === AstItemType.replacement) {
@@ -306,22 +309,22 @@ const matchToDiagnostic = (
     match: RegExpMatchArray, 
     offset: number, 
     message: string, 
-    actionCode?: DiagnosticCode,
+    code?: DiagnosticCode,
     severity?: vscode.DiagnosticSeverity): vscode.Diagnostic =>
-    createDiagnostic(document, offset + (match.index ?? 0), offset + (match.index ?? 0) + match[0].length, message, actionCode, severity);
+    createDiagnostic(document, offset + (match.index ?? 0), offset + (match.index ?? 0) + match[0].length, message, code, severity);
 
 const createDiagnostic = (
     document: vscode.TextDocument,
     start: number,
     end: number,
     message: string,
-    actionCode?: DiagnosticCode,
+    code?: DiagnosticCode,
     severity?: vscode.DiagnosticSeverity): vscode.Diagnostic => {
         const diagnostic = new vscode.Diagnostic(
             new vscode.Range(document.positionAt(start), document.positionAt(end)),
             message,
             severity
         );
-        diagnostic.code = actionCode;
+        diagnostic.code = code;
         return diagnostic;
     }

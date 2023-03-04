@@ -90,7 +90,7 @@ export function activate(context: vscode.ExtensionContext) {
 	const templateDocumentChangeProvider = new TemplateDocumentChangeProvider(virtualDocumentProvider);
 	const templateTypeHierarchyProvider = new TemplateTypeHierarchyProvider(virtualDocumentProvider);
 	const templateReferenceProvider = new TemplateReferenceProvider(virtualDocumentProvider);
-	const templateCodeActionProvider = new TemplateCodeActionProvider(virtualDocumentProvider);
+	const templateCodeActionProvider = new TemplateCodeActionProvider(virtualDocumentProvider, ankiModelDataProvider);
 	const templateDocumentColorProvider = new TemplateDocumentColorProvider(virtualDocumentProvider);
 	const templateDocumentFormattingEditProvider = new TemplateDocumentFormattingEditProvider(virtualDocumentProvider);
 	const templateDocumentRangeFormattingEditProvider = new TemplateDocumentRangeFormattingEditProvider(virtualDocumentProvider);
