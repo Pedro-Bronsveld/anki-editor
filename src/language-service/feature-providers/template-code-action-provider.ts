@@ -36,14 +36,12 @@ export default class TemplateCodeActionProvider extends LanguageFeatureProviderB
             .flatMap(diagnostic => {
 
                 switch(diagnostic.code) {
+                    case DiagnosticCode.invalidSpace:
                     case DiagnosticCode.invalidCharacter:
-                        case DiagnosticCode.invalidSpace:
-                        case DiagnosticCode.invalidTtsOptionValue:
+                    case DiagnosticCode.invalidTtsOptionValue:
                         {
-                            const workspaceEdit = new vscode.WorkspaceEdit();
-                            workspaceEdit.delete(document.uri, diagnostic.range);
                             const rangeLength = document.offsetAt(diagnostic.range.end) - document.offsetAt(diagnostic.range.start);
-                            return createCodeAction(`Remove invalid ${rangeLength > 1 ? invalidName[diagnostic.code].multiple : invalidName[diagnostic.code].single}`, workspaceEdit);
+                            return createRemovalCodeAction(document, diagnostic.code, diagnostic.range, rangeLength > 1)
                         }
                     case DiagnosticCode.invalidField:
                     case DiagnosticCode.invalidTtsOption:
@@ -104,10 +102,21 @@ const createCodeAction = (title: string, workspaceEdit: vscode.WorkspaceEdit, ki
     return action;
 }
 
-const invalidName = {
+const createRemovalCodeAction = (
+        document: vscode.TextDocument,
+        code: keyof typeof removalName,
+        range: vscode.Range,
+        isMultiple: boolean
+    ) => {
+    const workspaceEdit = new vscode.WorkspaceEdit();
+    workspaceEdit.delete(document.uri, range);
+    return createCodeAction(`Remove invalid ${isMultiple ? removalName[code].multiple : removalName[code].single}`, workspaceEdit);
+}
+
+const removalName = {
     [DiagnosticCode.invalidSpace]: {
         single: "space",
-        multiple: "spaces"
+        multiple: "spaces",
     },
     [DiagnosticCode.invalidCharacter]: {
         single: "character",
