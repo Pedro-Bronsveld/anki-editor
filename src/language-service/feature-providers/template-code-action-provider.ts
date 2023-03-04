@@ -37,12 +37,13 @@ export default class TemplateCodeActionProvider extends LanguageFeatureProviderB
 
                 switch(diagnostic.code) {
                     case DiagnosticCode.invalidCharacter:
-                    case DiagnosticCode.invalidSpace:
+                        case DiagnosticCode.invalidSpace:
+                        case DiagnosticCode.invalidTtsOptionValue:
                         {
                             const workspaceEdit = new vscode.WorkspaceEdit();
                             workspaceEdit.delete(document.uri, diagnostic.range);
                             const rangeLength = document.offsetAt(diagnostic.range.end) - document.offsetAt(diagnostic.range.start);
-                            return createCodeAction(`Remove invalid ${diagnostic.code === DiagnosticCode.invalidSpace ? "space" : "character"}${rangeLength > 1 ? "s" : ""}`, workspaceEdit);
+                            return createCodeAction(`Remove invalid ${rangeLength > 1 ? invalidName[diagnostic.code].multiple : invalidName[diagnostic.code].single}`, workspaceEdit);
                         }
                     case DiagnosticCode.invalidField:
                     case DiagnosticCode.invalidTtsOption:
@@ -102,3 +103,18 @@ const createCodeAction = (title: string, workspaceEdit: vscode.WorkspaceEdit, ki
     action.edit = workspaceEdit;
     return action;
 }
+
+const invalidName = {
+    [DiagnosticCode.invalidSpace]: {
+        single: "space",
+        multiple: "spaces"
+    },
+    [DiagnosticCode.invalidCharacter]: {
+        single: "character",
+        multiple: "characters"
+    },
+    [DiagnosticCode.invalidTtsOptionValue]: {
+        single: "character",
+        multiple: "values"
+    }
+} as const

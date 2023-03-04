@@ -3,5 +3,6 @@ export enum DiagnosticCode {
     invalidCharacter = 2,
     invalidField = 3,
     invalidTtsLanguageArg = 4,
-    invalidTtsOption = 5
+    invalidTtsOption = 5,
+    invalidTtsOptionValue = 6
 }

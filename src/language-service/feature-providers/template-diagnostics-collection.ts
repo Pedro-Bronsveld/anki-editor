@@ -188,7 +188,8 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                                         // Check if option is allowed to contain multiple comma separated values
                                         if (!ttsKeyValueArg.multiple && (arg.values.length > 1 || arg.content.endsWith(",")))
                                             allDiagnostics.push(createDiagnostic(document, arg.values[0].end, arg.end,
-                                                `Only one value must be given for option '${ttsKeyValueArg.key}'.`
+                                                `Only one value must be given for option '${ttsKeyValueArg.key}'.`,
+                                                DiagnosticCode.invalidTtsOptionValue
                                             ));
                                         // Check if key value argument contains at least one value
                                         else if (arg.values.length === 0)
