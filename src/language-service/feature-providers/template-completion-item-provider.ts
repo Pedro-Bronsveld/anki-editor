@@ -3,6 +3,7 @@ import { ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID } from '../../constants';
 import { uriPathToParts } from '../../note-types/uri-parser';
 import { builtinFilters, specialFields, ttsKeyValueArgs } from '../anki-builtin';
 import AnkiModelDataProvider from '../anki-model-data-provider';
+import { documentRange } from '../document-util';
 import { AstItemType, FilterArgumentKeyValue } from '../parser/ast-models';
 import { getItemAtOffset, inItem } from '../parser/ast-utils';
 import { parseTemplateDocument } from '../parser/template-parser';
@@ -37,7 +38,10 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                 // Handle completions in a field segment
                 
                 // Suggest special fields
-                completionItemList.push(...specialFields.map(fieldName => createCompletionItem(fieldName, vscode.CompletionItemKind.Constant, "3")));
+                const replaceRange = replacement.fieldSegment.field
+                    ? documentRange(document, replacement.fieldSegment.start, replacement.fieldSegment.field.end)
+                    : new vscode.Range(document.positionAt(replacement.fieldSegment.start), position);
+                completionItemList.push(...specialFields.map(fieldName => createCompletionItem(fieldName, vscode.CompletionItemKind.Constant, "3", replaceRange)));
 
                 // Field suggestions from the model can only be provided on documents loaded through Anki-Connect
                 if (document.uri.scheme === ANKI_EDITOR_SCHEME_BASE) {
@@ -47,7 +51,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                         // Create field suggestions
                         const modelName = uriParts[1];
                         const fieldNames = await this.ankiModelDataProvider.getFieldNames(modelName);
-                        completionItemList.push(...fieldNames.map(fieldName => createCompletionItem(fieldName, vscode.CompletionItemKind.Field, "1")));
+                        completionItemList.push(...fieldNames.map(fieldName => createCompletionItem(fieldName, vscode.CompletionItemKind.Field, "1", replaceRange)));
                     }
                 }
 
@@ -123,8 +127,13 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
     }
 }
 
-const createCompletionItem = (label: string | vscode.CompletionItemLabel, kind?: vscode.CompletionItemKind, sortText?: string): vscode.CompletionItem => {
+const createCompletionItem = (label: string | vscode.CompletionItemLabel,
+        kind?: vscode.CompletionItemKind,
+        sortText?: string,
+        range?: vscode.Range | { inserting: vscode.Range; replacing: vscode.Range }
+    ): vscode.CompletionItem => {
     const completion = new vscode.CompletionItem(label, kind);
     completion.sortText = sortText;
+    completion.range = range;
     return completion;
 }
