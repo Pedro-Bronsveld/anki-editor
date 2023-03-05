@@ -4,8 +4,9 @@ import { uriPathToParts } from '../../note-types/uri-parser';
 import { specialFields, ttsKeyValueArgs } from '../anki-builtin';
 import AnkiModelDataProvider from '../anki-model-data-provider';
 import { DiagnosticCode } from '../diagnostic-codes';
-import { documentRange, getConditionalAtOffset } from '../document-util';
+import { documentRange, getConditionalAtOffset, getReplacementAtOffset, getUnavailableFieldNames } from '../document-util';
 import { findSimilarStartEnd } from '../find-similar';
+import { AstItemType } from '../parser/ast-models';
 import { parseTemplateDocument } from '../parser/template-parser';
 import { isBackSide } from '../template-util';
 import VirtualDocumentProvider from '../virtual-documents-provider';
@@ -55,14 +56,20 @@ export default class TemplateCodeActionProvider extends LanguageFeatureProviderB
                                 // Check if field is in a conditional, replace linked tag if it has one
                                 const offset = document.offsetAt(diagnostic.range.start);
                                 const templateDocument = parseTemplateDocument(embeddedDocument.content);
-                                const conditional = getConditionalAtOffset(templateDocument.replacements, offset);
+                                const replacement = getReplacementAtOffset(templateDocument.replacements, offset);
     
-                                if (conditional?.linkedTag?.fieldSegment.field) {
-                                    const { field: linkedField } = conditional.linkedTag.fieldSegment;
+                                if (replacement?.type !== AstItemType.replacement && replacement?.linkedTag?.fieldSegment.field) {
+                                    const { field: linkedField } = replacement.linkedTag.fieldSegment;
                                     replaceRanges.push(documentRange(document, linkedField.start, linkedField.end));
                                 }
-                                else if (isBackside && !conditional)
+                                else if (isBackside && replacement?.type === AstItemType.replacement)
                                     subFieldNames.push("FrontSide");
+                                
+                                // Remove unavailable field names from field replacement suggestions
+                                if (replacement) {
+                                    const unavailableFieldNames = getUnavailableFieldNames(replacement);
+                                    subFieldNames = subFieldNames.filter(fieldName => !unavailableFieldNames.has(fieldName));
+                                }
                             }
                             // Replace 
                             return findSimilarStartEnd(diagnostic.code === DiagnosticCode.invalidField
@@ -74,7 +81,7 @@ export default class TemplateCodeActionProvider extends LanguageFeatureProviderB
                                     replaceRanges.forEach(range => {
                                         workspaceEdit.replace(document.uri, range, similarValue);
                                     });
-                                    return createCodeAction(`Replace with '${similarValue}'`, workspaceEdit);
+                                    return createCodeAction(`Replace field with '${similarValue}'`, workspaceEdit);
                                 });
                         }
                     case DiagnosticCode.invalidTtsLanguageArg:

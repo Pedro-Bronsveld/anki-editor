@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { AstItemType, ConditionalEnd, ConditionalStart, Field, FieldSegment, Replacement, StandardReplacement } from './parser/ast-models';
+import { AstItemType, ConditionalEnd, ConditionalStart, ConditionalType, Field, FieldSegment, Replacement, StandardReplacement } from './parser/ast-models';
 import { inItem } from './parser/ast-utils';
 
 export const documentRange = (document: vscode.TextDocument, start: number, end: number) =>
@@ -38,3 +38,18 @@ export const getParentConditionals = (replacement: Replacement): ConditionalStar
     
         return parentConditionals;
     }
+
+export const getUnavailableFieldNames = (replacement: Replacement): Set<string> => {
+    const parentConditionals = replacement.parentConditional ? getParentConditionals(replacement.parentConditional) : [];
+    const unavailableFieldNames = replacement.type !== AstItemType.replacement
+        ? new Set(parentConditionals
+            .filter((conditional): conditional is ConditionalStart & { fieldSegment: FieldSegment & Required<Pick<FieldSegment, "field">> } =>
+            conditional.fieldSegment.field !== undefined)
+            .map(conditional => conditional.fieldSegment.field.content)) 
+        : new Set(parentConditionals
+            .filter((conditional): conditional is ConditionalStart & { conditionalType: ConditionalType.empty , fieldSegment: FieldSegment & Required<Pick<FieldSegment, "field">> } =>
+            conditional.conditionalType === ConditionalType.empty &&
+            conditional.fieldSegment.field !== undefined)
+            .map(conditional => conditional.fieldSegment.field.content));
+    return unavailableFieldNames;
+}

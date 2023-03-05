@@ -3,7 +3,7 @@ import { ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID } from '../../constants';
 import { uriPathToParts } from '../../note-types/uri-parser';
 import { builtinFilters, specialFields, ttsKeyValueArgs } from '../anki-builtin';
 import AnkiModelDataProvider from '../anki-model-data-provider';
-import { documentRange, getParentConditionals } from '../document-util';
+import { documentRange, getParentConditionals, getUnavailableFieldNames } from '../document-util';
 import { AstItemType, ConditionalStart, ConditionalType, FieldSegment, FilterArgumentKeyValue } from '../parser/ast-models';
 import { getItemAtOffset, inItem } from '../parser/ast-utils';
 import { parseTemplateDocument } from '../parser/template-parser';
@@ -39,17 +39,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
 
                 // Get a list of all field names used in parent conditionals of this replacement,
                 // these must potentially be filtered out of autocomplete suggestions.
-                const parentConditionals = replacement.parentConditional ? getParentConditionals(replacement.parentConditional) : [];
-                const unavailableFieldNames = replacement.type !== AstItemType.replacement
-                    ? new Set(parentConditionals
-                        .filter((conditional): conditional is ConditionalStart & { fieldSegment: FieldSegment & Required<Pick<FieldSegment, "field">> } =>
-                        conditional.fieldSegment.field !== undefined)
-                        .map(conditional => conditional.fieldSegment.field.content)) 
-                    : new Set(parentConditionals
-                        .filter((conditional): conditional is ConditionalStart & { conditionalType: ConditionalType.empty , fieldSegment: FieldSegment & Required<Pick<FieldSegment, "field">> } =>
-                        conditional.conditionalType === ConditionalType.empty &&
-                        conditional.fieldSegment.field !== undefined)
-                        .map(conditional => conditional.fieldSegment.field.content));
+                const unavailableFieldNames = getUnavailableFieldNames(replacement);
                 
                 // Suggest special fields
                 const replaceRange = replacement.fieldSegment.field

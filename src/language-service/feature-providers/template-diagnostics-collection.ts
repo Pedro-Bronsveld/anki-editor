@@ -11,7 +11,7 @@ import { isBackSide } from '../template-util';
 import AnkiModelDataProvider from '../anki-model-data-provider';
 import { uriPathToParts } from '../../note-types/uri-parser';
 import { DiagnosticCode } from '../diagnostic-codes';
-import { getParentConditionals } from '../document-util';
+import { getParentConditionals, getUnavailableFieldNames } from '../document-util';
 
 export default class TemplateDiagnosticsProvider extends LanguageFeatureProviderBase {
 
@@ -71,7 +71,7 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
             }
 
             for (const replacement of templateDocument.replacements) {
-
+                
                 // Check for invalid characters
                 const invalidCharsMatches = [...replacement.content.substring(2, replacement.content.length - 2).matchAll(/["{}]+/g)];
                 allDiagnostics.push(...invalidCharsMatches.map(match =>
@@ -113,6 +113,19 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                             allDiagnostics.push(matchToDiagnostic(document, invalidStartSpaceMatch, replacement.fieldSegment.start,
                                 "A field name can't be preceded by a space when the replacement contains one or more ':' characters.",
                                 DiagnosticCode.invalidSpace));
+                    }
+
+                    // Get a set of field names that are unavailable in this replacement
+                    // because they were used in conditional parent replaments.
+                    const unavailableFieldNames = getUnavailableFieldNames(replacement);
+
+                    // Provide warning diagnostics for unavailable fields
+                    if (field && unavailableFieldNames.has(field.content)) {
+                        allDiagnostics.push(createDiagnostic(document, field.start, field.end,
+                            `The field '${field.content}' has been checked to be empty in a conditonal ^ parent tag.\n` +
+                            "As a result, it will never display any content when used here.",
+                            DiagnosticCode.invalidField,
+                            vscode.DiagnosticSeverity.Warning));
                     }
                     
                     for (const [i, filterSegment] of replacement.filterSegments.entries()) {
