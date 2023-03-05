@@ -5,13 +5,13 @@ import VirtualDocumentProvider from '../virtual-documents-provider';
 import { createProjectSync, Project, ts } from "@ts-morph/bootstrap";
 import { ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID } from '../../constants';
 import { parseTemplateDocument } from '../parser/template-parser';
-import { AstItemType, ConditionalType } from '../parser/ast-models';
+import { AstItemType } from '../parser/ast-models';
 import { specialFields, ttsKeyValueArgs, ttsKeyValueArgsMap } from '../anki-builtin';
 import { isBackSide } from '../template-util';
 import AnkiModelDataProvider from '../anki-model-data-provider';
 import { uriPathToParts } from '../../note-types/uri-parser';
 import { DiagnosticCode } from '../diagnostic-codes';
-import { getParentConditionals, getUnavailableFieldNames } from '../document-util';
+import { conditionalStartChar, getParentConditionals, getUnavailableFieldNames } from '../document-util';
 
 export default class TemplateDiagnosticsProvider extends LanguageFeatureProviderBase {
 
@@ -370,8 +370,6 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
         [chain].concat(chain.next ? chain.next.flatMap(this.flattenDiagnosticMessageChain) : []);
     
 }
-
-const conditionalStartChar = (conditionalType: ConditionalType) => conditionalType === ConditionalType.filled ? "#" : "^";
 
 const matchToDiagnostic = (
     document: vscode.TextDocument, 

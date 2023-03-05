@@ -15,10 +15,10 @@ export default class TemplateFoldingRangeProvider extends LanguageFeatureProvide
         
         // Anki template folding
         {
-            const embeddedTemplate = this.getEmbeddedByLanguage(document, TEMPLATE_LANGUAGE_ID);
+            const embeddedDocument = this.getEmbeddedByLanguage(document, TEMPLATE_LANGUAGE_ID);
 
-            if (embeddedTemplate) {
-                const templateDocument = parseTemplateDocument(embeddedTemplate.content);
+            if (embeddedDocument) {
+                const templateDocument = parseTemplateDocument(embeddedDocument.content);
                 
                 // Create folding ranges for linked conditional opening and closing tags
                 const conditionalFoldingRanges = templateDocument.replacements

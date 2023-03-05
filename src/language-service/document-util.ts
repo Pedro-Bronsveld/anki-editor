@@ -53,3 +53,10 @@ export const getUnavailableFieldNames = (replacement: Replacement): Set<string> 
             .map(conditional => conditional.fieldSegment.field.content));
     return unavailableFieldNames;
 }
+
+export const conditionalChar = (conditional: ConditionalStart | ConditionalEnd) =>
+    conditional.type === AstItemType.conditionalStart
+        ? conditionalStartChar(conditional.conditionalType)
+        : "/";
+
+export const conditionalStartChar = (conditionalType: ConditionalType) => conditionalType === ConditionalType.filled ? "#" : "^";
