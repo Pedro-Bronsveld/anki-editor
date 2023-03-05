@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { Field, Replacement } from './parser/ast-models';
+import { AstItemType, Field, FieldSegment, Replacement, StandardReplacement } from './parser/ast-models';
 import { inItem } from './parser/ast-utils';
 
 export const documentRange = (document: vscode.TextDocument, start: number, end: number) =>
@@ -16,3 +16,10 @@ export const getFieldAtOffset = (replacements: Replacement[], offset: number): F
 
 export const getReplacementAtOffset = (replacements: Replacement[], offset: number): Replacement | undefined =>
     replacements.find(replacement => inItem(replacement, offset));
+
+export const getMatchingStandardFields = (replacements: Replacement[], sourceField: Field) => 
+    replacements
+    .filter((other): other is StandardReplacement & { fieldSegment: FieldSegment & Required<Pick<FieldSegment, "field">> } =>
+    other.type === AstItemType.replacement &&
+    other.fieldSegment.field?.content === sourceField.content &&
+    other.fieldSegment.field !== sourceField);
