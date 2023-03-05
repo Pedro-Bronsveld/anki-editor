@@ -3,8 +3,8 @@ import { ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID } from '../../constants';
 import { uriPathToParts } from '../../note-types/uri-parser';
 import { builtinFilters, specialFields, ttsKeyValueArgs } from '../anki-builtin';
 import AnkiModelDataProvider from '../anki-model-data-provider';
-import { documentRange } from '../document-util';
-import { AstItemType, FilterArgumentKeyValue } from '../parser/ast-models';
+import { documentRange, getParentConditionals } from '../document-util';
+import { AstItemType, ConditionalStart, ConditionalType, FieldSegment, FilterArgumentKeyValue } from '../parser/ast-models';
 import { getItemAtOffset, inItem } from '../parser/ast-utils';
 import { parseTemplateDocument } from '../parser/template-parser';
 import { isBackSide } from '../template-util';
@@ -36,12 +36,28 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
             // Check if the trigger position is currently at a field position
             if (inItem(replacement.fieldSegment, offset)) {
                 // Handle completions in a field segment
+
+                // Get a list of all field names used in parent conditionals of this replacement,
+                // these must potentially be filtered out of autocomplete suggestions.
+                const parentConditionals = replacement.parentConditional ? getParentConditionals(replacement.parentConditional) : [];
+                const unavailableFieldNames = replacement.type !== AstItemType.replacement
+                    ? new Set(parentConditionals
+                        .filter((conditional): conditional is ConditionalStart & { fieldSegment: FieldSegment & Required<Pick<FieldSegment, "field">> } =>
+                        conditional.fieldSegment.field !== undefined)
+                        .map(conditional => conditional.fieldSegment.field.content)) 
+                    : new Set(parentConditionals
+                        .filter((conditional): conditional is ConditionalStart & { conditionalType: ConditionalType.empty , fieldSegment: FieldSegment & Required<Pick<FieldSegment, "field">> } =>
+                        conditional.conditionalType === ConditionalType.empty &&
+                        conditional.fieldSegment.field !== undefined)
+                        .map(conditional => conditional.fieldSegment.field.content));
                 
                 // Suggest special fields
                 const replaceRange = replacement.fieldSegment.field
                     ? documentRange(document, replacement.fieldSegment.start, replacement.fieldSegment.field.end)
                     : new vscode.Range(document.positionAt(replacement.fieldSegment.start), position);
-                completionItemList.push(...specialFields.map(fieldName => createCompletionItem(fieldName, vscode.CompletionItemKind.Constant, "3", replaceRange)));
+                completionItemList.push(...specialFields
+                    .filter(specialField => !unavailableFieldNames.has(specialField))
+                    .map(specialField => createCompletionItem(specialField, vscode.CompletionItemKind.Constant, "3", replaceRange)));
 
                 // Field suggestions from the model can only be provided on documents loaded through Anki-Connect
                 if (document.uri.scheme === ANKI_EDITOR_SCHEME_BASE) {
@@ -51,7 +67,9 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                         // Create field suggestions
                         const modelName = uriParts[1];
                         const fieldNames = await this.ankiModelDataProvider.getFieldNames(modelName);
-                        completionItemList.push(...fieldNames.map(fieldName => createCompletionItem(fieldName, vscode.CompletionItemKind.Field, "1", replaceRange)));
+                        completionItemList.push(...fieldNames
+                            .filter(specialField => !unavailableFieldNames.has(specialField))
+                            .map(fieldName => createCompletionItem(fieldName, vscode.CompletionItemKind.Field, "1", replaceRange)));
                     }
                 }
 

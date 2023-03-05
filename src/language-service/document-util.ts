@@ -28,3 +28,13 @@ export const getMatchingStandardFields = (replacements: Replacement[], sourceFie
     other.type === AstItemType.replacement &&
     other.fieldSegment.field?.content === sourceField.content &&
     other.fieldSegment.field !== sourceField);
+
+export const getParentConditionals = (replacement: Replacement): ConditionalStart[] => {
+    
+        const parentConditionals = replacement.parentConditional ? getParentConditionals(replacement.parentConditional) : [];
+    
+        if (replacement.type === AstItemType.conditionalStart)
+            parentConditionals.push(replacement);
+    
+        return parentConditionals;
+    }

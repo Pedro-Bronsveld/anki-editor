@@ -5,12 +5,13 @@ import VirtualDocumentProvider from '../virtual-documents-provider';
 import { createProjectSync, Project, ts } from "@ts-morph/bootstrap";
 import { ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID } from '../../constants';
 import { parseTemplateDocument } from '../parser/template-parser';
-import { AstItemType, ConditionalStart, ConditionalType, Replacement } from '../parser/ast-models';
+import { AstItemType, ConditionalType } from '../parser/ast-models';
 import { specialFields, ttsKeyValueArgs, ttsKeyValueArgsMap } from '../anki-builtin';
 import { isBackSide } from '../template-util';
 import AnkiModelDataProvider from '../anki-model-data-provider';
 import { uriPathToParts } from '../../note-types/uri-parser';
 import { DiagnosticCode } from '../diagnostic-codes';
+import { getParentConditionals } from '../document-util';
 
 export default class TemplateDiagnosticsProvider extends LanguageFeatureProviderBase {
 
@@ -246,7 +247,7 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                         const sameFieldParent = parentConditionals.find(conditional => conditional.fieldSegment.field?.content === field.content);
                         if (sameFieldParent) {
                             const parentConditionalChar = sameFieldParent.conditionalType === ConditionalType.filled ? "#" : "^";
-                            allDiagnostics.push(createDiagnostic(document, field.start, field.end,
+                            allDiagnostics.push(createDiagnostic(document, replacement.start, replacement.end,
                                 `Conditional is nested inside a ${parentConditionalChar} conditional with the same field name.\nAs a result, ` +
                                 (replacement.conditionalType === sameFieldParent.conditionalType
                                     ? "this conditional tag has no effect."
@@ -380,14 +381,4 @@ const createDiagnostic = (
         diagnostic.code = code;
         return diagnostic;
     }
-
-const getParentConditionals = (replacement: Replacement): ConditionalStart[] => {
-    
-    const parentConditionals = replacement.parentConditional ? getParentConditionals(replacement.parentConditional) : [];
-
-    if (replacement.type === AstItemType.conditionalStart)
-        parentConditionals.push(replacement);
-
-    return parentConditionals;
-}
     
