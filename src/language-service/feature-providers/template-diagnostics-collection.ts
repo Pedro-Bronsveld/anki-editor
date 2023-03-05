@@ -123,7 +123,7 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                     if (field && unavailableFieldNames.has(field.content)) {
                         allDiagnostics.push(createDiagnostic(document, field.start, field.end,
                             `The field '${field.content}' has been checked to be empty in a conditonal ^ parent tag.\n` +
-                            "As a result, it will never display any content when used here.",
+                            "As a result, the field will not display any content when used here.",
                             DiagnosticCode.invalidField,
                             vscode.DiagnosticSeverity.Warning));
                     }
