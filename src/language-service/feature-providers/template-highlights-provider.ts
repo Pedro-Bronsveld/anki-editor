@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
 import { TEMPLATE_LANGUAGE_ID } from '../../constants';
-import { documentRange, getMatchingStandardFields, getReplacementAtOffset } from '../document-util';
-import { AstItemType, FieldSegment, StandardReplacement } from '../parser/ast-models';
-import { inItem } from '../parser/ast-utils';
+import { documentRange } from '../document-util';
+import { AstItemType } from '../parser/ast-models';
+import { getMatchingStandardFields, getReplacementAtOffset, inItem } from '../parser/ast-utils';
 import { parseTemplateDocument } from '../parser/template-parser';
 import LanguageFeatureProviderBase from './language-feature-provider-base';
 

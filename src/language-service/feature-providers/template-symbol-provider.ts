@@ -1,9 +1,10 @@
 import * as vscode from 'vscode';
 import { TEMPLATE_LANGUAGE_ID } from '../../constants';
-import { conditionalChar, documentRange } from '../document-util';
+import { conditionalChar } from '../parser/ast-utils';
 import { AstItemType, ConditionalStart, FilterSegment, Replacement, StandardReplacement } from '../parser/ast-models';
 import { parseTemplateDocument } from '../parser/template-parser';
 import LanguageFeatureProviderBase from './language-feature-provider-base';
+import { documentRange } from '../document-util';
 
 export default class TemplateSymbolProvider extends LanguageFeatureProviderBase implements vscode.DocumentSymbolProvider {
     

@@ -11,7 +11,7 @@ import { isBackSide } from '../template-util';
 import AnkiModelDataProvider from '../anki-model-data-provider';
 import { uriPathToParts } from '../../note-types/uri-parser';
 import { DiagnosticCode } from '../diagnostic-codes';
-import { conditionalStartChar, getParentConditionals, getUnavailableFieldNames } from '../document-util';
+import { conditionalStartChar, getParentConditionals, getUnavailableFieldNames } from '../parser/ast-utils';
 
 export default class TemplateDiagnosticsProvider extends LanguageFeatureProviderBase {
 
@@ -166,7 +166,7 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                             // Check if there is more than one space between the tts filter name and the language argument
                             if (arg0?.type === AstItemType.filterArgument && arg0.start - filter.end > 1) {
                                 allDiagnostics.push(createDiagnostic(document, filter.end + 1, arg0.start,
-                                    "There must be exactly one space between the tts filtername and the language argument.",
+                                    "There must be exactly one space between the tts filter name and the language argument.",
                                     DiagnosticCode.invalidSpace
                                 ));
                             }
