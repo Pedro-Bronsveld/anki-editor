@@ -1,8 +1,7 @@
 import * as vscode from 'vscode';
 import { TEMPLATE_LANGUAGE_ID } from '../../constants';
-import { documentRange } from '../document-util';
-import { AstItemType, ConditionalEnd, ConditionalStart, FieldSegment, Replacement } from '../parser/ast-models';
-import { inItem } from '../parser/ast-utils';
+import { documentRange, getReplacementAtOffset } from '../document-util';
+import { AstItemType } from '../parser/ast-models';
 import { parseTemplateDocument } from '../parser/template-parser';
 import LanguageFeatureProviderBase from './language-feature-provider-base';
 
@@ -17,24 +16,33 @@ export default class TemplateHighlightsProvider extends LanguageFeatureProviderB
         if (embeddedDocument.languageId === TEMPLATE_LANGUAGE_ID) {
             // Anki template highlighting
             const templateDocument = parseTemplateDocument(embeddedDocument.content);
-            
-            const conditionalStart = templateDocument.replacements
-                .find((replacement):replacement is (ConditionalStart | ConditionalEnd) & Required<Pick<ConditionalStart | ConditionalEnd, "linkedTag">> & { fieldSegment: FieldSegment & Required<Pick<FieldSegment, "field">> } => 
-                    (replacement.type === AstItemType.conditionalStart || replacement.type === AstItemType.conditionalEnd) &&
-                    replacement.linkedTag !== undefined && 
-                    replacement.fieldSegment.field !== undefined &&
-                    inItem(replacement.fieldSegment.field, document.offsetAt(position)));
-                
-            if (!conditionalStart || !conditionalStart.linkedTag.fieldSegment.field)
-                return [];
-            
-            const { field } = conditionalStart.fieldSegment;
-            const { field: linkedField } = conditionalStart.linkedTag.fieldSegment;
 
-            return [
-                new vscode.DocumentHighlight(documentRange(document, field.start, field.end)),
-                new vscode.DocumentHighlight(documentRange(document, linkedField.start, linkedField.end))
-            ];
+            const replacement = getReplacementAtOffset(templateDocument.replacements, document.offsetAt(position));
+
+            const highlights: vscode.DocumentHighlight[] = [];
+            
+            if (!replacement)
+                return undefined;
+            else if (replacement.type === AstItemType.replacement) {
+
+            }
+            else if (replacement.type === AstItemType.conditionalStart || replacement.type === AstItemType.conditionalEnd) {
+                const { field } = replacement.fieldSegment;
+
+                if (!field)
+                    return highlights;
+                
+                highlights.push(new vscode.DocumentHighlight(documentRange(document, field.start, field.end)));
+                
+                if (!replacement.linkedTag?.fieldSegment.field)
+                    return highlights;
+                
+                const { field: linkedField } = replacement.linkedTag.fieldSegment;
+
+                highlights.push(new vscode.DocumentHighlight(documentRange(document, linkedField.start, linkedField.end)));
+            }
+
+            return highlights;
         }
         
         // html, javascript, css forwarding
