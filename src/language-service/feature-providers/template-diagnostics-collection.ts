@@ -259,12 +259,13 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                         
                         const sameFieldParent = parentConditionals.find(conditional => conditional.fieldSegment.field?.content === field.content);
                         if (sameFieldParent) {
-                            const parentConditionalChar = sameFieldParent.conditionalType === ConditionalType.filled ? "#" : "^";
+                            const replacementConditionalChar = conditionalStartChar(replacement.conditionalType);
+                            const parentConditionalChar = conditionalStartChar(sameFieldParent.conditionalType);
                             allDiagnostics.push(createDiagnostic(document, replacement.start, replacement.end,
-                                `Conditional is nested inside a ${parentConditionalChar} conditional with the same field name.\nAs a result, ` +
+                                `This conditional ${replacementConditionalChar} tag is nested inside a conditional ${parentConditionalChar} tag with the same field name.\nAs a result, ` +
                                 (replacement.conditionalType === sameFieldParent.conditionalType
-                                    ? "this conditional tag has no effect."
-                                    : "content in this conditional tag will never be visible."),
+                                    ? "this conditional block has no effect."
+                                    : "content inside this conditional block will never be visible."),
                                 undefined,
                                 vscode.DiagnosticSeverity.Warning));
                         }
@@ -369,6 +370,8 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
         [chain].concat(chain.next ? chain.next.flatMap(this.flattenDiagnosticMessageChain) : []);
     
 }
+
+const conditionalStartChar = (conditionalType: ConditionalType) => conditionalType === ConditionalType.filled ? "#" : "^";
 
 const matchToDiagnostic = (
     document: vscode.TextDocument, 
