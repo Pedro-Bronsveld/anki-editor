@@ -5,7 +5,7 @@ import VirtualDocumentProvider from '../virtual-documents-provider';
 import { createProjectSync, Project, ts } from "@ts-morph/bootstrap";
 import { ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID } from '../../constants';
 import { parseTemplateDocument } from '../parser/template-parser';
-import { AstItemType } from '../parser/ast-models';
+import { AstItemType, ConditionalStart, ConditionalType, Replacement } from '../parser/ast-models';
 import { specialFields, ttsKeyValueArgs, ttsKeyValueArgsMap } from '../anki-builtin';
 import { isBackSide } from '../template-util';
 import AnkiModelDataProvider from '../anki-model-data-provider';
@@ -238,6 +238,24 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                             DiagnosticCode.missingOpeningTag));
                     }
 
+                    // Provide warning diagnostics for conditional start tag nested inside another
+                    // conditional start tag with the same field name.
+                    if (replacement.type === AstItemType.conditionalStart && field && replacement.parentConditional) {
+                        const parentConditionals = getParentConditionals(replacement.parentConditional).reverse();
+                        
+                        const sameFieldParent = parentConditionals.find(conditional => conditional.fieldSegment.field?.content === field.content);
+                        if (sameFieldParent) {
+                            const parentConditionalChar = sameFieldParent.conditionalType === ConditionalType.filled ? "#" : "^";
+                            allDiagnostics.push(createDiagnostic(document, field.start, field.end,
+                                `Conditional is nested inside a ${parentConditionalChar} conditional with the same field name.\nAs a result, ` +
+                                (replacement.conditionalType === sameFieldParent.conditionalType
+                                    ? "this conditional tag has no effect."
+                                    : "content in this conditional tag will never be visible."),
+                                undefined,
+                                vscode.DiagnosticSeverity.Warning));
+                        }
+                    }
+
                     // Provide error diagnostic for filter syntax in a conditional replacement
                     const invalidFilterMatch = replacement.fieldSegment.content.match(/.*:/);
                     if (invalidFilterMatch)
@@ -362,3 +380,14 @@ const createDiagnostic = (
         diagnostic.code = code;
         return diagnostic;
     }
+
+const getParentConditionals = (replacement: Replacement): ConditionalStart[] => {
+    
+    const parentConditionals = replacement.parentConditional ? getParentConditionals(replacement.parentConditional) : [];
+
+    if (replacement.type === AstItemType.conditionalStart)
+        parentConditionals.push(replacement);
+
+    return parentConditionals;
+}
+    
