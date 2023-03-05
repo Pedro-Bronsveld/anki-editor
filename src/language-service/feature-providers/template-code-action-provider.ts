@@ -27,10 +27,9 @@ export default class TemplateCodeActionProvider extends LanguageFeatureProviderB
         const uriParts = uriPathToParts(document.uri);
         const modelName = document.uri.scheme === ANKI_EDITOR_SCHEME_BASE && uriParts.length >= 2 ? uriParts[1] : "";
         const fieldNames = (document.uri.scheme === ANKI_EDITOR_SCHEME_BASE ? await this.ankiModelDataProvider.getFieldNames(modelName) : [])
-            .concat(specialFields)
+            .concat(specialFields);
         
-        if (isBackSide(document))
-            fieldNames.push("FrontSide");
+        const isBackside = isBackSide(document);
 
         const actions: vscode.CodeAction[] = context.diagnostics
             .filter((diagnostic: vscode.Diagnostic | undefined): diagnostic is Exclude<vscode.Diagnostic, undefined> => typeof diagnostic?.code === "number")
@@ -50,6 +49,7 @@ export default class TemplateCodeActionProvider extends LanguageFeatureProviderB
                         {
                             // Ranges to replace invalid value
                             const replaceRanges: vscode.Range[] = [diagnostic.range];
+                            let subFieldNames = [...fieldNames];
                             
                             if (diagnostic.code === DiagnosticCode.invalidField) {
                                 // Check if field is in a conditional, replace linked tag if it has one
@@ -61,10 +61,12 @@ export default class TemplateCodeActionProvider extends LanguageFeatureProviderB
                                     const { field: linkedField } = conditional.linkedTag.fieldSegment;
                                     replaceRanges.push(documentRange(document, linkedField.start, linkedField.end));
                                 }
+                                else if (isBackside && !conditional)
+                                    subFieldNames.push("FrontSide");
                             }
                             // Replace 
                             return findSimilarStartEnd(diagnostic.code === DiagnosticCode.invalidField
-                                    ? fieldNames
+                                    ? subFieldNames
                                     : ttsKeyValueArgs.map(arg => arg.key),
                                 diagnosticContent.toLowerCase(), false)
                                 .map(similarValue => {
