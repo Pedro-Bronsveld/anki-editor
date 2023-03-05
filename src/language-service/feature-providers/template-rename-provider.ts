@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { TEMPLATE_LANGUAGE_ID } from '../../constants';
-import { documentRange } from '../document-util';
+import { documentRange, getFieldAtOffset, getMatchingStandardFields, getReplacementAtOffset } from '../document-util';
 import { AstItemType, ConditionalEnd, ConditionalStart, Replacement } from '../parser/ast-models';
 import { inItem } from '../parser/ast-utils';
 import { parseTemplateDocument } from '../parser/template-parser';
@@ -18,20 +18,32 @@ export default class TemplateRenameProvider extends LanguageFeatureProviderBase 
             // Anki template rename
             const templateDocument = parseTemplateDocument(embeddedDocument.content);
 
-            // Provide rename for conditional templates
-            const conditional = getConditionalAtOffset(templateDocument.replacements, document.offsetAt(position));
-            
-            if (!conditional?.fieldSegment.field)
-                return Promise.reject("Conditional not found at this position, or conditional contains no field name.");
-            
-            const { field } = conditional.fieldSegment;
-                
+            const offset = document.offsetAt(position);
+            const replacement = getReplacementAtOffset(templateDocument.replacements, offset);
+
+            if (!replacement || !replacement.fieldSegment.field || !inItem(replacement.fieldSegment.field, offset))
+                return Promise.reject("No field name found at rename position.");
+
+            const { field } = replacement.fieldSegment;
             const workspaceEdit = new vscode.WorkspaceEdit();
 
+            // Rename field at position
             workspaceEdit.replace(document.uri, documentRange(document, field.start, field.end), newName);
 
-            if (conditional.linkedTag?.fieldSegment.field) {
-                const { field: linkedField } = conditional.linkedTag.fieldSegment;
+            if (replacement.type === AstItemType.replacement) {
+                // Rename same field names in other standard replacements
+                getMatchingStandardFields(templateDocument.replacements, field)
+                    .forEach(replacement => {
+                        const { field: otherField } = replacement.fieldSegment;
+                        workspaceEdit.replace(document.uri, documentRange(document, otherField.start, otherField.end), newName);
+                    });
+            }
+            else if (replacement.type === AstItemType.conditionalStart || replacement.type === AstItemType.conditionalEnd) {
+                if (!replacement.linkedTag?.fieldSegment.field)
+                    return workspaceEdit;
+                
+                // Rename linked conditional field
+                const { field: linkedField } = replacement.linkedTag.fieldSegment;
                 workspaceEdit.replace(document.uri, documentRange(document, linkedField.start, linkedField.end), newName);
             }
 
@@ -69,15 +81,13 @@ export default class TemplateRenameProvider extends LanguageFeatureProviderBase 
         if (embeddedDocument.languageId === TEMPLATE_LANGUAGE_ID) {
             // Anki template prepare rename
             const templateDocument = parseTemplateDocument(embeddedDocument.content);
-            
-            // Provide rename prepare for conditional templates
-            const conditional = getConditionalAtOffset(templateDocument.replacements, document.offsetAt(position));
-            
-            if (!conditional?.fieldSegment.field)
-                return Promise.reject("Renames can only be performed on field names in a conditional template.");
 
-            const { field } = conditional.fieldSegment;
-            
+            const offset = document.offsetAt(position);
+            const field = getFieldAtOffset(templateDocument.replacements, offset);
+
+            if (!field || !inItem(field, offset))
+                return Promise.reject("Renames can only be performed on field names.");
+
             return {
                 range: documentRange(document, field.start, field.end),
                 placeholder: field.content

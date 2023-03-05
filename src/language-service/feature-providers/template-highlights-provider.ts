@@ -23,13 +23,10 @@ export default class TemplateHighlightsProvider extends LanguageFeatureProviderB
 
             const highlights: vscode.DocumentHighlight[] = [];
             
-            if (!replacement)
+            if (!replacement || !replacement.fieldSegment.field || !inItem(replacement.fieldSegment.field, offset))
                 return highlights;
             
             const { field } = replacement.fieldSegment;
-
-            if (!field || !inItem(field, offset))
-                return highlights;
             
             // Highlight field at position
             highlights.push(new vscode.DocumentHighlight(documentRange(document, field.start, field.end)));
