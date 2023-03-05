@@ -4,7 +4,7 @@ import { uriPathToParts } from '../../note-types/uri-parser';
 import { builtinFilters, specialFields, ttsKeyValueArgs } from '../anki-builtin';
 import AnkiModelDataProvider from '../anki-model-data-provider';
 import { documentRange } from '../document-util';
-import { AstItemType, ConditionalStart, ConditionalType, FieldSegment, FilterArgumentKeyValue } from '../parser/ast-models';
+import { AstItemType, FilterArgumentKeyValue } from '../parser/ast-models';
 import { getItemAtOffset, getUnavailableFieldNames, inItem } from '../parser/ast-utils';
 import { parseTemplateDocument } from '../parser/template-parser';
 import { isBackSide } from '../template-util';

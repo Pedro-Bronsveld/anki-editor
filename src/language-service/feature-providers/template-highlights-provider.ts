@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { TEMPLATE_LANGUAGE_ID } from '../../constants';
 import { documentRange } from '../document-util';
 import { AstItemType } from '../parser/ast-models';
-import { getMatchingStandardFields, getReplacementAtOffset, inItem } from '../parser/ast-utils';
+import { getItemAtOffset, getMatchingStandardFields, inItem } from '../parser/ast-utils';
 import { parseTemplateDocument } from '../parser/template-parser';
 import LanguageFeatureProviderBase from './language-feature-provider-base';
 
@@ -19,7 +19,7 @@ export default class TemplateHighlightsProvider extends LanguageFeatureProviderB
             const templateDocument = parseTemplateDocument(embeddedDocument.content);
             
             const offset = document.offsetAt(position);
-            const replacement = getReplacementAtOffset(templateDocument.replacements, offset);
+            const replacement = getItemAtOffset(templateDocument.replacements, offset);
 
             const highlights: vscode.DocumentHighlight[] = [];
             

@@ -9,16 +9,13 @@ export const getItemAtOffset = <T extends AstItemBase>(items: T[], offset: numbe
     items.find(item => inItem(item, offset))
 
 export const getFieldAtOffset = (replacements: Replacement[], offset: number): Field | undefined => {
-    const replacement = getReplacementAtOffset(replacements, offset);
+    const replacement = getItemAtOffset(replacements, offset);
 
     if (!replacement?.fieldSegment.field || !inItem(replacement.fieldSegment.field, offset))
         return undefined;
     
     return replacement.fieldSegment.field;
 }
-
-export const getReplacementAtOffset = (replacements: Replacement[], offset: number): Replacement | undefined =>
-    replacements.find(replacement => inItem(replacement, offset));
 
 export const getConditionalAtOffset = (replacements: Replacement[], offset: number): ConditionalStart | ConditionalEnd | undefined =>
     replacements.find((replacement): replacement is ConditionalStart | ConditionalEnd => 

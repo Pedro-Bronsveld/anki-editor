@@ -7,7 +7,7 @@ import { DiagnosticCode } from '../diagnostic-codes';
 import { documentRange } from '../document-util';
 import { findSimilarStartEnd } from '../find-similar';
 import { AstItemType } from '../parser/ast-models';
-import { getReplacementAtOffset, getUnavailableFieldNames } from '../parser/ast-utils';
+import { getItemAtOffset, getUnavailableFieldNames } from '../parser/ast-utils';
 import { parseTemplateDocument } from '../parser/template-parser';
 import { isBackSide } from '../template-util';
 import VirtualDocumentProvider from '../virtual-documents-provider';
@@ -57,7 +57,7 @@ export default class TemplateCodeActionProvider extends LanguageFeatureProviderB
                                 // Check if field is in a conditional tag, replace linked tag if it has one
                                 const offset = document.offsetAt(diagnostic.range.start);
                                 const templateDocument = parseTemplateDocument(embeddedDocument.content);
-                                const replacement = getReplacementAtOffset(templateDocument.replacements, offset);
+                                const replacement = getItemAtOffset(templateDocument.replacements, offset);
     
                                 if (replacement?.type !== AstItemType.replacement && replacement?.linkedTag?.fieldSegment.field) {
                                     const { field: linkedField } = replacement.linkedTag.fieldSegment;
