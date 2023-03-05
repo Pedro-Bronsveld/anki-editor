@@ -117,9 +117,3 @@ export default class TemplateRenameProvider extends LanguageFeatureProviderBase 
     }
     
 }
-
-const getConditionalAtOffset = (replacements: Replacement[], offset: number): ConditionalStart | ConditionalEnd | undefined =>
-    replacements.find((replacement): replacement is ConditionalStart | ConditionalEnd => 
-        (replacement.type === AstItemType.conditionalStart || replacement.type === AstItemType.conditionalEnd) &&
-        replacement.fieldSegment.field !== undefined &&
-        inItem(replacement.fieldSegment.field, offset));

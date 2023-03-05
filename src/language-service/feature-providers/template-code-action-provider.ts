@@ -1,11 +1,12 @@
 import * as vscode from 'vscode';
 import { ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID } from '../../constants';
 import { uriPathToParts } from '../../note-types/uri-parser';
-import { builtinFilters, specialFields, ttsKeyValueArgs } from '../anki-builtin';
+import { specialFields, ttsKeyValueArgs } from '../anki-builtin';
 import AnkiModelDataProvider from '../anki-model-data-provider';
 import { DiagnosticCode } from '../diagnostic-codes';
-import { documentRange } from '../document-util';
+import { documentRange, getConditionalAtOffset } from '../document-util';
 import { findSimilarStartEnd } from '../find-similar';
+import { parseTemplateDocument } from '../parser/template-parser';
 import { isBackSide } from '../template-util';
 import VirtualDocumentProvider from '../virtual-documents-provider';
 import LanguageFeatureProviderBase from './language-feature-provider-base';
@@ -46,15 +47,34 @@ export default class TemplateCodeActionProvider extends LanguageFeatureProviderB
                         return createRemovalCodeAction(document, diagnostic.code, diagnostic.range, [...diagnosticContent.matchAll(/:/g)].length > 1);
                     case DiagnosticCode.invalidField:
                     case DiagnosticCode.invalidTtsOption:
-                        return findSimilarStartEnd(diagnostic.code === DiagnosticCode.invalidField
-                                ? fieldNames
-                                : ttsKeyValueArgs.map(arg => arg.key),
-                            diagnosticContent.toLowerCase(), false)
-                            .map(similarValue => {
-                                const workspaceEdit = new vscode.WorkspaceEdit();
-                                workspaceEdit.replace(document.uri, diagnostic.range, similarValue);
-                                return createCodeAction(`Replace with '${similarValue}'`, workspaceEdit);
-                            });
+                        {
+                            // Ranges to replace invalid value
+                            const replaceRanges: vscode.Range[] = [diagnostic.range];
+                            
+                            if (diagnostic.code === DiagnosticCode.invalidField) {
+                                // Check if field is in a conditional, replace linked tag if it has one
+                                const offset = document.offsetAt(diagnostic.range.start);
+                                const templateDocument = parseTemplateDocument(embeddedDocument.content);
+                                const conditional = getConditionalAtOffset(templateDocument.replacements, offset);
+    
+                                if (conditional?.linkedTag?.fieldSegment.field) {
+                                    const { field: linkedField } = conditional.linkedTag.fieldSegment;
+                                    replaceRanges.push(documentRange(document, linkedField.start, linkedField.end));
+                                }
+                            }
+                            // Replace 
+                            return findSimilarStartEnd(diagnostic.code === DiagnosticCode.invalidField
+                                    ? fieldNames
+                                    : ttsKeyValueArgs.map(arg => arg.key),
+                                diagnosticContent.toLowerCase(), false)
+                                .map(similarValue => {
+                                    const workspaceEdit = new vscode.WorkspaceEdit();
+                                    replaceRanges.forEach(range => {
+                                        workspaceEdit.replace(document.uri, range, similarValue);
+                                    });
+                                    return createCodeAction(`Replace with '${similarValue}'`, workspaceEdit);
+                                });
+                        }
                     case DiagnosticCode.invalidTtsLanguageArg:
                         {
                             const spaceMatch = diagnosticContent.match(/^[\s\r\n]*/);
