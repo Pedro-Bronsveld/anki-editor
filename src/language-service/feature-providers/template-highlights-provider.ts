@@ -19,7 +19,7 @@ export default class TemplateHighlightsProvider extends LanguageFeatureProviderB
             const templateDocument = parseTemplateDocument(embeddedDocument.content);
             
             const conditionalStart = templateDocument.replacements
-                .find((replacement):replacement is (ConditionalStart | ConditionalEnd) & Required<Pick<ConditionalStart, "linkedTag">> & { fieldSegment: FieldSegment & Required<Pick<FieldSegment, "field">> } => 
+                .find((replacement):replacement is (ConditionalStart | ConditionalEnd) & Required<Pick<ConditionalStart | ConditionalEnd, "linkedTag">> & { fieldSegment: FieldSegment & Required<Pick<FieldSegment, "field">> } => 
                     (replacement.type === AstItemType.conditionalStart || replacement.type === AstItemType.conditionalEnd) &&
                     replacement.linkedTag !== undefined && 
                     replacement.fieldSegment.field !== undefined &&
