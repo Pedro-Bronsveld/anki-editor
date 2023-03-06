@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID } from '../../constants';
 import { uriPathToParts } from '../../note-types/uri-parser';
-import { specialFields, ttsKeyValueArgs } from '../anki-builtin';
+import { specialFieldsNames, ttsKeyValueArgs } from '../anki-builtin';
 import AnkiModelDataProvider from '../anki-model-data-provider';
 import { DiagnosticCode } from '../diagnostic-codes';
 import { documentRange } from '../document-util';
@@ -29,7 +29,7 @@ export default class TemplateCodeActionProvider extends LanguageFeatureProviderB
         const uriParts = uriPathToParts(document.uri);
         const modelName = document.uri.scheme === ANKI_EDITOR_SCHEME_BASE && uriParts.length >= 2 ? uriParts[1] : "";
         const fieldNames = (document.uri.scheme === ANKI_EDITOR_SCHEME_BASE ? await this.ankiModelDataProvider.getFieldNames(modelName) : [])
-            .concat(specialFields);
+            .concat(specialFieldsNames);
         
         const isBackside = isBackSide(document);
 

@@ -6,7 +6,7 @@ import { createProjectSync, Project, ts } from "@ts-morph/bootstrap";
 import { ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID } from '../../constants';
 import { parseTemplateDocument } from '../parser/template-parser';
 import { AstItemType } from '../parser/ast-models';
-import { specialFields, ttsKeyValueArgs, ttsKeyValueArgsMap } from '../anki-builtin';
+import { specialFieldsNames, ttsKeyValueArgs, ttsKeyValueArgsMap } from '../anki-builtin';
 import { isBackSide } from '../template-util';
 import AnkiModelDataProvider from '../anki-model-data-provider';
 import { uriPathToParts } from '../../note-types/uri-parser';
@@ -60,7 +60,7 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
             let modelName = "";
 
             if (modelAvailable) {
-                specialFields.forEach(validFields.add, validFields);
+                specialFieldsNames.forEach(validFields.add, validFields);
                 if (isBackSide(document))
                     validFields.add("FrontSide");
                 const uriParts = uriPathToParts(document.uri);

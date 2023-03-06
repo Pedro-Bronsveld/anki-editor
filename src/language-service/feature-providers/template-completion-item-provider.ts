@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID } from '../../constants';
 import { uriPathToParts } from '../../note-types/uri-parser';
-import { builtinFilters, specialFields, ttsKeyValueArgs } from '../anki-builtin';
+import { builtinFilters, specialFieldsNames, ttsKeyValueArgs } from '../anki-builtin';
 import AnkiModelDataProvider from '../anki-model-data-provider';
 import { documentRange } from '../document-util';
 import { AstItemType, FilterArgumentKeyValue } from '../parser/ast-models';
@@ -45,7 +45,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                 const replaceRange = replacement.fieldSegment.field
                     ? documentRange(document, replacement.fieldSegment.start, replacement.fieldSegment.field.end)
                     : new vscode.Range(document.positionAt(replacement.fieldSegment.start), position);
-                completionItemList.push(...specialFields
+                completionItemList.push(...specialFieldsNames
                     .filter(specialField => !unavailableFieldNames.has(specialField))
                     .map(specialField => createCompletionItem(specialField, vscode.CompletionItemKind.Constant, "3", replaceRange)));
 
