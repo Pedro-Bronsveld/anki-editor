@@ -6,14 +6,14 @@ export interface BuiltIn {
 const specialFieldsList: readonly BuiltIn[] = [
     {
         name: "Card",
-        description: "Contains the type name of the card template that this variable is used in."
+        description: "Contains the type name of the card template that this field is used in."
     },
     {
         name: "CardFlag",
         description: "If a card is marked with a flag, this variable will contain the name of the flag it's marked with.\n\n" +
             "The 7 available flag colors and names are:\n" +
-            "|Color|Name|\n" +
-            "|-----|----|\n" +
+            "|Flag|Name|\n" +
+            "|----|----|\n" +
             ["Red", "Orange", "Green", "Blue", "Pink", "Turquoise", "Purple"].map((color, index) => `|${color}|\`flag${index+1}\`|`).join("\n")
     },
     {
@@ -22,7 +22,8 @@ const specialFieldsList: readonly BuiltIn[] = [
     },
     {
         name: "Subdeck",
-        description: "Contains the name of the subdeck, if any, that the active card is in."
+        description: "Contains the name of the subdeck that the active card is directly nested in.\n" +
+            "If the card is not in a subdeck, this field contains the same value as the `Deck` field."
     },
     {
         name: "Tags",
@@ -36,44 +37,50 @@ const specialFieldsList: readonly BuiltIn[] = [
         name: "Type",
         description: "Contains the name of the note type that the active card is a part of."
     },
+    {
+        name: "FrontSide",
+        description: "This field is used on the back template of a card to embed the corresponding front template."
+    },
 ];
 
-export const builtinFilters: readonly BuiltIn[] = [
+export const builtinFiltersList: readonly BuiltIn[] = [
     {
         name: "tts-voices",
-        description: ""
+        description: "Displays a list of all available languages/voices in the card."
     },
     {
         name: "cloze",
-        description: ""
+        description: "Displays the field in this replacement as a cloze deletion."
     },
     {
         name: "cloze-only",
-        description: ""
+        description: "When used in combination with the `tts` filter, only the deleted text will be read.\n" +
+            "Example: `{{tts en_US:cloze-only:Text}}`."
     },
     {
         name: "hint",
-        description: ""
+        description: "Hides the content of the field until the user clicks it."
     },
     {
         name: "type",
-        description: ""
+        description: "Displays a text input for the user to type in their answer when used on the front of a card template.\n" +
+            "Displays a the correct and incorrect letters of the user's input when also used on the back of the card template."
     },
     {
         name: "text",
-        description: ""
+        description: "Displays the source content of the field without any formatting."
     },
     {
         name: "furigana",
-        description: ""
+        description: "Allows for the usage of logographic and ruby characters in a field.\nRuby characters will be displayed above the logographic characters of the field."
     },
     {
         name: "kana",
-        description: ""
+        description: "Allows for the usage of logographic and ruby characters in a field.\nOnly the ruby characters will be displayed."
     },
     {
         name: "kanji",
-        description: ""
+        description: "Allows for the usage of logographic and ruby characters in a field.\nOnly the logographic characters will be displayed."
     }
 ];
 
@@ -81,8 +88,10 @@ const toMap = <T extends BuiltIn>(builtins: readonly T[]): Map<string, T> => new
 const toNames = <T extends BuiltIn>(builtins: readonly T[]): readonly string[] => builtins.map(({ name }) => name);
 
 export const specialFields = toMap(specialFieldsList);
-export const specialFieldsNames = toNames(specialFieldsList);
+export const specialFieldsNames = toNames(specialFieldsList.filter(({ name }) => name !== "FrontSide"));
 
+export const builtinFilters = toMap(builtinFiltersList);
+export const builtinFiltersNames = toNames(builtinFiltersList);
 export interface TtsKeyValueArg {
     key: string;
     value: string;

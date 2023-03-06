@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID } from '../../constants';
 import { uriPathToParts } from '../../note-types/uri-parser';
-import { builtinFilters, specialFieldsNames, ttsKeyValueArgs } from '../anki-builtin';
+import { builtinFiltersNames, specialFieldsNames, ttsKeyValueArgs } from '../anki-builtin';
 import AnkiModelDataProvider from '../anki-model-data-provider';
 import { documentRange } from '../document-util';
 import { AstItemType, FilterArgumentKeyValue } from '../parser/ast-models';
@@ -105,7 +105,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                     // Create builtin filter suggestions, ending with colon if not already followed by one
                     const appendColon = !replacement.content.substring(offset - replacement.start).match(/^\s*(?=:)/);
                     const suffix = (appendColon ? ":" : "");
-                    completionItemList.push(...builtinFilters.map(filterName =>
+                    completionItemList.push(...builtinFiltersNames.map(filterName =>
                         createCompletionItem(filterName + suffix, vscode.CompletionItemKind.Function, "4")
                     ));
     
