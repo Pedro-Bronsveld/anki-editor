@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID } from '../../constants';
 import { uriPathToParts } from '../../note-types/uri-parser';
-import { specialFieldsNames, ttsKeyValueArgs } from '../anki-builtin';
+import { specialFieldsNames, ttsOptionsList } from '../anki-builtin';
 import AnkiModelDataProvider from '../anki-model-data-provider';
 import { DiagnosticCode } from '../diagnostic-codes';
 import { documentRange } from '../document-util';
@@ -75,7 +75,7 @@ export default class TemplateCodeActionProvider extends LanguageFeatureProviderB
                             // Replace 
                             return findSimilarStartEnd(diagnostic.code === DiagnosticCode.invalidField
                                     ? subFieldNames
-                                    : ttsKeyValueArgs.map(arg => arg.key),
+                                    : ttsOptionsList.map(arg => arg.name),
                                 diagnosticContent.toLowerCase(), false)
                                 .map(similarValue => {
                                     const workspaceEdit = new vscode.WorkspaceEdit();

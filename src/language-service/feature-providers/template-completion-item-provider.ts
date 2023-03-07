@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID } from '../../constants';
 import { uriPathToParts } from '../../note-types/uri-parser';
-import { builtinFiltersNames, specialFieldsNames, ttsKeyValueArgs } from '../anki-builtin';
+import { builtinFiltersNames, specialFieldsNames, ttsOptionsList } from '../anki-builtin';
 import AnkiModelDataProvider from '../anki-model-data-provider';
 import { documentRange } from '../document-util';
 import { AstItemType, FilterArgumentKeyValue } from '../parser/ast-models';
@@ -89,9 +89,9 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                         const usedOptions = new Set(filter.arguments
                             .filter((arg): arg is FilterArgumentKeyValue => arg.type === AstItemType.filterArgumentKeyValue)
                             .map(arg => arg.key.content));
-                        completionItemList.push(...ttsKeyValueArgs
-                                .filter(({ key, value }) => !usedOptions.has(key))
-                                .map(({ key, value }) => {
+                        completionItemList.push(...ttsOptionsList
+                                .filter(({ name: key, value }) => !usedOptions.has(key))
+                                .map(({ name: key, value }) => {
                                 const completion = createCompletionItem(key, vscode.CompletionItemKind.Property, "1");
                                 const prefix = filterSegment.content[offset - filterSegment.start - 1] === " " ? "" : " ";
                                 completion.insertText = new vscode.SnippetString(prefix + key + "=${0:" + value + "}" + suffix);

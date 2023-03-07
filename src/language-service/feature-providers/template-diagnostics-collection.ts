@@ -6,7 +6,7 @@ import { createProjectSync, Project, ts } from "@ts-morph/bootstrap";
 import { ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID } from '../../constants';
 import { parseTemplateDocument } from '../parser/template-parser';
 import { AstItemType } from '../parser/ast-models';
-import { specialFieldsNames, ttsKeyValueArgs, ttsKeyValueArgsMap } from '../anki-builtin';
+import { specialFieldsNames, ttsOptionsList, ttsOptions } from '../anki-builtin';
 import { isBackSide } from '../template-util';
 import AnkiModelDataProvider from '../anki-model-data-provider';
 import { uriPathToParts } from '../../note-types/uri-parser';
@@ -181,12 +181,12 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                                             "For example: 'speed=1.5'."
                                         ));
                                     else if (arg.type === AstItemType.filterArgumentKeyValue) {
-                                        const ttsKeyValueArg = ttsKeyValueArgsMap.get(arg.key.content);
+                                        const ttsOption = ttsOptions.get(arg.key.content);
                                         // Check if argument key is a vlaid option for tts filter
-                                        if (!ttsKeyValueArg) {
+                                        if (!ttsOption) {
                                             allDiagnostics.push(createDiagnostic(document, arg.key.start, arg.key.end,
                                                 `'${arg.key.content}' is not a valid option for the tts filter.\n Valid options are: ${
-                                                    ttsKeyValueArgs.map(arg => `${arg.key}`).join(", ")
+                                                    ttsOptionsList.map(arg => `${arg.name}`).join(", ")
                                                 }`,
                                                 DiagnosticCode.invalidTtsOption
                                             ));
@@ -202,9 +202,9 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                                         }
 
                                         // Check if option is allowed to contain multiple comma separated values
-                                        if (!ttsKeyValueArg.multiple && (arg.values.length > 1 || arg.content.endsWith(",")))
+                                        if (!ttsOption.multiple && (arg.values.length > 1 || arg.content.endsWith(",")))
                                             allDiagnostics.push(createDiagnostic(document, arg.values[0].end, arg.end,
-                                                `Only one value must be given for option '${ttsKeyValueArg.key}'.`,
+                                                `Only one value must be given for option '${ttsOption.name}'.`,
                                                 DiagnosticCode.invalidTtsOptionValue
                                             ));
                                         // Check if key value argument contains at least one value
@@ -216,13 +216,13 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                                             ));
                                         
                                         // Check formatting of values for this option
-                                        for (const value of arg.values.slice(0, ttsKeyValueArg.multiple ? arg.values.length : 1)) {
-                                            const validMatch = value.content.match(ttsKeyValueArg.validMatch);
+                                        for (const value of arg.values.slice(0, ttsOption.multiple ? arg.values.length : 1)) {
+                                            const validMatch = value.content.match(ttsOption.validMatch);
                                             if (validMatch)
                                                 continue;
                                             
                                             allDiagnostics.push(createDiagnostic(document, value.start, value.end,
-                                                ttsKeyValueArg.invalidMessage
+                                                ttsOption.invalidMessage
                                             ));
                                         }
                                     }
