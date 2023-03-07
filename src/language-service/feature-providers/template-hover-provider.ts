@@ -10,9 +10,6 @@ import LanguageFeatureProviderBase from './language-feature-provider-base';
 export default class TemplateHoverProvider extends LanguageFeatureProviderBase implements vscode.HoverProvider {
 
     async provideHover(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Promise<vscode.Hover | null | undefined> {
-        const allHovers: vscode.Hover = {
-            contents: []
-        };
         
         const embeddedDocument = this.getEmbeddedByPosition(document, position);
         
@@ -58,12 +55,10 @@ export default class TemplateHoverProvider extends LanguageFeatureProviderBase i
                 else if (filterSegment.filter.content === "tts") {
 
                     const languageArg = filterSegment.filter.arguments[0];
-                    if (languageArg) {
-                        if (languageArg.type === AstItemType.filterArgument && inItem(languageArg, offset)) {
-                            return new vscode.Hover(new vscode.MarkdownString("Code of the language that the tts command will use for speech conversion.\n\n" +
-                                "Use the `tts-voices` filter on a card template to display a list of available tts languages on a system."),
-                                documentRange(document, languageArg.start, languageArg.end));
-                        }
+                    if (languageArg && languageArg.type === AstItemType.filterArgument && inItem(languageArg, offset)) {
+                        return new vscode.Hover(new vscode.MarkdownString("Code of the language that the tts command will use for speech conversion.\n\n" +
+                            "Use the `tts-voices` filter on a card template to display a list of available tts languages on a system."),
+                            documentRange(document, languageArg.start, languageArg.end));
                     }
 
                     const filterOptionKey = getItemAtOffset(filterSegment.filter.arguments.slice(1)
