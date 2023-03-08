@@ -1,4 +1,4 @@
-import { AstItemBase } from './ast-models';
+import { AstItemBase, Filter, FilterSegment } from './ast-models';
 import { AstItemType, ConditionalEnd, ConditionalStart, ConditionalType, Field, FieldSegment, Replacement, StandardReplacement } from './ast-models';
 
 export const inItem = (item: AstItemBase, offset: number) =>
@@ -28,6 +28,14 @@ export const getMatchingStandardFields = (replacements: Replacement[], sourceFie
     other.type === AstItemType.replacement &&
     other.fieldSegment.field?.content === sourceField.content &&
     other.fieldSegment.field !== sourceField);
+
+export const getFiltersByName = (replacements: Replacement[], name: string): Filter[] =>
+    replacements
+    .filter((replacement): replacement is StandardReplacement => replacement.type === AstItemType.replacement)
+    .flatMap(replacement => replacement.filterSegments)
+    .filter((filterSegment): filterSegment is FilterSegment & Required<Pick<FilterSegment, "filter">> =>
+        filterSegment.filter !== undefined && filterSegment.filter.content === name)
+    .map(filterSegment => filterSegment.filter);
 
 export const getParentConditionals = (replacement: Replacement): ConditionalStart[] => {
     
