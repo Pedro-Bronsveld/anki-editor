@@ -2,8 +2,8 @@ import * as vscode from 'vscode';
 import { ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID } from '../../constants';
 import { partsToUri, uriPathToParts } from '../../note-types/uri-parser';
 import { documentRange } from '../document-util';
-import { TemplateDocument } from '../parser/ast-models';
-import { getItemAtOffset } from '../parser/ast-utils';
+import { AstItemType, FilterSegment, TemplateDocument } from '../parser/ast-models';
+import { getItemAtOffset, inItem } from '../parser/ast-utils';
 import { parseTemplateDocument } from '../parser/template-parser';
 import LanguageFeatureProviderBase from './language-feature-provider-base';
 
@@ -20,11 +20,16 @@ export default class TemplateReferenceProvider extends LanguageFeatureProviderBa
             const offset = document.offsetAt(position);
             const replacement = getItemAtOffset(templateDocument.replacements, offset);
 
-            if (!replacement || !replacement.fieldSegment.field)
+            if (!replacement)
                 return;
+            
+            const sourceItem = replacement.fieldSegment.field && inItem(replacement.fieldSegment.field, offset)
+                ? replacement.fieldSegment.field
+                : replacement.type === AstItemType.replacement ? getItemAtOffset(replacement.filterSegments, offset)?.filter : undefined;
 
-            const sourceField = replacement.fieldSegment.field;
-
+            if (!sourceItem)
+                return;
+                
             const templateDocuments: {
                 document: vscode.TextDocument,
                 template: TemplateDocument
@@ -62,14 +67,22 @@ export default class TemplateReferenceProvider extends LanguageFeatureProviderBa
             for (const { document, template } of templateDocuments) {
                 for (const replacement of template.replacements) {
 
-                    if (!replacement.fieldSegment.field || replacement.fieldSegment.field.content !== sourceField.content)
-                        continue;
+                    const otherItems = sourceItem.type === AstItemType.field
+                        ? [replacement.fieldSegment.field]
+                        : replacement.type === AstItemType.replacement ? replacement.filterSegments
+                            .filter((filterSegment): filterSegment is FilterSegment & Required<Pick<FilterSegment, "filter">> =>
+                                filterSegment.filter !== undefined && filterSegment.filter.content === sourceItem.content)
+                            .map(({ filter }) => filter) : [];
                     
-                    const { field } = replacement.fieldSegment;
-                                        
-                    const location = new vscode.Location(document.uri, documentRange(document, field.start, field.end));
+                    for (const otherItem of otherItems) {
+                        if (!otherItem)
+                            continue;
+
+                        const location = new vscode.Location(document.uri, documentRange(document, otherItem.start, otherItem.end));
+                        
+                        allLocations.push(location);
+                    }
                     
-                    allLocations.push(location);
                 }
             }
 
