@@ -211,7 +211,7 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                                         // Check if key value argument contains at least one value
                                         else if (arg.values.length === 0)
                                             allDiagnostics.push(createDiagnostic(document, arg.divider.end, arg.divider.end,
-                                                `No value given for option '${arg.key}'.`,
+                                                `No value given for option '${arg.key.content}'.`,
                                                 undefined,
                                                 vscode.DiagnosticSeverity.Warning
                                             ));
