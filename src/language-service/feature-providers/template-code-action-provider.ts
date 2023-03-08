@@ -88,15 +88,15 @@ export default class TemplateCodeActionProvider extends LanguageFeatureProviderB
                     case DiagnosticCode.invalidTtsLanguageArg:
                     case DiagnosticCode.missingTtsLanguageArg:
                         {
-                            const spaceMatch = diagnosticContent.match(/^(tts)?([\s\r\n])*/);
+                            const spaceMatch = diagnosticContent.match(/^(tts)?([\s\r\n]*)/);
                             const workspaceEdit = new vscode.WorkspaceEdit();
-                            const start = document.offsetAt(diagnostic.range.start);
                             const missing = diagnostic.code === DiagnosticCode.missingTtsLanguageArg;
+                            const start = document.offsetAt(diagnostic.range.start) + (missing ? 3 : 0);
                             const leadingSpace = missing ? " " : "";
-                            const range = missing
-                                ? documentRange(document,start + 3, start + (spaceMatch?.[2]?.length ?? 3 ))
-                                : documentRange(document,start , start + (spaceMatch?.[0]?.length ?? 0 ));
-                            workspaceEdit.replace(document.uri, range, leadingSpace + "en_US ");
+                            const trailingSpace = missing ? "" : " ";
+                            workspaceEdit.replace(document.uri,
+                                documentRange(document, start, start + (spaceMatch?.[2]?.length ?? 0 )),
+                                leadingSpace + "en_US" + trailingSpace);
                             return createCodeAction("Insert default language argument 'en_US'", workspaceEdit);
                         }
                     case DiagnosticCode.missingOpeningTag:
