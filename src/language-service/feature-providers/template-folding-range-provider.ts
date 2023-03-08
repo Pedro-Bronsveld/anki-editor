@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { getLanguageService, LanguageService, TextDocument, FoldingRangeKind } from 'vscode-html-languageservice';
 import { TEMPLATE_LANGUAGE_ID } from '../../constants';
+import { RequiredProp } from '../../models/required-prop';
 import { AstItemType, ConditionalStart } from '../parser/ast-models';
 import { parseTemplateDocument } from '../parser/template-parser';
 import LanguageFeatureProviderBase from './language-feature-provider-base';
@@ -22,7 +23,7 @@ export default class TemplateFoldingRangeProvider extends LanguageFeatureProvide
                 
                 // Create folding ranges for linked conditional opening and closing tags
                 const conditionalFoldingRanges = templateDocument.replacements
-                    .filter((conditional): conditional is ConditionalStart & Required<Pick<ConditionalStart, "linkedTag">> =>
+                    .filter((conditional): conditional is RequiredProp<ConditionalStart, "linkedTag"> =>
                         conditional.type === AstItemType.conditionalStart &&
                         conditional.linkedTag !== undefined)
                     .map(conditional =>

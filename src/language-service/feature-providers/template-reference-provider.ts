@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID } from '../../constants';
+import { RequiredProp } from '../../models/required-prop';
 import { partsToUri, uriPathToParts } from '../../note-types/uri-parser';
 import { documentRange } from '../document-util';
 import { AstItemType, FilterSegment, TemplateDocument } from '../parser/ast-models';
@@ -70,7 +71,7 @@ export default class TemplateReferenceProvider extends LanguageFeatureProviderBa
                     const otherItems = sourceItem.type === AstItemType.field
                         ? [replacement.fieldSegment.field]
                         : replacement.type === AstItemType.replacement ? replacement.filterSegments
-                            .filter((filterSegment): filterSegment is FilterSegment & Required<Pick<FilterSegment, "filter">> =>
+                            .filter((filterSegment): filterSegment is RequiredProp<FilterSegment, "filter"> =>
                                 filterSegment.filter !== undefined && filterSegment.filter.content === sourceItem.content)
                             .map(({ filter }) => filter) : [];
                     

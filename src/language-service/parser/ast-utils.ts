@@ -1,3 +1,4 @@
+import { RequiredProp } from '../../models/required-prop';
 import { AstItemBase, Filter, FilterSegment } from './ast-models';
 import { AstItemType, ConditionalEnd, ConditionalStart, ConditionalType, Field, FieldSegment, Replacement, StandardReplacement } from './ast-models';
 
@@ -24,7 +25,7 @@ export const getConditionalAtOffset = (replacements: Replacement[], offset: numb
 
 export const getMatchingStandardFields = (replacements: Replacement[], sourceField: Field) => 
     replacements
-    .filter((other): other is StandardReplacement & { fieldSegment: FieldSegment & Required<Pick<FieldSegment, "field">> } =>
+    .filter((other): other is StandardReplacement & { fieldSegment: RequiredProp<FieldSegment, "field"> } =>
     other.type === AstItemType.replacement &&
     other.fieldSegment.field?.content === sourceField.content &&
     other.fieldSegment.field !== sourceField);
@@ -33,7 +34,7 @@ export const getFiltersByName = (replacements: Replacement[], name: string): Fil
     replacements
     .filter((replacement): replacement is StandardReplacement => replacement.type === AstItemType.replacement)
     .flatMap(replacement => replacement.filterSegments)
-    .filter((filterSegment): filterSegment is FilterSegment & Required<Pick<FilterSegment, "filter">> =>
+    .filter((filterSegment): filterSegment is RequiredProp<FilterSegment, "filter"> =>
         filterSegment.filter !== undefined && filterSegment.filter.content === name)
     .map(filterSegment => filterSegment.filter);
 
@@ -51,11 +52,11 @@ export const getUnavailableFieldNames = (replacement: Replacement): Set<string> 
     const parentConditionals = replacement.parentConditional ? getParentConditionals(replacement.parentConditional) : [];
     const unavailableFieldNames = replacement.type !== AstItemType.replacement
         ? new Set(parentConditionals
-            .filter((conditional): conditional is ConditionalStart & { fieldSegment: FieldSegment & Required<Pick<FieldSegment, "field">> } =>
+            .filter((conditional): conditional is ConditionalStart & { fieldSegment: RequiredProp<FieldSegment, "field"> } =>
             conditional.fieldSegment.field !== undefined)
             .map(conditional => conditional.fieldSegment.field.content)) 
         : new Set(parentConditionals
-            .filter((conditional): conditional is ConditionalStart & { conditionalType: ConditionalType.empty , fieldSegment: FieldSegment & Required<Pick<FieldSegment, "field">> } =>
+            .filter((conditional): conditional is ConditionalStart & { conditionalType: ConditionalType.empty , fieldSegment: RequiredProp<FieldSegment, "field"> } =>
             conditional.conditionalType === ConditionalType.empty &&
             conditional.fieldSegment.field !== undefined)
             .map(conditional => conditional.fieldSegment.field.content));

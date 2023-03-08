@@ -5,6 +5,7 @@ import { AstItemType, ConditionalStart, FilterSegment, Replacement, StandardRepl
 import { parseTemplateDocument } from '../parser/template-parser';
 import LanguageFeatureProviderBase from './language-feature-provider-base';
 import { documentRange } from '../document-util';
+import { RequiredProp } from '../../models/required-prop';
 
 export default class TemplateSymbolProvider extends LanguageFeatureProviderBase implements vscode.DocumentSymbolProvider {
     
@@ -67,7 +68,7 @@ const createDocumentSymbol = (document: vscode.TextDocument, replacement: Standa
     
     const name = (replacement.type === AstItemType.replacement
         ? replacement.filterSegments
-            .filter((filterSegment): filterSegment is FilterSegment & Required<Pick<FilterSegment, "filter">> => filterSegment.filter !== undefined)
+            .filter((filterSegment): filterSegment is RequiredProp<FilterSegment, "filter"> => filterSegment.filter !== undefined)
             .map(filterSegment => filterSegment.filter.content + ":")
             .join("")
         : conditionalChar(replacement)) +

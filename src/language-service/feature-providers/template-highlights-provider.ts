@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { TEMPLATE_LANGUAGE_ID } from '../../constants';
+import { RequiredProp } from '../../models/required-prop';
 import { documentRange } from '../document-util';
 import { AstItemType, Filter, FilterSegment } from '../parser/ast-models';
 import { getFiltersByName, getItemAtOffset, getMatchingStandardFields, inItem } from '../parser/ast-utils';
@@ -56,7 +57,7 @@ export default class TemplateHighlightsProvider extends LanguageFeatureProviderB
 
                 // Highlight all filters in the document with the same name
                 const thisFilter = getItemAtOffset(replacement.filterSegments
-                    .filter((filterSegment): filterSegment is FilterSegment & Required<Pick<FilterSegment, "filter">> =>
+                    .filter((filterSegment): filterSegment is RequiredProp<FilterSegment, "filter"> =>
                         filterSegment.filter !== undefined)
                     .map(filterSegment => filterSegment.filter), offset);
                 
