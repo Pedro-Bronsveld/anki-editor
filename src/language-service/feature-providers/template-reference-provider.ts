@@ -62,7 +62,7 @@ export default class TemplateReferenceProvider extends LanguageFeatureProviderBa
                     });
             }
 
-            // Get all references to source field name
+            // Get all references to source item
             const allLocations: vscode.Location[] = [];
 
             for (const { document, template } of templateDocuments) {
