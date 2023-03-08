@@ -180,7 +180,8 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// Hack to work around vscode only providing hover information after the first 2 hovers
 	// for embedded javascript. Simply performs two dummy hovers when the extension activates.
-	runHoverProviderDummy(virtualDocumentProvider);
+	// (commented out because a loader keeps spinning in the bottom left corner saying "activating js/ts server")
+	// runHoverProviderDummy(virtualDocumentProvider);
 	
 }
 
