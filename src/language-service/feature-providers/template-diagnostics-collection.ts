@@ -152,7 +152,8 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                             // Check if the required language argument is set for the tts filter
                             if (!arg0)
                                 allDiagnostics.push(createDiagnostic(document, filter.start, filterSegment.end,
-                                    "The tts filter name must be followed by a language code.\nFor example: en_US"
+                                    "The tts filter name must be followed by a language code.\nFor example: en_US",
+                                    DiagnosticCode.missingTtsLanguageArg
                                 ));
                             // Check if the first argument of the tts filter is the language argument
                             else if (arg0.type === AstItemType.filterArgumentKeyValue) {

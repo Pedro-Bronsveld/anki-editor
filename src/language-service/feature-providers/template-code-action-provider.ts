@@ -86,13 +86,17 @@ export default class TemplateCodeActionProvider extends LanguageFeatureProviderB
                                 });
                         }
                     case DiagnosticCode.invalidTtsLanguageArg:
+                    case DiagnosticCode.missingTtsLanguageArg:
                         {
-                            const spaceMatch = diagnosticContent.match(/^[\s\r\n]*/);
+                            const spaceMatch = diagnosticContent.match(/^(tts)?([\s\r\n])*/);
                             const workspaceEdit = new vscode.WorkspaceEdit();
                             const start = document.offsetAt(diagnostic.range.start);
-                            workspaceEdit.replace(document.uri, documentRange(document,
-                                start, start + (spaceMatch?.[0].length ?? 0 )),
-                                "en_US ");
+                            const missing = diagnostic.code === DiagnosticCode.missingTtsLanguageArg;
+                            const leadingSpace = missing ? " " : "";
+                            const range = missing
+                                ? documentRange(document,start + 3, start + (spaceMatch?.[2]?.length ?? 3 ))
+                                : documentRange(document,start , start + (spaceMatch?.[0]?.length ?? 0 ));
+                            workspaceEdit.replace(document.uri, range, leadingSpace + "en_US ");
                             return createCodeAction("Insert default language argument 'en_US'", workspaceEdit);
                         }
                     case DiagnosticCode.missingOpeningTag:
