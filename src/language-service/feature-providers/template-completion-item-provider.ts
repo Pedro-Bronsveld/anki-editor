@@ -139,7 +139,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
             const optionFieldNames = (fieldNames.length > 0 ? fieldNames.slice().sort() : ["Field"])
                 .concat(
                     specialFieldsNames.concat(templateIsBackSide ? "FrontSide" : []).sort()
-                );
+                ).map(option => option.replace(/([,|])/g, "\\$1"));
             const offset = document.offsetAt(position);
             const preChar = document.getText().substring(offset-1, offset);
             builtinCompletionList.items.push(...[
