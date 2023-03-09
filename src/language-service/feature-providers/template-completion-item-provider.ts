@@ -20,6 +20,20 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
     async provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext): Promise<vscode.CompletionItem[] | vscode.CompletionList<vscode.CompletionItem> | null | undefined> {        
         const embeddedDocument = this.getEmbeddedByPosition(document, position);
 
+        const completionItemList: vscode.CompletionItem[] = [];
+        const fieldNames: string[] = [];
+
+        if (document.uri.scheme === ANKI_EDITOR_SCHEME_BASE) {
+            // Field suggestions from the model can only be provided on documents loaded through Anki-Connect
+            const uriParts = uriPathToParts(document.uri);
+    
+            if (uriParts.length >= 2) {
+                // Create field suggestions
+                const modelName = uriParts[1];
+                fieldNames.push(...(await this.ankiModelDataProvider.getFieldNames(modelName)));
+            }
+        }
+
         if (embeddedDocument.languageId === TEMPLATE_LANGUAGE_ID) {
 
             const templateDocument = parseTemplateDocument(embeddedDocument.content);
@@ -30,8 +44,6 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
             
             if (!replacement)
                 return undefined;
-            
-            const completionItemList: vscode.CompletionItem[] = [];
                 
             // Check if the trigger position is currently at a field position
             if (inItem(replacement.fieldSegment, offset)) {
@@ -49,19 +61,10 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                     .filter(specialField => !unavailableFieldNames.has(specialField))
                     .map(specialField => createCompletionItem(specialField, vscode.CompletionItemKind.Constant, "3", replaceRange)));
 
-                // Field suggestions from the model can only be provided on documents loaded through Anki-Connect
-                if (document.uri.scheme === ANKI_EDITOR_SCHEME_BASE) {
-                    const uriParts = uriPathToParts(document.uri);
-        
-                    if (uriParts.length >= 2) {
-                        // Create field suggestions
-                        const modelName = uriParts[1];
-                        const fieldNames = await this.ankiModelDataProvider.getFieldNames(modelName);
-                        completionItemList.push(...fieldNames
-                            .filter(specialField => !unavailableFieldNames.has(specialField))
-                            .map(fieldName => createCompletionItem(fieldName, vscode.CompletionItemKind.Field, "1", replaceRange)));
-                    }
-                }
+                // Create completion items for field names
+                completionItemList.push(...fieldNames
+                    .filter(specialField => !unavailableFieldNames.has(specialField))
+                    .map(fieldName => createCompletionItem(fieldName, vscode.CompletionItemKind.Field, "1", replaceRange)));
 
                 // Show FrontSide suggestion only when in back side template
                 if(replacement.type === AstItemType.replacement && isBackSide(document))
@@ -121,24 +124,41 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
         }
 
         // Html, javascript and css forwarding
-        const completionList = await vscode.commands.executeCommand<vscode.CompletionList>(
+        const builtinCompletionList = await vscode.commands.executeCommand<vscode.CompletionList>(
             'vscode.executeCompletionItemProvider',
             embeddedDocument.virtualUri,
             position,
             context.triggerCharacter
         );
 
+        completionItemList.push(...builtinCompletionList.items);
+
         {
-            // Conditional completion
-            const completion = createCompletionItem("{{#Field}} {{/Field}}",
-                vscode.CompletionItemKind.Snippet);
-            completion.insertText = new vscode.SnippetString("{{#$1}}$0\n{{/$1}}");
-            completionList.items.push(completion);
+            const offset = document.offsetAt(position);
+            const preChar = document.getText().substring(offset-1, offset);
+            builtinCompletionList.items.push(...[
+                    { char: "#", detail: "filled"}, 
+                    { char: "^", detail: "empty"}
+                ]
+                .map(({char, detail}) => {
+                    const options = fieldNames.join(",") || "Field";
+                    const isPreChar = char === preChar;
+                    const completion = createCompletionItem(`{{${char}Field}} {{${char}Field}}`,
+                            vscode.CompletionItemKind.Snippet,
+                            undefined,
+                            documentRange(document, offset - (isPreChar ? 1 : 0), offset)
+                        );
+                    completion.insertText = new vscode.SnippetString("{{#${1|" + options + "|}}}\n\t$0\n{{/${1|" + options + "|}}}");
+                    completion.detail = `If ${detail} block.`;
+                    completion.preselect = isPreChar;
+                    return completion;
+                }
+            ));            
         }
 
         return {
-            ...completionList,
-            items: completionList.items.filter(item => item.kind !== vscode.CompletionItemKind.Text)
+            ...builtinCompletionList,
+            items: builtinCompletionList.items.filter(item => item.kind !== vscode.CompletionItemKind.Text)
         };
     }
 }
