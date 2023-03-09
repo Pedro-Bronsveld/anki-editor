@@ -22,6 +22,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
 
         const completionItemList: vscode.CompletionItem[] = [];
         const fieldNames: string[] = [];
+        const templateIsBackSide = isBackSide(document);
 
         if (document.uri.scheme === ANKI_EDITOR_SCHEME_BASE) {
             // Field suggestions from the model can only be provided on documents loaded through Anki-Connect
@@ -67,7 +68,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                     .map(fieldName => createCompletionItem(fieldName, vscode.CompletionItemKind.Field, "1", replaceRange)));
 
                 // Show FrontSide suggestion only when in back side template
-                if(replacement.type === AstItemType.replacement && isBackSide(document))
+                if(replacement.type === AstItemType.replacement && templateIsBackSide)
                     completionItemList.push(createCompletionItem("FrontSide", vscode.CompletionItemKind.Reference, "2"));
             }
             
@@ -135,6 +136,10 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
 
         {
             // Provide snippets for standard replacement and conditional replacement tags and blocks
+            const optionFieldNames = (fieldNames.length > 0 ? fieldNames.slice().sort() : ["Field"])
+                .concat(
+                    specialFieldsNames.concat(templateIsBackSide ? "FrontSide" : []).sort()
+                );
             const offset = document.offsetAt(position);
             const preChar = document.getText().substring(offset-1, offset);
             builtinCompletionList.items.push(...[
@@ -144,10 +149,13 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                     { char: "/", detail: "Anki if block closing tag" }
                 ]
                 .flatMap(({char, detail}, index) => {
-                    const options = fieldNames.join(",") || "Field";
+                    const isConditional = char.match(/[#^]/)
+                    const options = optionFieldNames
+                        .filter(option => !(option === "FrontSide" && (isConditional || !templateIsBackSide)) )
+                        .join(",");
                     const isPreChar = char === preChar;
 
-                    return (char.match(/[#^]/) ? [false, true] : [false]).map(closeBlock => {
+                    return (isConditional ? [false, true] : [false]).map(closeBlock => {
                         const completion = createCompletionItem(`{{${char}Field}}` + (closeBlock ? " ... {{/Field}}" : ""),
                                 vscode.CompletionItemKind.Snippet,
                                 undefined,
