@@ -128,6 +128,14 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
             context.triggerCharacter
         );
 
+        {
+            // Conditional completion
+            const completion = createCompletionItem("{{#Field}} {{/Field}}",
+                vscode.CompletionItemKind.Snippet);
+            completion.insertText = new vscode.SnippetString("{{#$1}}$0\n{{/$1}}");
+            completionList.items.push(completion);
+        }
+
         return {
             ...completionList,
             items: completionList.items.filter(item => item.kind !== vscode.CompletionItemKind.Text)
