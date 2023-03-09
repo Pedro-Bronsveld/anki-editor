@@ -137,22 +137,23 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
             const offset = document.offsetAt(position);
             const preChar = document.getText().substring(offset-1, offset);
             builtinCompletionList.items.push(...[
-                    { char: "#", detail: "If filled opening"}, 
-                    { char: "^", detail: "If empty opening"},
-                    { char: "/", detail: "Closing tag" }
+                    { char: "",  detail: "Anki template replacement"},
+                    { char: "#", detail: "Anki if filled opening tag"},
+                    { char: "^", detail: "Anki if empty opening tag"},
+                    { char: "/", detail: "Anki if block closing tag" }
                 ]
                 .flatMap(({char, detail}, index) => {
                     const options = fieldNames.join(",") || "Field";
                     const isPreChar = char === preChar;
 
-                    return (char === "/" ? [false] : [false, true]).map(closeBlock => {
+                    return (char.match(/[#^]/) ? [false, true] : [false]).map(closeBlock => {
                         const completion = createCompletionItem(`{{${char}Field}}` + (closeBlock ? " ... {{/Field}}" : ""),
                                 vscode.CompletionItemKind.Snippet,
                                 undefined,
                                 documentRange(document, offset - (isPreChar ? 1 : 0), offset)
                             );
-                        completion.insertText = new vscode.SnippetString("{{#${1|" + options + "|}}}" + (closeBlock ? "\n\t$0\n{{/${1|" + options + "|}}}" : "$0"));
-                        completion.detail = `${detail} ${closeBlock ? "and close block" : ""}.`;
+                        completion.insertText = new vscode.SnippetString("{{" + char + "${1|" + options + "|}}}" + (closeBlock ? "\n\t$0\n{{/${1|" + options + "|}}}" : "$0"));
+                        completion.detail = `${detail}${closeBlock ? " and close block" : ""}.`;
                         completion.preselect = isPreChar;
                         completion.sortText = `conditional-${closeBlock}${index}${char}`;
                         return completion;
