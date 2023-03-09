@@ -137,23 +137,24 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
             const offset = document.offsetAt(position);
             const preChar = document.getText().substring(offset-1, offset);
             builtinCompletionList.items.push(...[
-                    { char: "#", detail: "filled"}, 
-                    { char: "^", detail: "empty"}
+                    { char: "#", detail: "If filled opening"}, 
+                    { char: "^", detail: "If empty opening"},
+                    { char: "/", detail: "Closing tag" }
                 ]
-                .flatMap(({char, detail}) => {
+                .flatMap(({char, detail}, index) => {
                     const options = fieldNames.join(",") || "Field";
                     const isPreChar = char === preChar;
 
-                    return [false, true].map(closeTag => {
-                        const completion = createCompletionItem(`{{${char}Field}}` + (closeTag ? " ... {{/Field}}" : ""),
+                    return (char === "/" ? [false] : [false, true]).map(closeBlock => {
+                        const completion = createCompletionItem(`{{${char}Field}}` + (closeBlock ? " ... {{/Field}}" : ""),
                                 vscode.CompletionItemKind.Snippet,
                                 undefined,
                                 documentRange(document, offset - (isPreChar ? 1 : 0), offset)
                             );
-                        completion.insertText = new vscode.SnippetString("{{#${1|" + options + "|}}}" + (closeTag ? "\n\t$0\n{{/${1|" + options + "|}}}" : "$0"));
-                        completion.detail = `If ${detail} block.`;
+                        completion.insertText = new vscode.SnippetString("{{#${1|" + options + "|}}}" + (closeBlock ? "\n\t$0\n{{/${1|" + options + "|}}}" : "$0"));
+                        completion.detail = `${detail} ${closeBlock ? "and close block" : ""}.`;
                         completion.preselect = isPreChar;
-                        completion.sortText = `conditional-${closeTag}${char}`;
+                        completion.sortText = `conditional-${closeBlock}${index}${char}`;
                         return completion;
                     });
                     
