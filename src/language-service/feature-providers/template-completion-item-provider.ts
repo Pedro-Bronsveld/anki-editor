@@ -134,6 +134,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
         completionItemList.push(...builtinCompletionList.items);
 
         {
+            // Provide snippets for standard replacement and conditional replacement tags and blocks
             const offset = document.offsetAt(position);
             const preChar = document.getText().substring(offset-1, offset);
             builtinCompletionList.items.push(...[
