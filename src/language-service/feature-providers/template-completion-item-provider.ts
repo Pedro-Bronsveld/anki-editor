@@ -140,18 +140,23 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                     { char: "#", detail: "filled"}, 
                     { char: "^", detail: "empty"}
                 ]
-                .map(({char, detail}) => {
+                .flatMap(({char, detail}) => {
                     const options = fieldNames.join(",") || "Field";
                     const isPreChar = char === preChar;
-                    const completion = createCompletionItem(`{{${char}Field}} {{${char}Field}}`,
-                            vscode.CompletionItemKind.Snippet,
-                            undefined,
-                            documentRange(document, offset - (isPreChar ? 1 : 0), offset)
-                        );
-                    completion.insertText = new vscode.SnippetString("{{#${1|" + options + "|}}}\n\t$0\n{{/${1|" + options + "|}}}");
-                    completion.detail = `If ${detail} block.`;
-                    completion.preselect = isPreChar;
-                    return completion;
+
+                    return [false, true].map(closeTag => {
+                        const completion = createCompletionItem(`{{${char}Field}}` + (closeTag ? " ... {{/Field}}" : ""),
+                                vscode.CompletionItemKind.Snippet,
+                                undefined,
+                                documentRange(document, offset - (isPreChar ? 1 : 0), offset)
+                            );
+                        completion.insertText = new vscode.SnippetString("{{#${1|" + options + "|}}}" + (closeTag ? "\n\t$0\n{{/${1|" + options + "|}}}" : "$0"));
+                        completion.detail = `If ${detail} block.`;
+                        completion.preselect = isPreChar;
+                        completion.sortText = `conditional-${closeTag}${char}`;
+                        return completion;
+                    });
+                    
                 }
             ));            
         }
