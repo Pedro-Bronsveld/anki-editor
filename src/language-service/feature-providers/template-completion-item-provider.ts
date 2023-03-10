@@ -153,7 +153,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                     const options = optionFieldNames
                         .filter(option => !(option === "FrontSide" && (isConditional || !templateIsBackSide)) )
                         .join(",");
-                    const isPreChar = char === preChar;
+                    const isPreChar = char === preChar && preChar !== "";
 
                     return (isConditional ? [false, true] : [false]).map(closeBlock => {
                         const completion = createCompletionItem(`{{${char}Field}}` + (closeBlock ? " ... {{/Field}}" : ""),
