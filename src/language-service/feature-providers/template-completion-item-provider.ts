@@ -142,6 +142,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                 ).map(option => option.replace(/([,|])/g, "\\$1"));
             const offset = document.offsetAt(position);
             const preChar = document.getText().substring(offset-1, offset);
+            const isPreChar = preChar.match(/[#^/]/) !== null;
             builtinCompletionList.items.push(...[
                     { char: "",  detail: "Anki template replacement"},
                     { char: "#", detail: "Anki if filled opening tag"},
@@ -153,7 +154,6 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                     const options = optionFieldNames
                         .filter(option => !(option === "FrontSide" && (isConditional || !templateIsBackSide)) )
                         .join(",");
-                    const isPreChar = char === preChar && preChar !== "";
 
                     return (isConditional ? [false, true] : [false]).map(closeBlock => {
                         const completion = createCompletionItem(`{{${char}Field}}` + (closeBlock ? " ... {{/Field}}" : ""),
