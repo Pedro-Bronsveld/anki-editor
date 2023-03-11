@@ -59,7 +59,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                     ? documentRange(document, replacement.fieldSegment.start, replacement.fieldSegment.field.end)
                     : new vscode.Range(document.positionAt(replacement.fieldSegment.start), position);
                 completionItemList.push(...specialFieldsList
-                    .filter(specialField => !unavailableFieldNames.has(specialField.name))
+                    .filter(specialField => specialField.name !== "FrontSide" && !unavailableFieldNames.has(specialField.name))
                     .map(specialField => createCompletionItem(specialField.name, vscode.CompletionItemKind.Constant, "3", replaceRange, specialField.description)));
 
                 // Create completion items for field names
