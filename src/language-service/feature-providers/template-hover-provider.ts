@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { TEMPLATE_LANGUAGE_ID } from '../../constants';
-import { builtinFilters, specialFields, ttsOptions } from '../anki-builtin';
+import { builtinFilters, specialFields, ttsDefaultLanguage, ttsOptions } from '../anki-builtin';
 import { documentRange } from '../document-util';
 import { AstItemType, FilterArgumentKeyValue } from '../parser/ast-models';
 import { getItemAtOffset, inItem } from '../parser/ast-utils';
@@ -56,8 +56,7 @@ export default class TemplateHoverProvider extends LanguageFeatureProviderBase i
 
                     const languageArg = filterSegment.filter.arguments[0];
                     if (languageArg && languageArg.type === AstItemType.filterArgument && inItem(languageArg, offset)) {
-                        return new vscode.Hover(new vscode.MarkdownString("Code of the language that the tts command will use for speech conversion.\n\n" +
-                            "Use the `tts-voices` filter on a card template to display a list of available tts languages on a system."),
+                        return new vscode.Hover(new vscode.MarkdownString(ttsDefaultLanguage.description),
                             documentRange(document, languageArg.start, languageArg.end));
                     }
 

@@ -3,7 +3,7 @@ export interface BuiltIn {
     description: string;
 }
 
-const specialFieldsList: readonly BuiltIn[] = [
+export const specialFieldsList: readonly BuiltIn[] = [
     {
         name: "Card",
         description: "Contains the type name of the card template that this field is used in."
@@ -28,10 +28,10 @@ const specialFieldsList: readonly BuiltIn[] = [
     {
         name: "Tags",
         description: "Contains the names of the tags that are attached to the active card.\n\n" +
-            "If multiple tags are attached to a card, the tag names will be sepparated by spaces.\n\n" +
+            "If multiple tags are attached to a card, the tag names will be separated by a single space.\n\n" +
             "For example:\n" +
-            "- One tag: `tag_1`\n" +
-            "- Two tags: `tag_1 tag_2`"
+            "- One tag: `\"tag_1\"`\n" +
+            "- Two tags: `\"tag_1 tag_2\"`"
     },
     {
         name: "Type",
@@ -62,7 +62,7 @@ export const builtinFiltersList: readonly BuiltIn[] = [
     {
         name: "cloze-only",
         description: "When used in combination with the `tts` filter, only the deleted text will be read.\n\n" +
-            "Example: `{{tts en_US:cloze-only:Text}}`."
+            "Example: `{{tts en_US:cloze-only:Field}}`."
     },
     {
         name: "hint",
@@ -109,7 +109,7 @@ export interface TtsOption extends BuiltIn {
 export const ttsOptionsList: readonly TtsOption[] = [
     { 
         name: "voices",
-        description: "The 'voices' options is used to specify one or more voices that will be used for text-to-speech conversion.\n\n" +
+        description: "The `voices` options is used to specify one or more voices that will be used for text-to-speech conversion.\n\n" +
             "When multiple values are provided, each value must be sepparated by a comma.\n\n" +
             "Use the `tts-voices` filter on a card template to display a list of available voices on a system.",
         value: "Voice_Name",
@@ -121,7 +121,7 @@ export const ttsOptionsList: readonly TtsOption[] = [
     },
     { 
         name: "speed",
-        description: "The 'speed' option is used to specify the speed by which to speed up or slow down the spoken text as a decimal number.\n\n" +
+        description: "The `speed` option is used to specify the speed by which to speed up or slow down the spoken text as a decimal number.\n\n" +
             "By default, this is set to `1.0`.\n\n" +
             "For example: to increase the speed by 50%, a value of `1.5` can be set.",
         value: "1.0",
@@ -133,5 +133,10 @@ export const ttsOptionsList: readonly TtsOption[] = [
     }
 ];
 
-export const ttsOptions: Map<string, TtsOption> = 
-    new Map(ttsOptionsList.map(keyValueArg => [keyValueArg.name, keyValueArg]));
+export const ttsDefaultLanguage: BuiltIn = {
+    name: "en_US",
+    description: "Code of the language that the tts command will use for speech conversion.\n\n" +
+        "Use the `tts-voices` filter on a card template to display a list of available tts languages on a system."
+}
+
+export const ttsOptions: Map<string, TtsOption> = toMap(ttsOptionsList);

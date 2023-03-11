@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID } from '../../constants';
 import { uriPathToParts } from '../../note-types/uri-parser';
-import { builtinFiltersNames, specialFieldsNames, ttsOptionsList } from '../anki-builtin';
+import { builtinFilters, builtinFiltersList, builtinFiltersNames, specialFields, specialFieldsList, specialFieldsNames, ttsDefaultLanguage, ttsOptionsList } from '../anki-builtin';
 import AnkiModelDataProvider from '../anki-model-data-provider';
 import { documentRange } from '../document-util';
 import { AstItemType, FilterArgumentKeyValue } from '../parser/ast-models';
@@ -58,9 +58,9 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                 const replaceRange = replacement.fieldSegment.field
                     ? documentRange(document, replacement.fieldSegment.start, replacement.fieldSegment.field.end)
                     : new vscode.Range(document.positionAt(replacement.fieldSegment.start), position);
-                completionItemList.push(...specialFieldsNames
-                    .filter(specialField => !unavailableFieldNames.has(specialField))
-                    .map(specialField => createCompletionItem(specialField, vscode.CompletionItemKind.Constant, "3", replaceRange)));
+                completionItemList.push(...specialFieldsList
+                    .filter(specialField => !unavailableFieldNames.has(specialField.name))
+                    .map(specialField => createCompletionItem(specialField.name, vscode.CompletionItemKind.Constant, "3", replaceRange, specialField.description)));
 
                 // Create completion items for field names
                 completionItemList.push(...fieldNames
@@ -69,7 +69,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
 
                 // Show FrontSide suggestion only when in back side template
                 if(replacement.type === AstItemType.replacement && templateIsBackSide)
-                    completionItemList.push(createCompletionItem("FrontSide", vscode.CompletionItemKind.Reference, "2"));
+                    completionItemList.push(createCompletionItem("FrontSide", vscode.CompletionItemKind.Reference, "2", undefined, specialFields.get("FrontSide")?.description));
             }
             
             if (replacement.type === AstItemType.replacement ) {
@@ -82,7 +82,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                     if (filter.arguments.length === 0 || 
                         // tts language argument completion
                         (filter.arguments[0].type === AstItemType.filterArgumentKeyValue && offset <= filter.arguments[0].start)) {
-                        const completion = createCompletionItem("en_US", vscode.CompletionItemKind.Property, "1")
+                        const completion = createCompletionItem("en_US", vscode.CompletionItemKind.Property, "1", undefined, ttsDefaultLanguage.description)
                         const suffix = offset === filter.arguments[0]?.start ? " " : "";
                         completion.insertText = new vscode.SnippetString("${0:en_US}" + suffix);
                         completionItemList.push(completion);
@@ -95,8 +95,8 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                             .map(arg => arg.key.content));
                         completionItemList.push(...ttsOptionsList
                                 .filter(({ name: key, value }) => !usedOptions.has(key))
-                                .map(({ name: key, value }) => {
-                                const completion = createCompletionItem(key, vscode.CompletionItemKind.Property, "1");
+                                .map(({ name: key, value, description }) => {
+                                const completion = createCompletionItem(key, vscode.CompletionItemKind.Property, "1", undefined, description);
                                 const prefix = filterSegment.content[offset - filterSegment.start - 1] === " " ? "" : " ";
                                 completion.insertText = new vscode.SnippetString(prefix + key + "=${0:" + value + "}" + suffix);
                                 return completion;
@@ -109,12 +109,12 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                     // Create builtin filter suggestions, ending with colon if not already followed by one
                     const appendColon = !replacement.content.substring(offset - replacement.start).match(/^\s*(?=:)/);
                     const suffix = (appendColon ? ":" : "");
-                    completionItemList.push(...builtinFiltersNames.map(filterName =>
-                        createCompletionItem(filterName + suffix, vscode.CompletionItemKind.Function, "4")
+                    completionItemList.push(...builtinFiltersList.map(filter =>
+                        createCompletionItem(filter.name + suffix, vscode.CompletionItemKind.Function, "4", undefined, filter.description)
                     ));
     
                     // Suggest builtin tts filter as a snippet
-                    const ttsCompletion = createCompletionItem("tts en_US" + suffix, vscode.CompletionItemKind.Function, "4");
+                    const ttsCompletion = createCompletionItem("tts en_US" + suffix, vscode.CompletionItemKind.Function, "4", undefined, builtinFilters.get("tts")?.description);
                     ttsCompletion.insertText = new vscode.SnippetString("tts ${0:en_US}" + suffix);
                     completionItemList.push(ttsCompletion);
                 }
@@ -182,10 +182,13 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
 const createCompletionItem = (label: string | vscode.CompletionItemLabel,
         kind?: vscode.CompletionItemKind,
         sortText?: string,
-        range?: vscode.Range | { inserting: vscode.Range; replacing: vscode.Range }
+        range?: vscode.Range | { inserting: vscode.Range; replacing: vscode.Range },
+        documentationMarkdown?: string
     ): vscode.CompletionItem => {
     const completion = new vscode.CompletionItem(label, kind);
     completion.sortText = sortText;
     completion.range = range;
+    if (documentationMarkdown)
+        completion.documentation = new vscode.MarkdownString(documentationMarkdown);
     return completion;
 }
