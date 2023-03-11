@@ -138,7 +138,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
         const preChar = document.getText().substring(offset-1, offset);
         if (preChar.match(/[#^/{\s]/)){
             // Provide snippets for standard replacement and conditional replacement tags and blocks
-            const optionFieldNames = (fieldNames.length > 0 ? fieldNames.slice().sort() : ["Field"])
+            const optionFieldNames = (fieldNames.length > 0 ? fieldNames : ["Field"])
                 .concat(
                     specialFieldsNames.concat(templateIsBackSide ? "FrontSide" : []).sort()
                 ).map(option => option.replace(/([,|])/g, "\\$1"));
