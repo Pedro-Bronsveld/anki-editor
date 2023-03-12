@@ -9,16 +9,16 @@ export const escapeText = (rawText: string): string =>
         // Replace forward slashes with an escape character followed by a
         // space, a division character (unicode 0x2215), and another space.
         // This is a workaround to display text with forward slashes
-        // in the workspace file browser.
+        // in the VSCode file browser.
+        // This is necessary because note types and card names are allowed
+        // to contain forward slashes.
         .replace(/\//g, "\u200B \u2215 ");
 
 export const unescapeText = (escapedText: string): string =>
     escapedText
-        // Replace escaped division character with regular
-        // forward slash.
+        // Replace escaped division character with regular forward slash.
         .replace(/\u200B \u2215 /g, "/")
-        // Replace double escape characters with single
-        // escape characters.
+        // Replace double escape characters with single escape characters.
         .replace(/\u200B\u200B/g, "\u200B");
 
 // Handle a somewhat unrealistic edge case for card names.
