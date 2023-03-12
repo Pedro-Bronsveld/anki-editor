@@ -6,6 +6,10 @@ export const escapeText = (rawText: string): string =>
     rawText
         // Replace any escape character with a double escape character.
         .replace(/\u200B/g, "\u200B\u200B")
+        // Prefix any division symbol that's already in the raw text.
+        // This prevents it from being replaced with a forward slash when
+        // unescaping this text.
+        .replace(/\u2215/g, "\u200B\u2215")
         // Replace forward slashes with an escape character followed by a
         // space, a division character (unicode 0x2215), and another space.
         // This is a workaround to display text with forward slashes
@@ -18,6 +22,8 @@ export const unescapeText = (escapedText: string): string =>
     escapedText
         // Replace escaped division character with regular forward slash.
         .replace(/\u200B \u2215 /g, "/")
+        // Unescape division characters.
+        .replace(/\u200B\u2215/g, "\u2215")
         // Replace double escape characters with single escape characters.
         .replace(/\u200B\u200B/g, "\u200B");
 
