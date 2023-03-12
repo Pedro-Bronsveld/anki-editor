@@ -1,5 +1,4 @@
 import { invoke } from "@autoanki/anki-connect";
-import { ModelTemplates } from "@autoanki/anki-connect/dist/model";
 
 export const updateModelTemplates = async (modelName: string, cardName: string, side: "Front" | "Back", html: string): Promise<void> => {
     return await invoke({
@@ -12,7 +11,7 @@ export const updateModelTemplates = async (modelName: string, cardName: string, 
                     [cardName]: {
                         [side]: html
                     }
-                } as ModelTemplates
+                }
             }
         }
     }).then(result => {
