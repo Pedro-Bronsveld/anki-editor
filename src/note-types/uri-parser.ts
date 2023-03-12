@@ -13,6 +13,9 @@ export const uriPathToParts = (uri: vscode.Uri): string[] => {
             if (parts[2] && parts[3])
                 // unescape card name
                 parts[2] = unescapeCardName(parts[2]);
+            else if (parts[2])
+                // unescape child of note type, likely Styling.css
+                parts[2] = unescapeText(parts[2]);
         }
     }
 
@@ -26,9 +29,13 @@ export const partsToUri = (parts: string[]): vscode.Uri => {
         if (parts[1])
             // escape note type name
             resultParts[1] = escapeText(parts[1])
+
             if (parts[2] && parts[3])
                 // escape card name
                 resultParts[2] = escapeCardName(parts[2]);
+            else if (parts[2])
+                // escape child of note type, likely Styling.css
+                parts[2] = escapeText(parts[2]);
     }
 
     const path = resultParts.join("/");
