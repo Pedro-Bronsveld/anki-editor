@@ -1,7 +1,7 @@
 import { invoke } from "@autoanki/anki-connect";
 
 export const updateModelStyling = async (modelName: string, css: string): Promise<void> => {
-    return invoke({
+    return await invoke({
             action: "updateModelStyling",
             version: 6,
             request: {
