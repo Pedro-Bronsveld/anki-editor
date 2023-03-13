@@ -1,8 +1,6 @@
 import { TextEncoder } from "util";
 import * as vscode from "vscode";
-import { getModelNames } from "../anki-connect/get-model-names";
-import { getModelStyling } from "../anki-connect/get-model-styling";
-import { getModelTemplates } from "../anki-connect/get-model-templates";
+import { AnkiConnect } from "../anki-connect/anki-connect";
 import { TEMPLATE_EXTENSION } from "../constants";
 import Directory from "../models/directory";
 import { Entry } from "../models/entry";
@@ -10,13 +8,13 @@ import File from "../models/file";
 import { escapeText, escapeCardName } from "./escape-uri";
 import { uriPathToParts } from "./uri-parser";
 
-export const lookupNoteType = async (uri: vscode.Uri): Promise<Entry | undefined> => {
+export const lookupNoteType = async (uri: vscode.Uri, ankiConnect: AnkiConnect): Promise<Entry | undefined> => {
     const parts = uriPathToParts(uri).slice(1);
 
     if (parts.length === 0) {
         // Uri is root of note types folder, return list of note type directories
         console.log("fetching modelNames");
-        const modelNames = await getModelNames();
+        const modelNames = await ankiConnect.getModelNames();
 
         const rootDir = new Directory("");
         modelNames
@@ -32,7 +30,7 @@ export const lookupNoteType = async (uri: vscode.Uri): Promise<Entry | undefined
 
     if (parts.length === 1) {
         // Uri is a note type model, return list of card directories and stylesheet file
-        const modelTemplates = await getModelTemplates(modelName);
+        const modelTemplates = await ankiConnect.getModelTemplates(modelName);
 
         const noteTypeDir = new Directory(modelName);
         Object.keys(modelTemplates)
@@ -47,7 +45,7 @@ export const lookupNoteType = async (uri: vscode.Uri): Promise<Entry | undefined
     else if (parts.length === 2) {
         // Uri is a stylesheet
         if (cardName === "Styling.css")
-            return await getModelStyling(modelName, cardName);
+            return await ankiConnect.getModelStyling(modelName, cardName);
         
         // Uri is a directory with card templates
         const cardTemplateDir = new Directory(cardName);
@@ -66,7 +64,7 @@ export const lookupNoteType = async (uri: vscode.Uri): Promise<Entry | undefined
         if (side !== "Front" && side !== "Back")
             throw vscode.FileSystemError.FileNotFound(uri);
 
-        const modelTemplates = await getModelTemplates(modelName);
+        const modelTemplates = await ankiConnect.getModelTemplates(modelName);
         const card = modelTemplates[cardName];
         if (!card)
             throw vscode.FileSystemError.FileNotFound(uri);

@@ -34,7 +34,7 @@ export default class TemplateSymbolProvider extends LanguageFeatureProviderBase 
         // html symbols
         {
             const embeddedDocument = this.getEmbeddedByLanguage(document, "html");
-            console.log("symbols");
+            // console.log("symbols");
             if (!embeddedDocument)
                 return;
             

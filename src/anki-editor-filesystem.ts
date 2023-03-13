@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { AnkiConnect } from "./anki-connect/anki-connect";
 import Directory from "./models/directory";
 import { Entry } from "./models/entry";
 import File from "./models/file";
@@ -10,18 +11,20 @@ export class AnkiEditorFs implements vscode.FileSystemProvider {
     private _emitter = new vscode.EventEmitter<vscode.FileChangeEvent[]>();
     readonly onDidChangeFile: vscode.Event<vscode.FileChangeEvent[]> = this._emitter.event;
 
+    constructor(private ankiConnect: AnkiConnect) {}
+
     watch(uri: vscode.Uri, options: { readonly recursive: boolean; readonly excludes: readonly string[]; }): vscode.Disposable {
-        console.log("watch", uri.path);
+        // console.log("watch", uri.path);
         return new vscode.Disposable(() => { });
     }
 
     stat(uri: vscode.Uri): vscode.FileStat | Thenable<vscode.FileStat> {
-        console.log("stat", uri.path);
+        // console.log("stat", uri.path);
         return this._lookup(uri, false);
     }
 
     readDirectory(uri: vscode.Uri): Thenable<[string, vscode.FileType][]> {
-        console.log("readDirectory", uri.path);
+        // console.log("readDirectory", uri.path);
 
         return this._lookupAsDirectory(uri, false).then(entry => {
             const result: [string, vscode.FileType][] = [];
@@ -33,7 +36,7 @@ export class AnkiEditorFs implements vscode.FileSystemProvider {
     }
 
     createDirectory(uri: vscode.Uri): void | Thenable<void> {
-        console.log("createDirectory");
+        // console.log("createDirectory");
         throw vscode.FileSystemError.NoPermissions("Creating a directory is not supported by Anki.");
     }
 
@@ -67,7 +70,7 @@ export class AnkiEditorFs implements vscode.FileSystemProvider {
     }
 
     rename(oldUri: vscode.Uri, newUri: vscode.Uri, options: { readonly overwrite: boolean; }): void | Thenable<void> {
-        console.log("rename");
+        // console.log("rename");
         throw vscode.FileSystemError.NoPermissions("Anki note types, card templates and stylesheets can't be renamed from Visual Studio Code.");
     }
 
@@ -88,7 +91,7 @@ export class AnkiEditorFs implements vscode.FileSystemProvider {
         const topFolder = parts[0];
 
         if (topFolder === "Note Types")
-            return await lookupNoteType(uri);
+            return await lookupNoteType(uri, this.ankiConnect);
         
         return undefined;
     }

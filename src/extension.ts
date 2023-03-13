@@ -24,6 +24,7 @@ import TemplateDocumentFormattingEditProvider from './language-service/feature-p
 import TemplateDocumentRangeFormattingEditProvider from './language-service/feature-providers/template-document-range-formatting-edit-provider';
 import TemplateFoldingRangeProvider from './language-service/feature-providers/template-folding-range-provider';
 import AnkiModelDataProvider from './language-service/anki-model-data-provider';
+import { AnkiConnect } from './anki-connect/anki-connect';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -33,8 +34,18 @@ export function activate(context: vscode.ExtensionContext) {
 	// This line of code will only be executed once when your extension is activated
 	console.log('Congratulations, your extension "anki-editor" is now active!');
 
+	// Setup Anki-Connect class and cache handling
+	const ankiConnect = new AnkiConnect();
+	context.subscriptions.push(
+		vscode.window.onDidChangeWindowState(state => {
+			if (!state.focused) {
+				ankiConnect.clearCache();
+			}
+		})
+	);
+
 	// Create Anki Eidtor Filesystem
-	const ankiCardFs = new AnkiEditorFs();
+	const ankiCardFs = new AnkiEditorFs(ankiConnect);
 	context.subscriptions.push(
 			vscode.workspace.registerFileSystemProvider(ANKI_EDITOR_SCHEME_BASE, ankiCardFs, { isCaseSensitive: true })
 		);
@@ -46,7 +57,7 @@ export function activate(context: vscode.ExtensionContext) {
 		}));
 
 	// Register note type tree
-	const noteTypesProvider = new NoteTypesTreeProvider();
+	const noteTypesProvider = new NoteTypesTreeProvider(ankiConnect);
 	context.subscriptions.push(
 			vscode.window.registerTreeDataProvider("note-types-tree", noteTypesProvider)
 		);
@@ -65,7 +76,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// Language service features
 	const virtualDocumentProvider = new VirtualDocumentProvider();
-	const ankiModelDataProvider: AnkiModelDataProvider = new AnkiModelDataProvider();
+	const ankiModelDataProvider: AnkiModelDataProvider = new AnkiModelDataProvider(ankiConnect);
 	
 	const templateSemanticTokenProvider = new TemplateSemanticTokenProvider(virtualDocumentProvider);
 	const templateHoverProvider = new TemplateHoverProvider(virtualDocumentProvider);
