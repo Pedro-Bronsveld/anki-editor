@@ -14,37 +14,7 @@ export interface LanguageRegion {
 export const createVirtualUri = (languageId: string, fileExtension: string, originalUri: vscode.Uri) => 
     vscode.Uri.parse(`${ANKI_EDITOR_EMBEDDED_SCHEME}${languageId}${originalUri.path}.${fileExtension}`);
 
-/**
- * Extract a language id, file extension and content string from a given html document at a position.
- *
- * @param {vscode.TextDocument} document
- * @param {vscode.Position} position
- * @returns {EmbeddedContent}
- */
-export const getLanguageRegionAtPosition = (document: vscode.TextDocument, position: vscode.Position): LanguageRegion => {
-    const languageRegions = getLanguageRegions(document);
-    const offset = document.offsetAt(position);
-
-    const positionRegion = languageRegions.find(region => offset >= region.start && offset <= region.end)
-
-    if (!positionRegion)
-        return defaultLanguageRegion(document);
-
-    const resultRegion = combineLanguageRegionsById(languageRegions).find(region => region.languageId === positionRegion.languageId);
-    
-    return resultRegion ?? defaultLanguageRegion(document);
-
-}
-
-export const getLanguageRegionByLanguage = (document: vscode.TextDocument, languageId: string): LanguageRegion | undefined => {
-    const languageRegions = getLanguageRegions(document);
-
-    const combinedLanguageRegions = combineLanguageRegionsById(languageRegions);
-
-    return combinedLanguageRegions.find(region => region.languageId === languageId);
-}
-
-const getLanguageRegions = (document: vscode.TextDocument): LanguageRegion[] => {
+export const getLanguageRegions = (document: vscode.TextDocument): LanguageRegion[] => {
     const htmlLanguageService = getLanguageService();
     const documentText = document.getText();
     const languageRegions: LanguageRegion[] = [];
@@ -99,7 +69,7 @@ const getLanguageRegions = (document: vscode.TextDocument): LanguageRegion[] => 
     return languageRegions;
 }
 
-const combineLanguageRegionsById = (languageRegions: LanguageRegion[]): LanguageRegion[] => 
+export const combineLanguageRegionsById = (languageRegions: LanguageRegion[]): LanguageRegion[] => 
     Array.from(languageRegions.reduce((output, region) => {
         output.get(region.languageId)?.push(region) ?? output.set(region.languageId, [region]);
         return output;
@@ -114,7 +84,7 @@ const combineLanguageRegionsById = (languageRegions: LanguageRegion[]): Language
         end: regions[regions.length-1].end
     }));
 
-const defaultLanguageRegion = (document: vscode.TextDocument): LanguageRegion => {
+export const defaultLanguageRegion = (document: vscode.TextDocument): LanguageRegion => {
     const htmlContent = document.getText();
     return {
         languageId: "html",

@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { createVirtualUri, getLanguageRegionAtPosition, getLanguageRegionByLanguage, LanguageRegion } from '../embedded-document';
+import { combineLanguageRegionsById, createVirtualUri, defaultLanguageRegion, getLanguageRegions, LanguageRegion } from '../language-regions';
 import VirtualDocumentProvider from "../virtual-documents-provider";
 
 export default abstract class LanguageFeatureProviderBase {
@@ -7,7 +7,7 @@ export default abstract class LanguageFeatureProviderBase {
     constructor(protected virtualDocumentProvider: VirtualDocumentProvider) {}
 
     /**
-     * Gets the embedded contents of a given document and stores it in the VirtualDocumentProvider.
+     * Gets the embedded contents of a given document at a position and stores it in the VirtualDocumentProvider.
      *
      * @protected
      * @param {vscode.TextDocument} document
@@ -16,13 +16,25 @@ export default abstract class LanguageFeatureProviderBase {
      * @memberof TemplateBaseProvider
      */
     protected getEmbeddedByPosition(document: vscode.TextDocument, position: vscode.Position): EmbeddedDocument {
-        const languageRegion = getLanguageRegionAtPosition(document, position);
-
-        return this.toEmbeddedDocument(languageRegion, document.uri);
+        const languageRegions = getLanguageRegions(document);
+        const offset = document.offsetAt(position);
+    
+        const positionRegion = languageRegions.find(region => offset >= region.start && offset <= region.end)
+    
+        if (!positionRegion)
+            return this.toEmbeddedDocument(defaultLanguageRegion(document), document.uri);
+    
+        const resultRegion = combineLanguageRegionsById(languageRegions).find(region => region.languageId === positionRegion.languageId);
+        
+        return this.toEmbeddedDocument(resultRegion ?? defaultLanguageRegion(document), document.uri);
     }
 
     protected getEmbeddedByLanguage(document: vscode.TextDocument, languageId: string): EmbeddedDocument | undefined {
-        const languageRegion = getLanguageRegionByLanguage(document, languageId);
+        const languageRegions = getLanguageRegions(document);
+
+        const combinedLanguageRegions = combineLanguageRegionsById(languageRegions);
+
+        const languageRegion = combinedLanguageRegions.find(region => region.languageId === languageId);
 
         if (!languageRegion)
             return undefined;

@@ -19,7 +19,11 @@ export const createCachedFunction = <Func extends AnyFunction>(func: Func): Cach
     
     return Object.assign((...args: Parameters<Func>) => {
 
-        const key = args.join(",");
+        const key = args
+            .map(arg => typeof arg === "object"
+                ? JSON.stringify(arg)
+                : arg)
+            .join(",");
         const cachedResult = cache.get(key);
         if (cachedResult) {
             return cachedResult.value;
