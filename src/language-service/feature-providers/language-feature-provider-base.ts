@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import { combineLanguageRegionsById, createVirtualUri, defaultLanguageRegion, getLanguageRegions, LanguageRegion } from '../language-regions';
 import VirtualDocumentProvider, { EmbeddedDocument } from "../virtual-documents-provider";
 
 export default abstract class LanguageFeatureProviderBase {
