@@ -13,17 +13,18 @@ type CachedFunctionMethods<Func extends AnyFunction> =
     clearCacheWhere: (predicate: (entry: CachedEntry<Func>, key: string) => boolean) => void;
 }
 
-export const createCachedFunction = <Func extends AnyFunction>(func: Func): CachedFunction<Func> => {
+type CachedFunctionOptions<Func extends AnyFunction> = {
+    createKey?: (args: Parameters<Func>) => string,
+    cache?: Map<string, CachedEntry<Func>>
+}
 
-    const cache = new Map<string, CachedEntry<Func>>();
+export const createCachedFunction = <Func extends AnyFunction>(func: Func, options: CachedFunctionOptions<Func> = {}): CachedFunction<Func> => {
+
+    const cache = options.cache ?? new Map<string, CachedEntry<Func>>();
     
     return Object.assign((...args: Parameters<Func>) => {
 
-        const key = args
-            .map(arg => typeof arg === "object"
-                ? JSON.stringify(arg)
-                : arg)
-            .join(",");
+        const key = options.createKey?.(args) ?? args.join(",");
         const cachedResult = cache.get(key);
         if (cachedResult) {
             return cachedResult.value;

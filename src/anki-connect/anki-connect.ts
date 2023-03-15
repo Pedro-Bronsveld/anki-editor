@@ -1,4 +1,4 @@
-import { createCachedFunction } from "../utility/cached-function";
+import { createCachedFunction } from "../cache/cached-function";
 import { getModelFieldNames } from "./get-model-field-names";
 import { getModelNames } from "./get-model-names";
 import { getModelStyling } from "./get-model-styling";
