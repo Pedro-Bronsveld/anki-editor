@@ -14,5 +14,9 @@ export default class VirtualDocumentProvider implements vscode.TextDocumentConte
     clear() {
         this.documents.clear();
     };
+
+    deleteUri(uri: vscode.Uri) {
+        this.documents.delete(uri.toString());
+    }
     
 }

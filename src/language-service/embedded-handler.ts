@@ -47,13 +47,15 @@ export default class EmbeddedHandler {
                         this.tsProject.removeSourceFile(uriString);
                     cachedFunctions.forEach(cachedFunction => cachedFunction
                         .clearCacheWhere(({ args: [cachedDocument] }) => cachedDocument.uri.toString() === uriString)
-                    )
+                    );
+                    this.virtualDocumentProvider.deleteUri(uri);
                 }
             );
         else {
             // Clear all entries from caches
             cachedFunctions.forEach(cachedFunction => cachedFunction.clearCache());
             this.parseTemplateDocument.clearCache();
+            this.virtualDocumentProvider.clear();
         }
     }
     
