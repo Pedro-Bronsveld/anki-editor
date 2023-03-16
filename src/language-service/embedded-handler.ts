@@ -2,12 +2,19 @@ import * as vscode from 'vscode';
 import { createCachedFunction } from "../cache/cached-function";
 import { EmbeddedDocument } from '../models/embedded-document';
 import { combineLanguageRegionsById, createVirtualUri, defaultLanguageRegion, getLanguageRegions, LanguageRegion } from './language-regions';
+import { parseTemplateDocument } from './parser/template-parser';
 import VirtualDocumentProvider from "./virtual-documents-provider";
 
 export default class EmbeddedHandler {
 
     constructor(private virtualDocumentProvider: VirtualDocumentProvider) { }
 
+    public clearCache() {
+        this.getEmbeddedByPosition.clearCache();
+        this.getEmbeddedByLanguage.clearCache();
+        this.getLanguageRegions.clearCache();
+    }
+    
     /**
      * Gets the embedded contents of a given document at a position and stores it in the VirtualDocumentProvider.
      *
@@ -65,6 +72,10 @@ export default class EmbeddedHandler {
     private getLanguageRegions = createCachedFunction(getLanguageRegions, {
         cacheKey: (document) => `${document.version},${document.uri}`,
         onCacheMiss: (cachedFuncion, [document]) => cachedFuncion.clearCacheWhere(({ args: [entryDocument] }) => entryDocument.uri.toString() === document.uri.toString()),
+        maxSize: 10
+    });
+
+    public parseTemplateDocument = createCachedFunction(parseTemplateDocument, {
         maxSize: 10
     });
     

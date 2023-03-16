@@ -19,7 +19,7 @@ export default class TemplateFoldingRangeProvider extends LanguageFeatureProvide
             const embeddedDocument = this.getEmbeddedByLanguage(document, TEMPLATE_LANGUAGE_ID);
 
             if (embeddedDocument) {
-                const templateDocument = parseTemplateDocument(embeddedDocument.content);
+                const templateDocument = this.parseTemplateDocument(embeddedDocument.content);
                 
                 // Create folding ranges for linked conditional opening and closing tags
                 const conditionalFoldingRanges = templateDocument.replacements

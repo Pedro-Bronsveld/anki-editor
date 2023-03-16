@@ -56,7 +56,7 @@ export default class TemplateCodeActionProvider extends LanguageFeatureProviderB
                             if (diagnostic.code === DiagnosticCode.invalidField) {
                                 // Check if field is in a conditional tag, replace linked tag if it has one
                                 const offset = document.offsetAt(diagnostic.range.start);
-                                const templateDocument = parseTemplateDocument(embeddedDocument.content);
+                                const templateDocument = this.parseTemplateDocument(embeddedDocument.content);
                                 const replacement = getItemAtOffset(templateDocument.replacements, offset);
     
                                 if (replacement?.type !== AstItemType.replacement && replacement?.linkedTag?.fieldSegment.field) {

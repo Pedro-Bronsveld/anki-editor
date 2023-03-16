@@ -53,7 +53,7 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
         const templateEmbeddedDocument = this.getEmbeddedByLanguage(document, TEMPLATE_LANGUAGE_ID);
         if (templateEmbeddedDocument) {
             // anki template
-            const templateDocument = parseTemplateDocument(templateEmbeddedDocument.content);
+            const templateDocument = this.parseTemplateDocument(templateEmbeddedDocument.content);
 
             const validFields: Set<string> = new Set();
             const modelAvailable: boolean = document.uri.scheme === ANKI_EDITOR_SCHEME_BASE;

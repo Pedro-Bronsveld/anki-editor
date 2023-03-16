@@ -17,7 +17,7 @@ export default class TemplateHighlightsProvider extends LanguageFeatureProviderB
         
         if (embeddedDocument.languageId === TEMPLATE_LANGUAGE_ID) {
             // Anki template highlighting
-            const templateDocument = parseTemplateDocument(embeddedDocument.content);
+            const templateDocument = this.parseTemplateDocument(embeddedDocument.content);
             
             const offset = document.offsetAt(position);
             const replacement = getItemAtOffset(templateDocument.replacements, offset);

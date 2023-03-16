@@ -22,5 +22,7 @@ export default abstract class LanguageFeatureProviderBase {
     protected getEmbeddedByLanguage(document: vscode.TextDocument, languageId: string): EmbeddedDocument | undefined {
         return this.embeddedHandler.getEmbeddedByLanguage(document, languageId);
     }
+
+    protected parseTemplateDocument = this.embeddedHandler.parseTemplateDocument.bind(this.embeddedHandler);
     
 }

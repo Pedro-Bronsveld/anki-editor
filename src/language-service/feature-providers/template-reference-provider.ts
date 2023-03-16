@@ -15,7 +15,7 @@ export default class TemplateReferenceProvider extends LanguageFeatureProviderBa
 
         if (embeddedDocument.languageId === TEMPLATE_LANGUAGE_ID) {
 
-            const templateDocument = parseTemplateDocument(embeddedDocument.content);
+            const templateDocument = this.parseTemplateDocument(embeddedDocument.content);
 
             // Get field at trigger position
             const offset = document.offsetAt(position);
@@ -58,7 +58,7 @@ export default class TemplateReferenceProvider extends LanguageFeatureProviderBa
                 if (otherAnkiTemplate)
                     templateDocuments.push({
                         document: otherDocument,
-                        template: parseTemplateDocument(otherAnkiTemplate.content)
+                        template: this.parseTemplateDocument(otherAnkiTemplate.content)
                     });
             }
 

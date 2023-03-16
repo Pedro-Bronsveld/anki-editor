@@ -37,7 +37,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
 
         if (embeddedDocument.languageId === TEMPLATE_LANGUAGE_ID) {
 
-            const templateDocument = parseTemplateDocument(embeddedDocument.content);
+            const templateDocument = this.parseTemplateDocument(embeddedDocument.content);
 
             const offset = document.offsetAt(position);
             // Find template replacement at the trigger position

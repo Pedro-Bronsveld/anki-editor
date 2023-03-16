@@ -18,7 +18,7 @@ export default class TemplateSymbolProvider extends LanguageFeatureProviderBase 
             const embeddedDocument = this.getEmbeddedByLanguage(document, TEMPLATE_LANGUAGE_ID);
 
             if (embeddedDocument) {
-                const templateDocument = parseTemplateDocument(embeddedDocument.content);
+                const templateDocument = this.parseTemplateDocument(embeddedDocument.content);
 
                 // Create document symbols for top-level replacements (replacements without a parent conditional)
                 const templateDocumentSymbols = templateDocument.replacements

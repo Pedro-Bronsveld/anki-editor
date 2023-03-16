@@ -16,7 +16,7 @@ export default class TemplateRenameProvider extends LanguageFeatureProviderBase 
 
         if (embeddedDocument.languageId === TEMPLATE_LANGUAGE_ID) {
             // Anki template rename
-            const templateDocument = parseTemplateDocument(embeddedDocument.content);
+            const templateDocument = this.parseTemplateDocument(embeddedDocument.content);
 
             const offset = document.offsetAt(position);
             const replacement = getItemAtOffset(templateDocument.replacements, offset);
@@ -80,7 +80,7 @@ export default class TemplateRenameProvider extends LanguageFeatureProviderBase 
         
         if (embeddedDocument.languageId === TEMPLATE_LANGUAGE_ID) {
             // Anki template prepare rename
-            const templateDocument = parseTemplateDocument(embeddedDocument.content);
+            const templateDocument = this.parseTemplateDocument(embeddedDocument.content);
 
             const offset = document.offsetAt(position);
             const field = getFieldAtOffset(templateDocument.replacements, offset);

@@ -15,7 +15,7 @@ export default class TemplateHoverProvider extends LanguageFeatureProviderBase i
         
         if (embeddedDocument.languageId === TEMPLATE_LANGUAGE_ID) {
             // Anki template hover provider
-            const templateDocument = parseTemplateDocument(embeddedDocument.content);
+            const templateDocument = this.parseTemplateDocument(embeddedDocument.content);
             const offset = document.offsetAt(position);
             
             const replacement = getItemAtOffset(templateDocument.replacements, offset);
