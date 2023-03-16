@@ -4,7 +4,6 @@ import { RequiredProp } from '../../models/required-prop';
 import { documentRange } from '../document-util';
 import { AstItemType, Filter, FilterSegment } from '../parser/ast-models';
 import { getFiltersByName, getItemAtOffset, getMatchingStandardFields, inItem } from '../parser/ast-utils';
-import { parseTemplateDocument } from '../parser/template-parser';
 import LanguageFeatureProviderBase from './language-feature-provider-base';
 
 export default class TemplateHighlightsProvider extends LanguageFeatureProviderBase implements vscode.DocumentHighlightProvider {

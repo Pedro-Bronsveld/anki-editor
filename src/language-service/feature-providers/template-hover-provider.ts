@@ -4,7 +4,6 @@ import { builtinFilters, specialFields, ttsDefaultLanguage, ttsOptions } from '.
 import { documentRange } from '../document-util';
 import { AstItemType, FilterArgumentKeyValue } from '../parser/ast-models';
 import { getItemAtOffset, inItem } from '../parser/ast-utils';
-import { parseTemplateDocument } from '../parser/template-parser';
 import LanguageFeatureProviderBase from './language-feature-provider-base';
 
 export default class TemplateHoverProvider extends LanguageFeatureProviderBase implements vscode.HoverProvider {

@@ -3,7 +3,6 @@ import { getLanguageService, LanguageService, TextDocument, FoldingRangeKind } f
 import { TEMPLATE_LANGUAGE_ID } from '../../constants';
 import { RequiredProp } from '../../models/required-prop';
 import { AstItemType, ConditionalStart } from '../parser/ast-models';
-import { parseTemplateDocument } from '../parser/template-parser';
 import LanguageFeatureProviderBase from './language-feature-provider-base';
 
 export default class TemplateFoldingRangeProvider extends LanguageFeatureProviderBase implements vscode.FoldingRangeProvider {

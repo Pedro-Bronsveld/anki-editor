@@ -5,7 +5,6 @@ import { partsToUri, uriPathToParts } from '../../note-types/uri-parser';
 import { documentRange } from '../document-util';
 import { AstItemType, FilterSegment, TemplateDocument } from '../parser/ast-models';
 import { getItemAtOffset, inItem } from '../parser/ast-utils';
-import { parseTemplateDocument } from '../parser/template-parser';
 import LanguageFeatureProviderBase from './language-feature-provider-base';
 
 export default class TemplateReferenceProvider extends LanguageFeatureProviderBase implements vscode.ReferenceProvider {

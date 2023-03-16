@@ -9,7 +9,6 @@ import EmbeddedHandler from '../embedded-handler';
 import { findSimilarStartEnd } from '../find-similar';
 import { AstItemType } from '../parser/ast-models';
 import { getItemAtOffset, getUnavailableFieldNames } from '../parser/ast-utils';
-import { parseTemplateDocument } from '../parser/template-parser';
 import { isBackSide } from '../template-util';
 import LanguageFeatureProviderBase from './language-feature-provider-base';
 

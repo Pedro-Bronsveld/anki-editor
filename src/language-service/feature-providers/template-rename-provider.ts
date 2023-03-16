@@ -3,7 +3,6 @@ import { TEMPLATE_LANGUAGE_ID } from '../../constants';
 import { documentRange } from '../document-util';
 import { AstItemType } from '../parser/ast-models';
 import { getFieldAtOffset, getItemAtOffset, getMatchingStandardFields, inItem } from '../parser/ast-utils';
-import { parseTemplateDocument } from '../parser/template-parser';
 import LanguageFeatureProviderBase from './language-feature-provider-base';
 
 export default class TemplateRenameProvider extends LanguageFeatureProviderBase implements vscode.RenameProvider {

@@ -3,7 +3,6 @@ import LanguageFeatureProviderBase from './language-feature-provider-base';
 import { getCSSLanguageService, TextDocument as CssTextDocument } from 'vscode-css-languageservice';
 import { createProjectSync, Project, ts } from "@ts-morph/bootstrap";
 import { ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID } from '../../constants';
-import { parseTemplateDocument } from '../parser/template-parser';
 import { AstItemType } from '../parser/ast-models';
 import { specialFieldsNames, ttsOptionsList, ttsOptions } from '../anki-builtin';
 import { isBackSide } from '../template-util';

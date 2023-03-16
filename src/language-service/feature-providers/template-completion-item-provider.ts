@@ -7,7 +7,6 @@ import { documentRange } from '../document-util';
 import EmbeddedHandler from '../embedded-handler';
 import { AstItemType, FilterArgumentKeyValue } from '../parser/ast-models';
 import { getItemAtOffset, getUnavailableFieldNames, inItem } from '../parser/ast-utils';
-import { parseTemplateDocument } from '../parser/template-parser';
 import { isBackSide } from '../template-util';
 import LanguageFeatureProviderBase from './language-feature-provider-base';
 
