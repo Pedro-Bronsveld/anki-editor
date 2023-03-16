@@ -41,10 +41,14 @@ export default class EmbeddedHandler {
             // Clear only the given document from cache
             objectEntries(embeddedLanguages)
             .map(([languageId, fileExtension]) => createVirtualUri(languageId, fileExtension, document.uri))
-            .forEach(uri => cachedFunctions
-                .forEach(cachedFunction => cachedFunction
-                    .clearCacheWhere(({ args: [cachedDocument] }) => cachedDocument.uri.toString() === uri.toString())
-                )
+            .forEach(uri => {
+                    const uriString = uri.toString();
+                    if (uriString.endsWith(".js"))
+                        this.tsProject.removeSourceFile(uriString);
+                    cachedFunctions.forEach(cachedFunction => cachedFunction
+                        .clearCacheWhere(({ args: [cachedDocument] }) => cachedDocument.uri.toString() === uriString)
+                    )
+                }
             );
         else {
             // Clear all entries from caches
