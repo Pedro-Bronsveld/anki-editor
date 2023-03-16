@@ -17,7 +17,7 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
     private cssLanguageService: CSSLanguageService;
     private tsProject: Project;
     private tsLanguageService: ts.LanguageService;
-    private collection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection('anki');
+    private collection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection(TEMPLATE_LANGUAGE_ID);
 
     private severityMap = {
         [ts.DiagnosticCategory.Warning]: vscode.DiagnosticSeverity.Warning,

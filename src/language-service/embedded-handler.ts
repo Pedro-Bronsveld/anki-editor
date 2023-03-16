@@ -3,7 +3,10 @@ import * as vscode from 'vscode';
 import { getCSSLanguageService } from 'vscode-css-languageservice';
 import { createCachedFunction } from "../cache/cached-function";
 import { EmbeddedDocument } from '../models/embedded-document';
-import { combineLanguageRegionsById, createVirtualUri, defaultLanguageRegion, getLanguageRegions, LanguageRegion } from './language-regions';
+import { embeddedLanguages } from '../models/embedded-languages';
+import { objectEntries } from '../util/object-utilities';
+import { createVirtualUri } from './feature-providers/embedded-functions';
+import { combineLanguageRegionsById, defaultLanguageRegion, getLanguageRegions, LanguageRegion } from './language-regions';
 import { parseTemplateDocument } from './parser/template-parser';
 import VirtualDocumentProvider from "./virtual-documents-provider";
 
@@ -27,10 +30,27 @@ export default class EmbeddedHandler {
 
     }
     
-    public clearCache() {
-        this.getEmbeddedByPosition.clearCache();
-        this.getEmbeddedByLanguage.clearCache();
-        this.getLanguageRegions.clearCache();
+    public clearCache(document?: vscode.TextDocument) {
+        const cachedFunctions = [
+            this.getEmbeddedByPosition,
+            this.getEmbeddedByLanguage,
+            this.getLanguageRegions
+        ] as const;
+        
+        if (document)
+            // Clear only the given document from cache
+            objectEntries(embeddedLanguages)
+            .map(([languageId, fileExtension]) => createVirtualUri(languageId, fileExtension, document.uri))
+            .forEach(uri => cachedFunctions
+                .forEach(cachedFunction => cachedFunction
+                    .clearCacheWhere(({ args: [cachedDocument] }) => cachedDocument.uri.toString() === uri.toString())
+                )
+            );
+        else {
+            // Clear all entries from caches
+            cachedFunctions.forEach(cachedFunction => cachedFunction.clearCache());
+            this.parseTemplateDocument.clearCache();
+        }
     }
     
     /**

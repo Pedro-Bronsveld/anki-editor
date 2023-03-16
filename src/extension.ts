@@ -102,6 +102,13 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 
 	context.subscriptions.push(
+		vscode.workspace.onDidCloseTextDocument((document) => {
+			if (document.uri.scheme === ANKI_EDITOR_EMBEDDED_SCHEME_BASE)
+				embeddedHandler.clearCache(document);
+		})
+	);
+
+	context.subscriptions.push(
 		vscode.languages.registerDocumentSemanticTokensProvider(TEMPLATE_SELECTOR, templateSemanticTokenProvider, tsTokenLegend)
 	);
 

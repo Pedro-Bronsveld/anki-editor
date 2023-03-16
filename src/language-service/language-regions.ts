@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { getLanguageService, TokenType } from 'vscode-html-languageservice';
-import { ANKI_EDITOR_EMBEDDED_SCHEME, TEMPLATE_EXTENSION, TEMPLATE_LANGUAGE_ID } from '../constants';
+import { TEMPLATE_EXTENSION, TEMPLATE_LANGUAGE_ID } from '../constants';
 import { getReplacementMatches } from './parser/template-parser';
 
 export interface LanguageRegion {
@@ -10,9 +10,6 @@ export interface LanguageRegion {
     start: number;
     end: number;
 }
-
-export const createVirtualUri = (languageId: string, fileExtension: string, originalUri: vscode.Uri) => 
-    vscode.Uri.parse(`${ANKI_EDITOR_EMBEDDED_SCHEME}${languageId}${originalUri.path}.${fileExtension}`);
 
 export const getLanguageRegions = (document: vscode.TextDocument): LanguageRegion[] => {
     const htmlLanguageService = getLanguageService();
