@@ -6,7 +6,7 @@ import { getModelTemplates } from "./get-model-templates";
 import { updateModelStyling } from "./update-model-styling";
 import { updateModelTemplates } from "./update-model-templates";
 
-export class AnkiConnect {
+export default class AnkiConnect {
 
     public getModelNames = createCachedFunction(getModelNames);
     public getModelFieldNames = createCachedFunction(getModelFieldNames);

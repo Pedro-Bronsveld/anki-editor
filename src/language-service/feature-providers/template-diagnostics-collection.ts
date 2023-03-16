@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import LanguageFeatureProviderBase from './language-feature-provider-base';
 import { getCSSLanguageService, TextDocument as CssTextDocument } from 'vscode-css-languageservice';
-import VirtualDocumentProvider from '../virtual-documents-provider';
 import { createProjectSync, Project, ts } from "@ts-morph/bootstrap";
 import { ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID } from '../../constants';
 import { parseTemplateDocument } from '../parser/template-parser';
@@ -12,6 +11,7 @@ import AnkiModelDataProvider from '../anki-model-data-provider';
 import { uriPathToParts } from '../../note-types/uri-parser';
 import { DiagnosticCode } from '../diagnostic-codes';
 import { conditionalStartChar, getParentConditionals, getUnavailableFieldNames } from '../parser/ast-utils';
+import EmbeddedHandler from '../embedded-handler';
 
 export default class TemplateDiagnosticsProvider extends LanguageFeatureProviderBase {
 
@@ -27,8 +27,8 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
         [ts.DiagnosticCategory.Message]: vscode.DiagnosticSeverity.Information
     } as const;
 
-    constructor(virtualDocumentProvider: VirtualDocumentProvider, private ankiModelDataProvider: AnkiModelDataProvider) {
-        super(virtualDocumentProvider);
+    constructor(embeddedHandler: EmbeddedHandler, private ankiModelDataProvider: AnkiModelDataProvider) {
+        super(embeddedHandler);
 
         this.project = createProjectSync({
             useInMemoryFileSystem: true,

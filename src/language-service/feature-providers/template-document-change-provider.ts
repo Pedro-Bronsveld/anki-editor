@@ -2,14 +2,14 @@ import * as vscode from 'vscode';
 import { getLanguageService, LanguageService, TextDocument as HtmlLibTextDocument } from 'vscode-html-languageservice';
 import { TEMPLATE_LANGUAGE_ID } from '../../constants';
 import LanguageFeatureProviderBase from './language-feature-provider-base';
-import VirtualDocumentProvider from '../virtual-documents-provider';
+import EmbeddedHandler from '../embedded-handler';
 
 export default class TemplateDocumentChangeProvider extends LanguageFeatureProviderBase {
 
     private htmlLanguageService: LanguageService;
     
-    constructor(protected virtualDocumentProvider: VirtualDocumentProvider) {
-        super(virtualDocumentProvider);
+    constructor(protected embeddedHandler: EmbeddedHandler) {
+        super(embeddedHandler);
 
         this.htmlLanguageService = getLanguageService();
     }

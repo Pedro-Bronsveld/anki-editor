@@ -3,7 +3,6 @@
 import * as vscode from 'vscode';
 import { AnkiEditorFs } from './anki-editor-filesystem';
 import { ANKI_EDITOR_EMBEDDED_SCHEME_BASE, ANKI_EDITOR_SCHEME, ANKI_EDITOR_SCHEME_BASE, TEMPLATE_SELECTOR } from './constants';
-import { runHoverProviderDummy } from './language-service/hover-provider-dummy';
 import TemplateCompletionItemProvider from './language-service/feature-providers/template-completion-item-provider';
 import TemplateDefinitionProvider from './language-service/feature-providers/template-definition-provider';
 import TemplateDiagnosticsProvider from './language-service/feature-providers/template-diagnostics-collection';
@@ -24,7 +23,8 @@ import TemplateDocumentFormattingEditProvider from './language-service/feature-p
 import TemplateDocumentRangeFormattingEditProvider from './language-service/feature-providers/template-document-range-formatting-edit-provider';
 import TemplateFoldingRangeProvider from './language-service/feature-providers/template-folding-range-provider';
 import AnkiModelDataProvider from './language-service/anki-model-data-provider';
-import { AnkiConnect } from './anki-connect/anki-connect';
+import AnkiConnect from './anki-connect/anki-connect';
+import EmbeddedHandler from './language-service/embedded-handler';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -76,25 +76,26 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// Language service features
 	const virtualDocumentProvider = new VirtualDocumentProvider();
+	const embeddedHandler = new EmbeddedHandler(virtualDocumentProvider);
 	const ankiModelDataProvider: AnkiModelDataProvider = new AnkiModelDataProvider(ankiConnect);
 	
-	const templateSemanticTokenProvider = new TemplateSemanticTokenProvider(virtualDocumentProvider);
-	const templateHoverProvider = new TemplateHoverProvider(virtualDocumentProvider);
-	const templateCompletionItemProvider = new TemplateCompletionItemProvider(virtualDocumentProvider, ankiModelDataProvider);
-	const templateSignatureHelpProvider = new TemplateSignatureHelpProvider(virtualDocumentProvider);
-	const templateRenameProvider = new TemplateRenameProvider(virtualDocumentProvider);
-	const templateDiagnosticsProvider = new TemplateDiagnosticsProvider(virtualDocumentProvider, ankiModelDataProvider);
-	const templateDefinitionProvider = new TemplateDefinitionProvider(virtualDocumentProvider);
-	const templateHighlightsProvider = new TemplateHighlightsProvider(virtualDocumentProvider);
-	const templateSymbolProvider = new TemplateSymbolProvider(virtualDocumentProvider);
-	const templateDocumentChangeProvider = new TemplateDocumentChangeProvider(virtualDocumentProvider);
-	const templateTypeHierarchyProvider = new TemplateTypeHierarchyProvider(virtualDocumentProvider);
-	const templateReferenceProvider = new TemplateReferenceProvider(virtualDocumentProvider);
-	const templateCodeActionProvider = new TemplateCodeActionProvider(virtualDocumentProvider, ankiModelDataProvider);
-	const templateDocumentColorProvider = new TemplateDocumentColorProvider(virtualDocumentProvider);
-	const templateDocumentFormattingEditProvider = new TemplateDocumentFormattingEditProvider(virtualDocumentProvider);
-	const templateDocumentRangeFormattingEditProvider = new TemplateDocumentRangeFormattingEditProvider(virtualDocumentProvider);
-	const templateFoldingRangeProvider = new TemplateFoldingRangeProvider(virtualDocumentProvider);
+	const templateSemanticTokenProvider = new TemplateSemanticTokenProvider(embeddedHandler);
+	const templateHoverProvider = new TemplateHoverProvider(embeddedHandler);
+	const templateCompletionItemProvider = new TemplateCompletionItemProvider(embeddedHandler, ankiModelDataProvider);
+	const templateSignatureHelpProvider = new TemplateSignatureHelpProvider(embeddedHandler);
+	const templateRenameProvider = new TemplateRenameProvider(embeddedHandler);
+	const templateDiagnosticsProvider = new TemplateDiagnosticsProvider(embeddedHandler, ankiModelDataProvider);
+	const templateDefinitionProvider = new TemplateDefinitionProvider(embeddedHandler);
+	const templateHighlightsProvider = new TemplateHighlightsProvider(embeddedHandler);
+	const templateSymbolProvider = new TemplateSymbolProvider(embeddedHandler);
+	const templateDocumentChangeProvider = new TemplateDocumentChangeProvider(embeddedHandler);
+	const templateTypeHierarchyProvider = new TemplateTypeHierarchyProvider(embeddedHandler);
+	const templateReferenceProvider = new TemplateReferenceProvider(embeddedHandler);
+	const templateCodeActionProvider = new TemplateCodeActionProvider(embeddedHandler, ankiModelDataProvider);
+	const templateDocumentColorProvider = new TemplateDocumentColorProvider(embeddedHandler);
+	const templateDocumentFormattingEditProvider = new TemplateDocumentFormattingEditProvider(embeddedHandler);
+	const templateDocumentRangeFormattingEditProvider = new TemplateDocumentRangeFormattingEditProvider(embeddedHandler);
+	const templateFoldingRangeProvider = new TemplateFoldingRangeProvider(embeddedHandler);
 
 	context.subscriptions.push(
 		vscode.workspace.registerTextDocumentContentProvider(ANKI_EDITOR_EMBEDDED_SCHEME_BASE, virtualDocumentProvider)

@@ -1,4 +1,4 @@
-import { AnkiConnect } from "../anki-connect/anki-connect";
+import AnkiConnect from "../anki-connect/anki-connect";
 
 export default class AnkiModelDataProvider {
 

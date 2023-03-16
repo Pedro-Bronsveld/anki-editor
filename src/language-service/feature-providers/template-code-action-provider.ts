@@ -5,18 +5,18 @@ import { specialFieldsNames, ttsOptionsList } from '../anki-builtin';
 import AnkiModelDataProvider from '../anki-model-data-provider';
 import { DiagnosticCode } from '../diagnostic-codes';
 import { documentRange } from '../document-util';
+import EmbeddedHandler from '../embedded-handler';
 import { findSimilarStartEnd } from '../find-similar';
 import { AstItemType } from '../parser/ast-models';
 import { getItemAtOffset, getUnavailableFieldNames } from '../parser/ast-utils';
 import { parseTemplateDocument } from '../parser/template-parser';
 import { isBackSide } from '../template-util';
-import VirtualDocumentProvider from '../virtual-documents-provider';
 import LanguageFeatureProviderBase from './language-feature-provider-base';
 
 export default class TemplateCodeActionProvider extends LanguageFeatureProviderBase implements vscode.CodeActionProvider {
 
-    constructor(virtualDocumentProvider: VirtualDocumentProvider, private ankiModelDataProvider: AnkiModelDataProvider) {
-        super(virtualDocumentProvider);
+    constructor(embeddedHandler: EmbeddedHandler, private ankiModelDataProvider: AnkiModelDataProvider) {
+        super(embeddedHandler);
     }
     
     async provideCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection, context: vscode.CodeActionContext, token: vscode.CancellationToken): Promise<(vscode.CodeAction | vscode.Command)[] | null | undefined> {

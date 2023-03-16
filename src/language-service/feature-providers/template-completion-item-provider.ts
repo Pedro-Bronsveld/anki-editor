@@ -1,20 +1,20 @@
 import * as vscode from 'vscode';
 import { ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID } from '../../constants';
 import { uriPathToParts } from '../../note-types/uri-parser';
-import { builtinFilters, builtinFiltersList, builtinFiltersNames, specialFields, specialFieldsList, specialFieldsNames, ttsDefaultLanguage, ttsOptionsList } from '../anki-builtin';
+import { builtinFilters, builtinFiltersList, specialFields, specialFieldsList, specialFieldsNames, ttsDefaultLanguage, ttsOptionsList } from '../anki-builtin';
 import AnkiModelDataProvider from '../anki-model-data-provider';
 import { documentRange } from '../document-util';
+import EmbeddedHandler from '../embedded-handler';
 import { AstItemType, FilterArgumentKeyValue } from '../parser/ast-models';
 import { getItemAtOffset, getUnavailableFieldNames, inItem } from '../parser/ast-utils';
 import { parseTemplateDocument } from '../parser/template-parser';
 import { isBackSide } from '../template-util';
-import VirtualDocumentProvider from '../virtual-documents-provider';
 import LanguageFeatureProviderBase from './language-feature-provider-base';
 
 export default class TemplateCompletionItemProvider extends LanguageFeatureProviderBase implements vscode.CompletionItemProvider {
     
-    constructor(virtualDocumentProvider: VirtualDocumentProvider, private ankiModelDataProvider: AnkiModelDataProvider) {
-        super(virtualDocumentProvider);
+    constructor(embeddedHandler: EmbeddedHandler, private ankiModelDataProvider: AnkiModelDataProvider) {
+        super(embeddedHandler);
     }
     
     async provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext): Promise<vscode.CompletionItem[] | vscode.CompletionList<vscode.CompletionItem> | null | undefined> {        

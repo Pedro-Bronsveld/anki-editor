@@ -1,9 +1,10 @@
 import * as vscode from 'vscode';
-import VirtualDocumentProvider, { EmbeddedDocument } from "../virtual-documents-provider";
+import { EmbeddedDocument } from '../../models/embedded-document';
+import EmbeddedHandler from '../embedded-handler';
 
 export default abstract class LanguageFeatureProviderBase {
 
-    constructor(protected virtualDocumentProvider: VirtualDocumentProvider) {}
+    constructor(protected embeddedHandler: EmbeddedHandler) { }
 
     /**
      * Gets the embedded contents of a given document at a position and stores it in the VirtualDocumentProvider.
@@ -15,11 +16,11 @@ export default abstract class LanguageFeatureProviderBase {
      * @memberof TemplateBaseProvider
      */
     protected getEmbeddedByPosition(document: vscode.TextDocument, position: vscode.Position): EmbeddedDocument {
-        return this.virtualDocumentProvider.getEmbeddedByPosition(document, position);
+        return this.embeddedHandler.getEmbeddedByPosition(document, position);
     }
 
     protected getEmbeddedByLanguage(document: vscode.TextDocument, languageId: string): EmbeddedDocument | undefined {
-        return this.virtualDocumentProvider.getEmbeddedByLanguage(document, languageId);
+        return this.embeddedHandler.getEmbeddedByLanguage(document, languageId);
     }
     
 }

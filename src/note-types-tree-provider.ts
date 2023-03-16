@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { AnkiConnect } from './anki-connect/anki-connect';
+import AnkiConnect from './anki-connect/anki-connect';
 import { NoteTypeTreeItem, CardFolderTreeItem, CardTemplateTreeItem, CardStylingTreeItem, AnyNoteTypeItem } from './models/note-type-tree-items';
 
 export class NoteTypesTreeProvider implements vscode.TreeDataProvider<AnyNoteTypeItem> {

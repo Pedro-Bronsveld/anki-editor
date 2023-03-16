@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { AnkiConnect } from "./anki-connect/anki-connect";
+import AnkiConnect from "./anki-connect/anki-connect";
 import Directory from "./models/directory";
 import { Entry } from "./models/entry";
 import File from "./models/file";

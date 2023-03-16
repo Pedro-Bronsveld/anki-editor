@@ -1,6 +1,6 @@
 import { TextEncoder } from "util";
 import * as vscode from "vscode";
-import { AnkiConnect } from "../anki-connect/anki-connect";
+import AnkiConnect from "../anki-connect/anki-connect";
 import { TEMPLATE_EXTENSION } from "../constants";
 import Directory from "../models/directory";
 import { Entry } from "../models/entry";
