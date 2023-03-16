@@ -4,21 +4,14 @@ import { createProjectSync, Project, ts } from "@ts-morph/bootstrap";
 import EmbeddedHandler from '../embedded-handler';
 export default class TemplateSemanticTokenProvider extends LanguageFeatureProviderBase implements vscode.DocumentSemanticTokensProvider {
 
-    private project: Project;
+    private tsProject: Project;
     private tsLanguageService: ts.LanguageService;
 
     constructor(protected embeddedHandler: EmbeddedHandler) {
         super(embeddedHandler);
 
-        this.project = createProjectSync({
-            useInMemoryFileSystem: true,
-            compilerOptions: {
-                allowJs: true,
-                checkJs: true
-            }
-        });
-
-        this.tsLanguageService = this.project.getLanguageService();
+        this.tsProject = embeddedHandler.tsProject;
+        this.tsLanguageService = embeddedHandler.tsLanguageService;
     }
 
     async provideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SemanticTokens | null | undefined> {
@@ -30,7 +23,7 @@ export default class TemplateSemanticTokenProvider extends LanguageFeatureProvid
         
         const fileName = embeddedDocument.virtualUri.toString();
 
-        const jsSourceFile = this.project.createSourceFile(
+        const jsSourceFile = this.tsProject.createSourceFile(
             fileName,
             embeddedDocument.content,
             {
@@ -40,7 +33,7 @@ export default class TemplateSemanticTokenProvider extends LanguageFeatureProvid
         
         const classifications = this.tsLanguageService.getEncodedSemanticClassifications(fileName, { start: 0, length: embeddedDocument.content.length }, ts.SemanticClassificationFormat.TwentyTwenty);
 
-        this.project.removeSourceFile(jsSourceFile);
+        this.tsProject.removeSourceFile(jsSourceFile);
 
         const tokensBuilder = new vscode.SemanticTokensBuilder(tsTokenLegend);
         

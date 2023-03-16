@@ -1,10 +1,16 @@
 import * as vscode from 'vscode';
-import { getCSSLanguageService, TextDocument as CssTextDocument } from 'vscode-css-languageservice';
+import { TextDocument as CssTextDocument, LanguageService as CSSLanguageService } from 'vscode-css-languageservice';
+import EmbeddedHandler from '../embedded-handler';
 import LanguageFeatureProviderBase from './language-feature-provider-base';
 
 export default class TemplateDocumentColorProvider extends LanguageFeatureProviderBase implements vscode.DocumentColorProvider {
 
-    private cssLanguageService = getCSSLanguageService();
+    private cssLanguageService: CSSLanguageService;
+
+    constructor(embeddedHandler: EmbeddedHandler) {
+        super(embeddedHandler);
+        this.cssLanguageService = embeddedHandler.cssLanguageService;
+    }
     
     async provideDocumentColors(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.ColorInformation[] | null | undefined> {
         const embeddedDocument = this.getEmbeddedByLanguage(document, "css");

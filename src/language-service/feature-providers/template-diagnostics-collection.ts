@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import LanguageFeatureProviderBase from './language-feature-provider-base';
-import { getCSSLanguageService, TextDocument as CssTextDocument } from 'vscode-css-languageservice';
-import { createProjectSync, Project, ts } from "@ts-morph/bootstrap";
+import { TextDocument as CssTextDocument, LanguageService as CSSLanguageService } from 'vscode-css-languageservice';
+import { Project, ts } from "@ts-morph/bootstrap";
 import { ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID } from '../../constants';
 import { AstItemType } from '../parser/ast-models';
 import { specialFieldsNames, ttsOptionsList, ttsOptions } from '../anki-builtin';
@@ -14,8 +14,8 @@ import EmbeddedHandler from '../embedded-handler';
 
 export default class TemplateDiagnosticsProvider extends LanguageFeatureProviderBase {
 
-    private cssLanguageService = getCSSLanguageService();
-    private project: Project;
+    private cssLanguageService: CSSLanguageService;
+    private tsProject: Project;
     private tsLanguageService: ts.LanguageService;
     private collection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection('anki');
 
@@ -29,15 +29,9 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
     constructor(embeddedHandler: EmbeddedHandler, private ankiModelDataProvider: AnkiModelDataProvider) {
         super(embeddedHandler);
 
-        this.project = createProjectSync({
-            useInMemoryFileSystem: true,
-            compilerOptions: {
-                allowJs: true,
-                checkJs: true
-            }
-        });
-
-        this.tsLanguageService = this.project.getLanguageService();
+        this.tsProject = embeddedHandler.tsProject;
+        this.tsLanguageService = embeddedHandler.tsLanguageService;
+        this.cssLanguageService = embeddedHandler.cssLanguageService;
     }
     
     async updateDiagnostics(document: vscode.TextDocument): Promise<void> {
@@ -314,7 +308,7 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
             // javascript
             const fileName = jsEmbeddedDocument.virtualUri.toString();
             
-            const jsSourceFile = this.project.createSourceFile(
+            const jsSourceFile = this.tsProject.createSourceFile(
                 fileName,
                 jsEmbeddedDocument.content,
                 {
@@ -336,7 +330,7 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
 
             allDiagnostics.push(...transformedSyntacticDiagnostics);
 
-            this.project.removeSourceFile(jsSourceFile);
+            this.tsProject.removeSourceFile(jsSourceFile);
             
         }
 

@@ -1,4 +1,6 @@
+import { createProjectSync, Project, ts } from '@ts-morph/bootstrap';
 import * as vscode from 'vscode';
+import { getCSSLanguageService } from 'vscode-css-languageservice';
 import { createCachedFunction } from "../cache/cached-function";
 import { EmbeddedDocument } from '../models/embedded-document';
 import { combineLanguageRegionsById, createVirtualUri, defaultLanguageRegion, getLanguageRegions, LanguageRegion } from './language-regions';
@@ -7,8 +9,24 @@ import VirtualDocumentProvider from "./virtual-documents-provider";
 
 export default class EmbeddedHandler {
 
-    constructor(private virtualDocumentProvider: VirtualDocumentProvider) { }
+    public readonly cssLanguageService = getCSSLanguageService();
+    public readonly tsProject: Project;
+    public readonly tsLanguageService: ts.LanguageService;
 
+    constructor(private virtualDocumentProvider: VirtualDocumentProvider) {
+
+        this.tsProject = createProjectSync({
+            useInMemoryFileSystem: true,
+            compilerOptions: {
+                allowJs: true,
+                checkJs: true
+            }
+        });
+
+        this.tsLanguageService = this.tsProject.getLanguageService();
+
+    }
+    
     public clearCache() {
         this.getEmbeddedByPosition.clearCache();
         this.getEmbeddedByLanguage.clearCache();
