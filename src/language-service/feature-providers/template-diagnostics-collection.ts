@@ -262,6 +262,17 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                                     : "content inside this conditional block will never be visible."),
                                 undefined,
                                 vscode.DiagnosticSeverity.Warning));
+                            
+                            if (replacementConditionalChar !== parentConditionalChar && replacement.linkedTag) {
+                                // Mark content of conditional block as dead code using a diagnostic with tag Unnecessary.
+                                const deadCodeDiagnostic = createDiagnostic(document, replacement.end, replacement.linkedTag.start,
+                                    `This content will never be visible because it's inside a conditional ${replacementConditionalChar} block nested inside a conditional ${parentConditionalChar} ` +
+                                    "block with the same name.",
+                                    undefined,
+                                    vscode.DiagnosticSeverity.Hint);
+                                deadCodeDiagnostic.tags = [vscode.DiagnosticTag.Unnecessary];
+                                allDiagnostics.push(deadCodeDiagnostic);
+                            }
                         }
                     }
 
