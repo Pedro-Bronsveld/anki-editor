@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import { getCSSLanguageService } from 'vscode-css-languageservice';
 import { createCachedFunction } from "../cache/cached-function";
 import { EmbeddedDocument } from '../models/embedded-document';
-import { embeddedLanguages } from '../models/embedded-languages';
+import { embeddedLanguages, LanguageId } from '../models/embedded-languages';
 import { objectEntries } from '../util/object-utilities';
 import { createVirtualUri } from './feature-providers/embedded-functions';
 import { combineLanguageRegionsById, defaultLanguageRegion, getLanguageRegions, LanguageRegion } from './language-regions';
@@ -86,7 +86,7 @@ export default class EmbeddedHandler {
         maxSize: 10
     });
     
-    public getEmbeddedByLanguage = createCachedFunction((document: vscode.TextDocument, languageId: string): EmbeddedDocument | undefined => {
+    public getEmbeddedByLanguage = createCachedFunction((document: vscode.TextDocument, languageId: LanguageId): EmbeddedDocument | undefined => {
         const languageRegions = this.getLanguageRegions(document);
 
         const combinedLanguageRegions = combineLanguageRegionsById(languageRegions);

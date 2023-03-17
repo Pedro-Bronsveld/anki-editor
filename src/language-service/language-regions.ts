@@ -1,10 +1,11 @@
 import * as vscode from 'vscode';
 import { getLanguageService, TokenType } from 'vscode-html-languageservice';
 import { TEMPLATE_EXTENSION, TEMPLATE_LANGUAGE_ID } from '../constants';
+import type { LanguageId } from '../models/embedded-languages';
 import { getReplacementMatches } from './parser/template-parser';
 
 export interface LanguageRegion {
-    languageId: string;
+    languageId: LanguageId;
     fileExtension: string;
     content: string;
     start: number;
@@ -70,8 +71,8 @@ export const combineLanguageRegionsById = (languageRegions: LanguageRegion[]): L
     Array.from(languageRegions.reduce((output, region) => {
         output.get(region.languageId)?.push(region) ?? output.set(region.languageId, [region]);
         return output;
-    }, new Map<string, LanguageRegion[]>()))
-    .map<LanguageRegion>(([languageId, regions]) => 
+    }, new Map<LanguageId, LanguageRegion[]>()))
+    .map<LanguageRegion>(([languageId, regions]) =>
     ({
         languageId,
         fileExtension: regions[0].fileExtension,

@@ -6,3 +6,5 @@ export const embeddedLanguages = {
     "javascript": "js",
     [TEMPLATE_LANGUAGE_ID]: "template.anki"
 } as const;
+
+export type LanguageId = keyof typeof embeddedLanguages;

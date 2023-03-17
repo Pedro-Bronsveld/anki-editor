@@ -1,7 +1,8 @@
 import * as vscode from 'vscode';
+import { LanguageId } from '../models/embedded-languages';
 
 export type EmbeddedDocument = {
-    languageId: string,
+    languageId: LanguageId,
     content: string,
     virtualUri: vscode.Uri
 }

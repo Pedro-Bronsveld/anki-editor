@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { EmbeddedDocument } from '../../models/embedded-document';
+import { LanguageId } from '../../models/embedded-languages';
 import EmbeddedHandler from '../embedded-handler';
 
 export default abstract class LanguageFeatureProviderBase {
@@ -19,7 +20,7 @@ export default abstract class LanguageFeatureProviderBase {
         return this.embeddedHandler.getEmbeddedByPosition(document, position);
     }
 
-    protected getEmbeddedByLanguage(document: vscode.TextDocument, languageId: string): EmbeddedDocument | undefined {
+    protected getEmbeddedByLanguage(document: vscode.TextDocument, languageId: LanguageId): EmbeddedDocument | undefined {
         return this.embeddedHandler.getEmbeddedByLanguage(document, languageId);
     }
 
