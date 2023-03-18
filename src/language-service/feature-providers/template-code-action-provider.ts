@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID } from '../../constants';
 import { uriPathToParts } from '../../note-types/uri-parser';
-import { specialFieldsNames, ttsOptionsList } from '../anki-builtin';
+import { builtinFiltersNames, specialFieldsNames, ttsOptionsNames } from '../anki-builtin';
 import AnkiModelDataProvider from '../anki-model-data-provider';
 import { DiagnosticCode } from '../diagnostic-codes';
 import { documentRange } from '../document-util';
@@ -47,6 +47,7 @@ export default class TemplateCodeActionProvider extends LanguageFeatureProviderB
                         return createRemovalCodeAction(document, diagnostic.code, diagnostic.range, [...diagnosticContent.matchAll(/:/g)].length > 1);
                     case DiagnosticCode.invalidField:
                     case DiagnosticCode.invalidTtsOption:
+                    case DiagnosticCode.invalidFilterName:
                         {
                             // Ranges to replace invalid value
                             const replaceRanges: vscode.Range[] = [diagnostic.range];
@@ -74,7 +75,7 @@ export default class TemplateCodeActionProvider extends LanguageFeatureProviderB
                             // Replace 
                             return findSimilarStartEnd(diagnostic.code === DiagnosticCode.invalidField
                                     ? subFieldNames
-                                    : ttsOptionsList.map(arg => arg.name),
+                                    : nameReplacements[diagnostic.code],
                                 diagnosticContent.toLowerCase(), false)
                                 .map(similarValue => {
                                     const workspaceEdit = new vscode.WorkspaceEdit();
@@ -164,6 +165,11 @@ const createRemovalCodeAction = (
     workspaceEdit.delete(document.uri, range);
     return createCodeAction(`Remove invalid ${isMultiple ? removalName[code].multiple : removalName[code].single}`, workspaceEdit);
 }
+
+const nameReplacements = {
+    [DiagnosticCode.invalidTtsOption]: ttsOptionsNames,
+    [DiagnosticCode.invalidFilterName]: builtinFiltersNames
+} as const
 
 const removalName = {
     [DiagnosticCode.invalidSpace]: {

@@ -1,4 +1,4 @@
-export const findSimilar = (options: string[], item: string, fromStart: boolean = true, matchCase: boolean = true): string[] => {
+export const findSimilar = (options: readonly string[], item: string, fromStart: boolean = true, matchCase: boolean = true): string[] => {
     let partial: string[] = [...options];
     let output: string[] = [];
     for (let i = 1; i <= item.length; i++) {
@@ -23,7 +23,7 @@ export const findSimilar = (options: string[], item: string, fromStart: boolean 
     return output;
 }
 
-export const findSimilarStartEnd = (options: string[], item: string, matchCase: boolean = true): string[] => {
+export const findSimilarStartEnd = (options: readonly string[], item: string, matchCase: boolean = true): string[] => {
     const similarStart = findSimilar(options, item, true, matchCase);
     const similarStartSet = new Set(similarStart);
     const similarEnd = findSimilar(options.filter(option => !similarStartSet.has(option)), item, false, matchCase);

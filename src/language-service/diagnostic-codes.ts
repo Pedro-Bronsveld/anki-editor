@@ -6,7 +6,8 @@ export enum DiagnosticCode {
     invalidTtsOption = 5,
     invalidTtsOptionValue = 6,
     invalidFilter = 7,
-    missingClosingTag = 8,
-    missingOpeningTag = 9,
-    missingTtsLanguageArg = 10
+    invalidFilterName = 8,
+    missingClosingTag = 9,
+    missingOpeningTag = 10,
+    missingTtsLanguageArg = 11
 }

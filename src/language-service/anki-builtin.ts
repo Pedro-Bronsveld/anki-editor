@@ -139,4 +139,5 @@ export const ttsDefaultLanguage: BuiltIn = {
         "Use the `tts-voices` filter on a card template to display a list of available tts languages on a system."
 }
 
-export const ttsOptions: Map<string, TtsOption> = toMap(ttsOptionsList);
+export const ttsOptions = toMap(ttsOptionsList);
+export const ttsOptionsNames = toNames(ttsOptionsList);

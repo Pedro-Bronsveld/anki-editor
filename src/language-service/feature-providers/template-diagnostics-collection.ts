@@ -4,7 +4,7 @@ import { TextDocument as CssTextDocument, LanguageService as CSSLanguageService 
 import { Project, ts } from "@ts-morph/bootstrap";
 import { ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID } from '../../constants';
 import { AstItemType } from '../parser/ast-models';
-import { specialFieldsNames, ttsOptionsList, ttsOptions } from '../anki-builtin';
+import { specialFieldsNames, ttsOptionsList, ttsOptions, builtinFiltersNames } from '../anki-builtin';
 import { isBackSide } from '../template-util';
 import AnkiModelDataProvider from '../anki-model-data-provider';
 import { uriPathToParts } from '../../note-types/uri-parser';
@@ -123,6 +123,14 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                     
                     for (const [i, filterSegment] of replacement.filterSegments.entries()) {
 
+                        const { filter } = filterSegment;
+                        // Check if filter name exists
+                        if(filter && !builtinFiltersNames.includes(filter.content)) {
+                            allDiagnostics.push(createDiagnostic(document, filter.start, filter.end,
+                                `'${filter.content}' is not a built-in filter.`,
+                                DiagnosticCode.invalidFilterName));
+                        }
+
                         // Check for invalid spacing at the start of filter segment
                         const startSpaceMatch = filterSegment.content.match(/^\s+/);
                         if (i > 0 && startSpaceMatch)
@@ -136,9 +144,8 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                             allDiagnostics.push(matchToDiagnostic(document, endSpaceMatch, filterSegment.end - endSpaceMatch[0].length,
                                 "Filters can't end with a space, tab or new line character.",
                                 DiagnosticCode.invalidSpace));
-                        
+                                
                         // Diagnostics for tts filter
-                        const { filter } = filterSegment;
                         if (filter?.content === "tts") {
                             const arg0 = filter.arguments[0];
 

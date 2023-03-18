@@ -21,14 +21,19 @@ export default class AnkiConnect {
 
     public getModelNames = createCachedFunction(() =>
         getModelNames(this.origin));
+        
     public getModelFieldNames = createCachedFunction((modelName: string) =>
         getModelFieldNames(modelName, this.origin));
+
     public getModelTemplates = createCachedFunction((modelName: string) =>
         getModelTemplates(modelName, this.origin));
+
     public getModelStyling = createCachedFunction((modelName: string, cardName: string) =>
         getModelStyling(modelName, cardName, this.origin));
+
     public updateModelTemplates = (modelName: string, cardName: string, side: Side, html: string) =>
         updateModelTemplates(modelName, cardName, side, html, this.origin);
+
     public updateModelStyling = (modelName: string, css: string) =>
         updateModelStyling(modelName, css, this.origin);
 
