@@ -169,7 +169,7 @@ const createRemovalCodeAction = (
 
 const nameReplacements = {
     [DiagnosticCode.invalidTtsOption]: () => ttsOptionsNames,
-    [DiagnosticCode.invalidFilterName]: () => getExtendedFilterNames()
+    [DiagnosticCode.invalidFilterName]: getExtendedFilterNames
 } as const
 
 const removalName = {

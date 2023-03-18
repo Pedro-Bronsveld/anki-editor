@@ -25,11 +25,11 @@ export const getCustomFiltersList = () => getCustomFilterNames().map<BuiltIn>(fi
     description: "Custom field defined in anki-editor extension settings."
 }));
 
-export const getExtendedSpecialFieldsList = () => [...getCustomFieldsList(), ...specialFieldsList];
-export const getExtendedFiltersList = () => [...getCustomFiltersList(), ...builtinFiltersList];
+export const getExtendedSpecialFieldsList = () => specialFieldsList.concat(getCustomFieldsList());
+export const getExtendedFiltersList = () => builtinFiltersList.concat(getCustomFiltersList());
 
 export const getExtendedSpecialFields = () => toMap(getExtendedSpecialFieldsList());
 export const getExtendedFilters = () => toMap(getExtendedFiltersList());
 
-export const getExtendedSpecialFieldNames = () => [...getCustomFieldNames(), ...specialFieldsNames];
-export const getExtendedFilterNames = () => [...getCustomFilterNames(), ...builtinFiltersNames];
+export const getExtendedSpecialFieldNames = () => specialFieldsNames.concat(getCustomFieldNames());
+export const getExtendedFilterNames = () => builtinFiltersNames.concat(getCustomFilterNames());
