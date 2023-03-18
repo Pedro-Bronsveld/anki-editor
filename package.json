@@ -100,10 +100,22 @@
       "title": "Anki Editor",
       "properties": {
         "anki-editor.origin": {
+          "title": "Anki-Connect Origin",
           "type": "string",
           "default": "http://127.0.0.1:8765",
-          "description": "Url that Anki-Connect can be reached at.",
-          "title": "Anki-Connect Origin"
+          "description": "Url that Anki-Connect can be reached at."
+        },
+        "anki-editor.invalidFieldDiagnostics": {
+          "title": "Invalid Field Diagnostics",
+          "type": "boolean",
+          "default": true,
+          "description": "Show errors for field names that are not part of the note type."
+        },
+        "anki-editor.invalidFilterDiagnostics": {
+          "title": "Invalid Field Diagnostics",
+          "type": "boolean",
+          "default": true,
+          "description": "Show errors for filter names that are not built into Anki."
         }
       }
     }

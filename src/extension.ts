@@ -2,7 +2,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import { AnkiEditorFs } from './anki-editor-filesystem';
-import { ANKI_EDITOR_EMBEDDED_SCHEME_BASE, ANKI_EDITOR_SCHEME, ANKI_EDITOR_SCHEME_BASE, TEMPLATE_SELECTOR } from './constants';
+import { ANKI_EDITOR_EMBEDDED_SCHEME_BASE, ANKI_EDITOR_SCHEME, ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID, TEMPLATE_SELECTOR } from './constants';
 import TemplateCompletionItemProvider from './language-service/feature-providers/template-completion-item-provider';
 import TemplateDefinitionProvider from './language-service/feature-providers/template-definition-provider';
 import TemplateDiagnosticsProvider from './language-service/feature-providers/template-diagnostics-collection';
@@ -25,6 +25,7 @@ import TemplateFoldingRangeProvider from './language-service/feature-providers/t
 import AnkiModelDataProvider from './language-service/anki-model-data-provider';
 import AnkiConnect from './anki-connect/anki-connect';
 import EmbeddedHandler from './language-service/embedded-handler';
+import { updateAllDiagnostics } from './language-service/run-diagnostics';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -96,11 +97,12 @@ export function activate(context: vscode.ExtensionContext) {
 	const templateDocumentFormattingEditProvider = new TemplateDocumentFormattingEditProvider(embeddedHandler);
 	const templateDocumentRangeFormattingEditProvider = new TemplateDocumentRangeFormattingEditProvider(embeddedHandler);
 	const templateFoldingRangeProvider = new TemplateFoldingRangeProvider(embeddedHandler);
-
+	
 	context.subscriptions.push(
 		vscode.workspace.onDidChangeConfiguration((event) => {
 			if (event.affectsConfiguration("anki-editor")) {
 				embeddedHandler.clearCache();
+				updateAllDiagnostics(templateDiagnosticsProvider);
 			}
 		})
 	);
@@ -146,6 +148,12 @@ export function activate(context: vscode.ExtensionContext) {
 			templateDiagnosticsProvider.updateDiagnostics(editor.document);
 		}
 	}));
+
+	context.subscriptions.push(vscode.workspace.onDidOpenTextDocument(document => {
+		if (document.languageId === TEMPLATE_LANGUAGE_ID)
+			templateDiagnosticsProvider.updateDiagnostics(document);
+	}));
+	
 	context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(event => {
 			templateDiagnosticsProvider.updateDiagnostics(event.document);
 	}));

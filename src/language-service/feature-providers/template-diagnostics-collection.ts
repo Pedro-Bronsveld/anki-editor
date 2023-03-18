@@ -48,6 +48,8 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
             // anki template
             const templateDocument = this.parseTemplateDocument(templateEmbeddedDocument.content);
 
+            const config = vscode.workspace.getConfiguration("anki-editor");
+
             const validFields: Set<string> = new Set();
             const modelAvailable: boolean = document.uri.scheme === ANKI_EDITOR_SCHEME_BASE;
             let modelName = "";
@@ -80,7 +82,7 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                     allDiagnostics.push(createDiagnostic(document, replacement.fieldSegment.start, replacement.fieldSegment.end,
                         "Missing field name."));
                 }
-                else if (modelAvailable && field && !validFields.has(field.content)) {
+                else if (config.get("invalidFieldDiagnostics") && modelAvailable && field && !validFields.has(field.content)) {
                     // Provide diagnostics based on field names from model
                     allDiagnostics.push(createDiagnostic(document, field.start, field.end,
                         field.content === "FrontSide"
@@ -125,7 +127,7 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
 
                         const { filter } = filterSegment;
                         // Check if filter name exists
-                        if(filter && !builtinFiltersNames.includes(filter.content)) {
+                        if(config.get("invalidFilterDiagnostics") && filter && !builtinFiltersNames.includes(filter.content)) {
                             allDiagnostics.push(createDiagnostic(document, filter.start, filter.end,
                                 `'${filter.content}' is not a built-in filter.`,
                                 DiagnosticCode.invalidFilterName));
