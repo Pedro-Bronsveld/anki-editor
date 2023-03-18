@@ -1,6 +1,6 @@
-import { invoke } from "@autoanki/anki-connect";
+import { invoke } from "./invoke";
 
-export const updateModelStyling = async (modelName: string, css: string, origin?: string): Promise<null> => {
+export const updateModelStyling = async (modelName: string, css: string, origin?: string, key?: string): Promise<null> => {
     return await invoke({
             action: "updateModelStyling",
             version: 6,
@@ -10,6 +10,7 @@ export const updateModelStyling = async (modelName: string, css: string, origin?
                     css
                 }
             },
-            origin
+            origin,
+            key
         });
 }

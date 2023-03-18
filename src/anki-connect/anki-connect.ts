@@ -20,23 +20,32 @@ export default class AnkiConnect {
         return origin;
     }
 
+    private get apiKey(): string | undefined {
+        const origin = vscode.workspace.getConfiguration(ANKI_EDITOR_CONFIG).get("apiKey");
+
+        if (typeof origin !== "string")
+            return undefined
+        
+        return origin;
+    }
+
     public getModelNames = createCachedFunction(() =>
-        getModelNames(this.origin));
+        getModelNames(this.origin, this.apiKey));
         
     public getModelFieldNames = createCachedFunction((modelName: string) =>
-        getModelFieldNames(modelName, this.origin));
+        getModelFieldNames(modelName, this.origin, this.apiKey));
 
     public getModelTemplates = createCachedFunction((modelName: string) =>
-        getModelTemplates(modelName, this.origin));
+        getModelTemplates(modelName, this.origin, this.apiKey));
 
     public getModelStyling = createCachedFunction((modelName: string, cardName: string) =>
-        getModelStyling(modelName, cardName, this.origin));
+        getModelStyling(modelName, cardName, this.origin, this.apiKey));
 
     public updateModelTemplates = (modelName: string, cardName: string, side: Side, html: string) =>
-        updateModelTemplates(modelName, cardName, side, html, this.origin);
+        updateModelTemplates(modelName, cardName, side, html, this.origin, this.apiKey);
 
     public updateModelStyling = (modelName: string, css: string) =>
-        updateModelStyling(modelName, css, this.origin);
+        updateModelStyling(modelName, css, this.origin, this.apiKey);
 
     public clearCache() {
         [
