@@ -98,6 +98,14 @@ export function activate(context: vscode.ExtensionContext) {
 	const templateFoldingRangeProvider = new TemplateFoldingRangeProvider(embeddedHandler);
 
 	context.subscriptions.push(
+		vscode.workspace.onDidChangeConfiguration((event) => {
+			if (event.affectsConfiguration("anki-editor")) {
+				embeddedHandler.clearCache();
+			}
+		})
+	);
+
+	context.subscriptions.push(
 		vscode.workspace.registerTextDocumentContentProvider(ANKI_EDITOR_EMBEDDED_SCHEME_BASE, virtualDocumentProvider)
 	);
 

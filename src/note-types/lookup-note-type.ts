@@ -49,7 +49,7 @@ export const lookupNoteType = async (uri: vscode.Uri, ankiConnect: AnkiConnect):
         
         // Uri is a directory with card templates
         const cardTemplateDir = new Directory(cardName);
-        ["Front", "Back"]
+        (["Front", "Back"] as const)
             .map(side => `${side}${TEMPLATE_EXTENSION}`)
             .forEach(fileName => {
                 cardTemplateDir.entries.set(fileName, new File(fileName));

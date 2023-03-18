@@ -95,7 +95,18 @@
           "text.html.anki"
         ]
       }
-    ]
+    ],
+    "configuration": {
+      "title": "Anki Editor",
+      "properties": {
+        "anki-editor.origin": {
+          "type": "string",
+          "default": "http://127.0.0.1:8765",
+          "description": "Url that Anki-Connect can be reached at.",
+          "title": "Anki-Connect Origin"
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run esbuild-base -- --minify",
