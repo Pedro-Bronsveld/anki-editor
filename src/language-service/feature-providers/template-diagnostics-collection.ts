@@ -4,13 +4,14 @@ import { TextDocument as CssTextDocument, LanguageService as CSSLanguageService 
 import { Project, ts } from "@ts-morph/bootstrap";
 import { ANKI_EDITOR_CONFIG, ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID } from '../../constants';
 import { AstItemType } from '../parser/ast-models';
-import { specialFieldsNames, ttsOptionsList, ttsOptions, builtinFiltersNames } from '../anki-builtin';
+import { ttsOptionsList, ttsOptions } from '../anki-builtin';
 import { isBackSide } from '../template-util';
 import AnkiModelDataProvider from '../anki-model-data-provider';
 import { uriPathToParts } from '../../note-types/uri-parser';
 import { DiagnosticCode } from '../diagnostic-codes';
 import { conditionalStartChar, getParentConditionals, getUnavailableFieldNames } from '../parser/ast-utils';
 import EmbeddedHandler from '../embedded-handler';
+import { getExtendedFilterNames, getExtendedSpecialFieldNames } from '../anki-custom';
 
 export default class TemplateDiagnosticsProvider extends LanguageFeatureProviderBase {
 
@@ -55,7 +56,7 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
             let modelName = "";
 
             if (modelAvailable) {
-                specialFieldsNames.forEach(validFields.add, validFields);
+                getExtendedSpecialFieldNames().forEach(validFields.add, validFields);
                 if (isBackSide(document))
                     validFields.add("FrontSide");
                 const uriParts = uriPathToParts(document.uri);
@@ -127,7 +128,7 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
 
                         const { filter } = filterSegment;
                         // Check if filter name exists
-                        if(config.get("invalidFilterDiagnostics") && filter && !builtinFiltersNames.includes(filter.content)) {
+                        if(config.get("invalidFilterDiagnostics") && filter && !getExtendedFilterNames().includes(filter.content)) {
                             allDiagnostics.push(createDiagnostic(document, filter.start, filter.end,
                                 `'${filter.content}' is not a built-in filter.`,
                                 DiagnosticCode.invalidFilterName));

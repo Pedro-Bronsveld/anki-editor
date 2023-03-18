@@ -112,10 +112,32 @@
           "description": "Show errors for field names that are not part of the note type."
         },
         "anki-editor.invalidFilterDiagnostics": {
-          "title": "Invalid Field Diagnostics",
+          "title": "Invalid Filter Diagnostics",
           "type": "boolean",
           "default": true,
           "description": "Show errors for filter names that are not built into Anki."
+        },
+        "anki-editor.customFieldNames": {
+          "title": "Custom Fields",
+          "type":"array",
+          "items": {
+            "type": "string",
+            "pattern": "^[^#^/\\s:{}\"]+([^:{}\\s\"]|\\s(?!\\s*(}}|$)))*$",
+            "patternErrorMessage": "Restrictions for custom field:\n• Can't start with # ^ /\n• Can't contain : \" { }\n• Can't start or end with spaces"
+          },
+          "default": [],
+          "markdownDescription": "Extra field names to show in completion suggestions, and to ignore when checking errors."
+        },
+        "anki-editor.customFilterNames": {
+          "title": "Custom Filters",
+          "type":"array",
+          "items": {
+            "type": "string",
+            "pattern": "^[^#^/\\s:{}\"]+$",
+            "patternErrorMessage": "Custom filter names can't contain spaces or # ^ / : \" { }"
+          },
+          "default": [],
+          "description": "Extra filter names to show in completion suggestions, and to ignore when checking errors."
         }
       }
     }

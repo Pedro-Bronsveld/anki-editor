@@ -1,8 +1,9 @@
 import * as vscode from 'vscode';
 import { ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID } from '../../constants';
 import { uriPathToParts } from '../../note-types/uri-parser';
-import { builtinFilters, builtinFiltersList, specialFields, specialFieldsList, specialFieldsNames, ttsDefaultLanguage, ttsOptionsList } from '../anki-builtin';
+import { builtinFilters, specialFields, ttsDefaultLanguage, ttsOptionsList } from '../anki-builtin';
 import AnkiModelDataProvider from '../anki-model-data-provider';
+import { getExtendedSpecialFieldNames, getExtendedSpecialFieldsList, getExtendedFiltersList } from '../anki-custom';
 import { documentRange } from '../document-util';
 import EmbeddedHandler from '../embedded-handler';
 import { AstItemType, FilterArgumentKeyValue } from '../parser/ast-models';
@@ -53,13 +54,17 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                 // these must potentially be filtered out of autocomplete suggestions.
                 const unavailableFieldNames = getUnavailableFieldNames(replacement);
                 
-                // Suggest special fields
+                // Suggest special fields and custom fields
                 const replaceRange = replacement.fieldSegment.field
                     ? documentRange(document, replacement.fieldSegment.start, replacement.fieldSegment.field.end)
                     : new vscode.Range(document.positionAt(replacement.fieldSegment.start), position);
-                completionItemList.push(...specialFieldsList
+                completionItemList.push(...getExtendedSpecialFieldsList()
                     .filter(specialField => specialField.name !== "FrontSide" && !unavailableFieldNames.has(specialField.name))
-                    .map(specialField => createCompletionItem(specialField.name, vscode.CompletionItemKind.Constant, "3", replaceRange, specialField.description)));
+                    .map(specialField => createCompletionItem(specialField.name,
+                        specialFields.has(specialField.name)
+                            ? vscode.CompletionItemKind.Constant
+                            : vscode.CompletionItemKind.Enum,
+                        "3", replaceRange, specialField.description)));
 
                 // Create completion items for field names
                 completionItemList.push(...fieldNames
@@ -105,11 +110,15 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                     
                 }
                 else {
-                    // Create builtin filter suggestions, ending with colon if not already followed by one
+                    // Create builtin and custom filter suggestions, ending with colon if not already followed by one
                     const appendColon = !replacement.content.substring(offset - replacement.start).match(/^\s*(?=:)/);
                     const suffix = (appendColon ? ":" : "");
-                    completionItemList.push(...builtinFiltersList.map(filter =>
-                        createCompletionItem(filter.name + suffix, vscode.CompletionItemKind.Function, "4", undefined, filter.description)
+                    completionItemList.push(...getExtendedFiltersList().map(filter =>
+                        createCompletionItem(filter.name + suffix, 
+                            builtinFilters.has(filter.name)
+                                ? vscode.CompletionItemKind.Function
+                                : vscode.CompletionItemKind.Enum,
+                            "4", undefined, filter.description)
                     ));
     
                     // Suggest builtin tts filter as a snippet
@@ -139,7 +148,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
             // Provide snippets for standard replacement and conditional replacement tags and blocks
             const optionFieldNames = (fieldNames.length > 0 ? fieldNames : ["Field"])
                 .concat(
-                    specialFieldsNames.concat(templateIsBackSide ? "FrontSide" : []).sort()
+                    getExtendedSpecialFieldNames().concat(templateIsBackSide ? "FrontSide" : []).sort()
                 ).map(option => option.replace(/([,|])/g, "\\$1"));
             const isPreChar = preChar.match(/[#^/]/) !== null;
             builtinCompletionList.items.push(...[

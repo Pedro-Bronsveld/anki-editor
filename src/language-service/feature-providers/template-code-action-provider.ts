@@ -1,8 +1,9 @@
 import * as vscode from 'vscode';
 import { ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID } from '../../constants';
 import { uriPathToParts } from '../../note-types/uri-parser';
-import { builtinFiltersNames, specialFieldsNames, ttsOptionsNames } from '../anki-builtin';
+import { ttsOptionsNames } from '../anki-builtin';
 import AnkiModelDataProvider from '../anki-model-data-provider';
+import { getExtendedFilterNames, getExtendedSpecialFieldNames } from '../anki-custom';
 import { DiagnosticCode } from '../diagnostic-codes';
 import { documentRange } from '../document-util';
 import EmbeddedHandler from '../embedded-handler';
@@ -28,7 +29,7 @@ export default class TemplateCodeActionProvider extends LanguageFeatureProviderB
         const uriParts = uriPathToParts(document.uri);
         const modelName = document.uri.scheme === ANKI_EDITOR_SCHEME_BASE && uriParts.length >= 2 ? uriParts[1] : "";
         const fieldNames = (document.uri.scheme === ANKI_EDITOR_SCHEME_BASE ? await this.ankiModelDataProvider.getFieldNames(modelName) : [])
-            .concat(specialFieldsNames);
+            .concat(getExtendedSpecialFieldNames());
         
         const isBackside = isBackSide(document);
 
@@ -75,7 +76,7 @@ export default class TemplateCodeActionProvider extends LanguageFeatureProviderB
                             // Replace 
                             return findSimilarStartEnd(diagnostic.code === DiagnosticCode.invalidField
                                     ? subFieldNames
-                                    : nameReplacements[diagnostic.code],
+                                    : nameReplacements[diagnostic.code](),
                                 diagnosticContent.toLowerCase(), false)
                                 .map(similarValue => {
                                     const workspaceEdit = new vscode.WorkspaceEdit();
@@ -167,8 +168,8 @@ const createRemovalCodeAction = (
 }
 
 const nameReplacements = {
-    [DiagnosticCode.invalidTtsOption]: ttsOptionsNames,
-    [DiagnosticCode.invalidFilterName]: builtinFiltersNames
+    [DiagnosticCode.invalidTtsOption]: () => ttsOptionsNames,
+    [DiagnosticCode.invalidFilterName]: () => getExtendedFilterNames()
 } as const
 
 const removalName = {

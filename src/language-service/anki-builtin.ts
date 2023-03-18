@@ -91,7 +91,7 @@ export const builtinFiltersList: readonly BuiltIn[] = [
     }
 ];
 
-const toMap = <T extends BuiltIn>(builtins: readonly T[]): Map<string, T> => new Map(builtins.map(builtin => [builtin.name, builtin]));
+export const toMap = <T extends BuiltIn>(builtins: readonly T[]): Map<string, T> => new Map(builtins.map(builtin => [builtin.name, builtin]));
 const toNames = <T extends BuiltIn>(builtins: readonly T[]): readonly string[] => builtins.map(({ name }) => name);
 
 export const specialFields = toMap(specialFieldsList);

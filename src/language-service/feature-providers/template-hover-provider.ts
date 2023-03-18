@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { TEMPLATE_LANGUAGE_ID } from '../../constants';
-import { builtinFilters, specialFields, ttsDefaultLanguage, ttsOptions } from '../anki-builtin';
+import { ttsDefaultLanguage, ttsOptions } from '../anki-builtin';
+import { getExtendedFilters, getExtendedSpecialFields } from '../anki-custom';
 import { documentRange } from '../document-util';
 import { AstItemType, FilterArgumentKeyValue } from '../parser/ast-models';
 import { getItemAtOffset, inItem } from '../parser/ast-utils';
@@ -25,11 +26,11 @@ export default class TemplateHoverProvider extends LanguageFeatureProviderBase i
             const { field } = replacement.fieldSegment;
 
             if (field && inItem(field, offset)) {
-                const builtinField = specialFields.get(field.content);
-                if (!builtinField)
+                const knownField = getExtendedSpecialFields().get(field.content);
+                if (!knownField)
                     return;
                 return new vscode.Hover(
-                    new vscode.MarkdownString(builtinField.description),
+                    new vscode.MarkdownString(knownField.description),
                     documentRange(document, field.start, field.end)
                 );
             }
@@ -43,11 +44,11 @@ export default class TemplateHoverProvider extends LanguageFeatureProviderBase i
                 const { filter } = filterSegment;
 
                 if (inItem(filterSegment.filter, offset)) {
-                    const builtinFilter = builtinFilters.get(filter.content);
-                    if (!builtinFilter)
+                    const knownFilter = getExtendedFilters().get(filter.content);
+                    if (!knownFilter)
                         return;
                     return new vscode.Hover(
-                        new vscode.MarkdownString(builtinFilter.description),
+                        new vscode.MarkdownString(knownFilter.description),
                         documentRange(document, filter.start, filter.end)
                     );
                 }
