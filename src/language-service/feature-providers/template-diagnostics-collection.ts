@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import LanguageFeatureProviderBase from './language-feature-provider-base';
 import { TextDocument as CssTextDocument, LanguageService as CSSLanguageService } from 'vscode-css-languageservice';
 import { Project, ts } from "@ts-morph/bootstrap";
-import { ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID } from '../../constants';
+import { ANKI_EDITOR_CONFIG, ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID } from '../../constants';
 import { AstItemType } from '../parser/ast-models';
 import { specialFieldsNames, ttsOptionsList, ttsOptions, builtinFiltersNames } from '../anki-builtin';
 import { isBackSide } from '../template-util';
@@ -48,7 +48,7 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
             // anki template
             const templateDocument = this.parseTemplateDocument(templateEmbeddedDocument.content);
 
-            const config = vscode.workspace.getConfiguration("anki-editor");
+            const config = vscode.workspace.getConfiguration(ANKI_EDITOR_CONFIG);
 
             const validFields: Set<string> = new Set();
             const modelAvailable: boolean = document.uri.scheme === ANKI_EDITOR_SCHEME_BASE;

@@ -2,7 +2,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import { AnkiEditorFs } from './anki-editor-filesystem';
-import { ANKI_EDITOR_EMBEDDED_SCHEME_BASE, ANKI_EDITOR_SCHEME, ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID, TEMPLATE_SELECTOR } from './constants';
+import { ANKI_EDITOR_CONFIG, ANKI_EDITOR_EMBEDDED_SCHEME_BASE, ANKI_EDITOR_SCHEME, ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID, TEMPLATE_SELECTOR } from './constants';
 import TemplateCompletionItemProvider from './language-service/feature-providers/template-completion-item-provider';
 import TemplateDefinitionProvider from './language-service/feature-providers/template-definition-provider';
 import TemplateDiagnosticsProvider from './language-service/feature-providers/template-diagnostics-collection';
@@ -100,7 +100,7 @@ export function activate(context: vscode.ExtensionContext) {
 	
 	context.subscriptions.push(
 		vscode.workspace.onDidChangeConfiguration((event) => {
-			if (event.affectsConfiguration("anki-editor")) {
+			if (event.affectsConfiguration(ANKI_EDITOR_CONFIG)) {
 				embeddedHandler.clearCache();
 				updateAllDiagnostics(templateDiagnosticsProvider);
 			}
@@ -144,7 +144,7 @@ export function activate(context: vscode.ExtensionContext) {
 		templateDiagnosticsProvider.updateDiagnostics(vscode.window.activeTextEditor.document);
 	}
 	context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(editor => {
-		if (editor) {
+		if (editor && editor.document.languageId === TEMPLATE_LANGUAGE_ID) {
 			templateDiagnosticsProvider.updateDiagnostics(editor.document);
 		}
 	}));
@@ -155,6 +155,7 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 	
 	context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(event => {
+		if (event.document.languageId === TEMPLATE_LANGUAGE_ID)
 			templateDiagnosticsProvider.updateDiagnostics(event.document);
 	}));
 

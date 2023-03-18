@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { createCachedFunction } from "../cache/cached-function";
+import { ANKI_EDITOR_CONFIG } from '../constants';
 import { Side } from '../models/template';
 import { getModelFieldNames } from "./get-model-field-names";
 import { getModelNames } from "./get-model-names";
@@ -11,7 +12,7 @@ import { updateModelTemplates } from "./update-model-templates";
 export default class AnkiConnect {
 
     private get origin(): string {
-        const origin = vscode.workspace.getConfiguration("anki-editor").get("origin");
+        const origin = vscode.workspace.getConfiguration(ANKI_EDITOR_CONFIG).get("origin");
 
         if (typeof origin !== "string")
             throw Error("Anki-Connect origin setting not set.");
