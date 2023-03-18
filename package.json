@@ -103,6 +103,11 @@
           "title": "Anki-Connect Origin",
           "type": "string",
           "default": "http://127.0.0.1:8765",
+          "pattern": "^https?://",
+          "patternErrorMessage": "Must start with http:// or https://",
+          "examples": [
+            "http://localhost:8765"
+          ],
           "description": "Url that Anki-Connect can be reached at."
         },
         "anki-editor.invalidFieldDiagnostics": {
