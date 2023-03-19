@@ -63,7 +63,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                     .map(specialField => createCompletionItem(specialField.name,
                         specialFields.has(specialField.name)
                             ? vscode.CompletionItemKind.Constant
-                            : vscode.CompletionItemKind.Enum,
+                            : vscode.CompletionItemKind.EnumMember,
                         "3", replaceRange, specialField.description)));
 
                 // Create completion items for field names
@@ -86,7 +86,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                     if (filter.arguments.length === 0 || 
                         // tts language argument completion
                         (filter.arguments[0].type === AstItemType.filterArgumentKeyValue && offset <= filter.arguments[0].start)) {
-                        const completion = createCompletionItem("en_US", vscode.CompletionItemKind.Property, "1", undefined, ttsDefaultLanguage.description)
+                        const completion = createCompletionItem("en_US", vscode.CompletionItemKind.TypeParameter, "1", undefined, ttsDefaultLanguage.description)
                         const suffix = offset === filter.arguments[0]?.start ? " " : "";
                         completion.insertText = new vscode.SnippetString("${0:en_US}" + suffix);
                         completionItemList.push(completion);
@@ -100,7 +100,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                         completionItemList.push(...ttsOptionsList
                                 .filter(({ name: key, value }) => !usedOptions.has(key))
                                 .map(({ name: key, value, description }) => {
-                                const completion = createCompletionItem(key, vscode.CompletionItemKind.Property, "1", undefined, description);
+                                const completion = createCompletionItem(key, vscode.CompletionItemKind.Variable, "1", undefined, description);
                                 const prefix = filterSegment.content[offset - filterSegment.start - 1] === " " ? "" : " ";
                                 completion.insertText = new vscode.SnippetString(prefix + key + "=${0:" + value + "}" + suffix);
                                 return completion;
@@ -117,7 +117,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                         createCompletionItem(filter.name + suffix, 
                             builtinFilters.has(filter.name)
                                 ? vscode.CompletionItemKind.Function
-                                : vscode.CompletionItemKind.Enum,
+                                : vscode.CompletionItemKind.Value,
                             "4", undefined, filter.description)
                     ));
     
