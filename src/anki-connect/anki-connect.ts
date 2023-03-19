@@ -41,20 +41,31 @@ export default class AnkiConnect {
     public getModelStyling = createCachedFunction((modelName: string, cardName: string) =>
         getModelStyling(modelName, cardName, this.origin, this.apiKey));
 
-    public updateModelTemplates = (modelName: string, cardName: string, side: Side, html: string) =>
-        updateModelTemplates(modelName, cardName, side, html, this.origin, this.apiKey);
+    public updateModelTemplates = (modelName: string, cardName: string, side: Side, html: string) => {
+        this.clearCacheForModel(modelName);
+        return updateModelTemplates(modelName, cardName, side, html, this.origin, this.apiKey);
+    }
 
-    public updateModelStyling = (modelName: string, css: string) =>
-        updateModelStyling(modelName, css, this.origin, this.apiKey);
+    public updateModelStyling = (modelName: string, css: string) => {
+        this.clearCacheForModel(modelName);
+        return updateModelStyling(modelName, css, this.origin, this.apiKey);
+    }
 
+    // Cache clearing
+
+    private cachedFunctions = [
+        this.getModelNames,
+        this.getModelFieldNames,
+        this.getModelTemplates,
+        this.getModelStyling
+    ] as const;
+        
     public clearCache() {
-        [
-            this.getModelNames,
-            this.getModelFieldNames,
-            this.getModelTemplates,
-            this.getModelStyling
-        ]
-        .forEach(func => func.clearCache());
+        this.cachedFunctions.forEach(func => func.clearCache());
+    }
+
+    public clearCacheForModel(modelName: string) {
+        this.cachedFunctions.forEach(func => func.clearCacheWhere(({ args: [cachedModelName] }) => cachedModelName === modelName ))
     }
 
 }
