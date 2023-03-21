@@ -7,6 +7,7 @@ import { getModelFieldNames } from "./get-model-field-names";
 import { getModelNames } from "./get-model-names";
 import { getModelStyling } from "./get-model-styling";
 import { getModelTemplates } from "./get-model-templates";
+import { requestPermission } from './request-permission';
 import { updateModelStyling } from "./update-model-styling";
 import { updateModelTemplates } from "./update-model-templates";
 
@@ -30,31 +31,46 @@ export default class AnkiConnect {
         return key;
     }
 
-    public getModelNames = createCachedFunction(() =>
-        getModelNames(this.origin, this.apiKey));
-        
-    public getModelFieldNames = createCachedFunction((modelName: string) =>
-        getModelFieldNames(modelName, this.origin, this.apiKey));
+    private async getApiKey(): Promise<Exclude<ApiKey, null> | undefined> {
 
-    public getModelTemplates = createCachedFunction((modelName: string) =>
-        getModelTemplates(modelName, this.origin, this.apiKey));
+        const permissionResult = await this.requestPermission();
 
-    public getModelStyling = createCachedFunction((modelName: string, cardName: string) =>
-        getModelStyling(modelName, cardName, this.origin, this.apiKey));
-
-    public updateModelTemplates = (modelName: string, cardName: string, side: Side, html: string) => {
-        this.clearCacheForModel(modelName);
-        return updateModelTemplates(modelName, cardName, side, html, this.origin, this.apiKey);
+        if (permissionResult.requireApikey === false)
+            // Don't return api key if not required for requests.
+            return undefined;
+            
+        return this.apiKey;
     }
 
-    public updateModelStyling = (modelName: string, css: string) => {
+    public requestPermission = createCachedFunction(async () =>
+        requestPermission(this.origin));
+
+    public getModelNames = createCachedFunction(async () =>
+        getModelNames(this.origin, await this.getApiKey()));
+        
+    public getModelFieldNames = createCachedFunction(async (modelName: string) =>
+        getModelFieldNames(modelName, this.origin, await this.getApiKey()));
+
+    public getModelTemplates = createCachedFunction(async (modelName: string) =>
+        getModelTemplates(modelName, this.origin, await this.getApiKey()));
+
+    public getModelStyling = createCachedFunction(async (modelName: string, cardName: string) =>
+        getModelStyling(modelName, cardName, this.origin, await this.getApiKey()));
+
+    public updateModelTemplates = async (modelName: string, cardName: string, side: Side, html: string) => {
         this.clearCacheForModel(modelName);
-        return updateModelStyling(modelName, css, this.origin, this.apiKey);
+        return updateModelTemplates(modelName, cardName, side, html, this.origin, await this.getApiKey());
+    }
+
+    public updateModelStyling = async (modelName: string, css: string) => {
+        this.clearCacheForModel(modelName);
+        return updateModelStyling(modelName, css, this.origin, await this.getApiKey());
     }
 
     // Cache clearing
 
     private cachedFunctions = [
+        this.requestPermission,
         this.getModelNames,
         this.getModelFieldNames,
         this.getModelTemplates,
