@@ -29,6 +29,12 @@
         "title": "Refresh Note Types",
         "category": "Anki Editor",
         "icon": "$(refresh)"
+      },
+      {
+        "command": "anki-editor.clearCache",
+        "title": "Clear Cache",
+        "category": "Anki Editor",
+        "icon": "$(clear-all)"
       }
     ],
     "viewsContainers": {

@@ -45,7 +45,7 @@ export function activate(context: vscode.ExtensionContext) {
 		})
 	);
 
-	// Create Anki Eidtor Filesystem
+	// Create Anki Editor Filesystem
 	const ankiCardFs = new AnkiEditorFs(ankiConnect);
 	context.subscriptions.push(
 			vscode.workspace.registerFileSystemProvider(ANKI_EDITOR_SCHEME_BASE, ankiCardFs, { isCaseSensitive: true })
@@ -73,6 +73,13 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.window.onDidChangeWindowState((e) => {
 			if (e.focused)
 				vscode.commands.executeCommand("anki-editor.refreshNoteTypesTree");
+		}));
+	
+	// Clear in-memory caches
+	context.subscriptions.push(
+		vscode.commands.registerCommand('anki-editor.clearCache', () => {
+			ankiConnect.clearCache();
+			embeddedHandler.clearCache();
 		}));
 
 	// Language service features
