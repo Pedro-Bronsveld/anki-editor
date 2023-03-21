@@ -21,12 +21,12 @@ export default class AnkiConnect {
     }
 
     private get apiKey(): string | undefined {
-        const origin = vscode.workspace.getConfiguration(ANKI_EDITOR_CONFIG).get("apiKey");
+        const key = vscode.workspace.getConfiguration(ANKI_EDITOR_CONFIG).get("apiKey");
 
-        if (typeof origin !== "string")
+        if (typeof key !== "string" || key === "")
             return undefined
         
-        return origin;
+        return key;
     }
 
     public getModelNames = createCachedFunction(() =>
