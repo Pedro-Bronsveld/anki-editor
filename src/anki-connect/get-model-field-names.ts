@@ -1,6 +1,6 @@
-import { invoke } from "@autoanki/anki-connect";
+import { ApiKey, invoke } from "@autoanki/anki-connect";
 
-export const getModelFieldNames = async (modelName: string, origin?: string, key?: string): Promise<string[]> =>
+export const getModelFieldNames = async (modelName: string, origin?: string, key?: ApiKey): Promise<string[]> =>
     await invoke({
         action: "modelFieldNames",
         version: 6,

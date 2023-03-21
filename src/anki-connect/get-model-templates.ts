@@ -1,7 +1,7 @@
-import { invoke } from "@autoanki/anki-connect";
+import { ApiKey, invoke } from "@autoanki/anki-connect";
 import { ModelTemplates } from "@autoanki/anki-connect/dist/model";
 
-export const getModelTemplates = async (modelName: string, origin?: string, key?: string): Promise<ModelTemplates> =>
+export const getModelTemplates = async (modelName: string, origin?: string, key?: ApiKey): Promise<ModelTemplates> =>
     await invoke({
         action: "modelTemplates",
         version: 6,

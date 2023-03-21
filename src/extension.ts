@@ -109,6 +109,7 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.workspace.onDidChangeConfiguration((event) => {
 			if (event.affectsConfiguration(ANKI_EDITOR_CONFIG)) {
 				embeddedHandler.clearCache();
+				ankiConnect.clearCache();
 				updateAllDiagnostics(templateDiagnosticsProvider);
 			}
 		})

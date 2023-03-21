@@ -118,8 +118,9 @@
         },
         "anki-editor.apiKey": {
           "title": "Anki-Connect API key",
+          "default": null,
           "type": "string",
-          "description": "Anki-Connect API key."
+          "markdownDescription": "Anki-Connect API key.\n\nThis must match the value set for `\"apiKey\"` in the Anki-Connect config if it's set to anything other than `null`."
         },
         "anki-editor.invalidFieldDiagnostics": {
           "title": "Invalid Field Diagnostics",

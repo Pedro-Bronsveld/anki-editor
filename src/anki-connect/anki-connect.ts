@@ -1,3 +1,4 @@
+import { ApiKey } from '@autoanki/anki-connect';
 import * as vscode from 'vscode';
 import { createCachedFunction } from "../cache/cached-function";
 import { ANKI_EDITOR_CONFIG } from '../constants';
@@ -20,11 +21,11 @@ export default class AnkiConnect {
         return origin;
     }
 
-    private get apiKey(): string | undefined {
-        const key = vscode.workspace.getConfiguration(ANKI_EDITOR_CONFIG).get("apiKey");
+    private get apiKey(): Exclude<ApiKey, null> | undefined {
+        const key = vscode.workspace.getConfiguration(ANKI_EDITOR_CONFIG).get<ApiKey>("apiKey");
 
-        if (typeof key !== "string" || key === "")
-            return undefined
+        if (key === null)
+            return undefined;
         
         return key;
     }
