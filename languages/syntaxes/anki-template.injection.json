@@ -24,11 +24,9 @@
 			"patterns": [
 				{ "include": "#anki-template-invalid-characters" },
 				{ "include": "#anki-conditional-block" },
-				{ "include": "#anki-template-segment" },
-				{ "include": "#anki-leftover" }
+				{ "include": "#anki-template-segment" }
 			],
-			"contentName": "source.anki.template",
-			"name": "meta.anki.template"
+			"name": "source.anki.template"
 		},
 		"anki-template-oneline-conditional": {
 			"begin": "{{(?=\\s*[#^/])",
@@ -43,6 +41,7 @@
 				{ "include": "#anki-template-invalid-characters" },
 				{ "include": "#anki-conditional-block" }
 			],
+			"contentName": "source.anki.conditional",
 			"name": "meta.anki.template.oneline.conditional"
 		},
 		"anki-template-invalid-characters": {
