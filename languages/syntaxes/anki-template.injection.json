@@ -16,17 +16,19 @@
 			"begin": "{{",
 			"end": "}}",
 			"beginCaptures": {
-				"0": { "name": "support.constant.handlebars.anki" }
+				"0": { "name": "constant.character.escape.anki.template.begin" }
 			},
 			"endCaptures": {
-				"0": { "name": "support.constant.handlebars.anki" }
+				"0": { "name": "constant.character.escape.anki.template.end" }
 			},
 			"patterns": [
 				{ "include": "#anki-template-invalid-characters" },
 				{ "include": "#anki-conditional-block" },
-				{ "include": "#anki-template-segment" }
+				{ "include": "#anki-template-segment" },
+				{ "include": "#anki-leftover" }
 			],
-			"name": "source.anki.template"
+			"contentName": "source.anki.template",
+			"name": "meta.anki.template"
 		},
 		"anki-template-oneline-conditional": {
 			"begin": "{{(?=\\s*[#^/])",

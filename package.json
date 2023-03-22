@@ -90,8 +90,7 @@
           "text.html": "html",
           "source.anki": "anki-template",
           "source.js": "javascript",
-          "source.css": "css",
-          "support.constant.handlebars": "handlebars"
+          "source.css": "css"
         }
       },
       {
