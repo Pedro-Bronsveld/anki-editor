@@ -50,7 +50,7 @@ export class AnkiEditorFs implements vscode.FileSystemProvider {
     }
 
     writeFile(uri: vscode.Uri, content: Uint8Array, options: { readonly create: boolean; readonly overwrite: boolean; }): Thenable<void> {
-        console.log("writeFile");
+        // console.log("writeFile");
 
         const parts = uri.path.split("/").filter(part => part);
 

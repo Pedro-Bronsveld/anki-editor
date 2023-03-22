@@ -85,7 +85,7 @@ export default class TemplateHoverProvider extends LanguageFeatureProviderBase i
         else {
             // html, javascript, css hover provider
     
-            console.log("hover");
+            // console.log("hover");
     
             const hovers = await vscode.commands.executeCommand<vscode.Hover[]>(
                 'vscode.executeHoverProvider',
