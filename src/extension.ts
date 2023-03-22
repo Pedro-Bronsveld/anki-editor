@@ -52,9 +52,13 @@ export function activate(context: vscode.ExtensionContext) {
 		);
 
 	// Add command to add anki editor root folder to workspace
-	context.subscriptions.push(vscode.commands.registerCommand('anki-editor.openAsFolder', _ => {
-			// vscode.workspace.updateWorkspaceFolders(0, 0, { uri: vscode.Uri.parse('anki-editor:'), name: "Anki Editor" });
+	context.subscriptions.push(vscode.commands.registerCommand('anki-editor.openAsWorkspaceFolder', _ => {
 			vscode.commands.executeCommand('vscode.openFolder', vscode.Uri.parse(`${ANKI_EDITOR_SCHEME}`));
+		}));
+	
+	// Add command to add anki editor root as folder to the current workspace
+	context.subscriptions.push(vscode.commands.registerCommand('anki-editor.addFolderToWorkspace', _ => {
+			vscode.workspace.updateWorkspaceFolders(0, 0, { uri: vscode.Uri.parse(ANKI_EDITOR_SCHEME), name: "Anki Editor" });
 		}));
 
 	// Register note type tree
@@ -66,6 +70,7 @@ export function activate(context: vscode.ExtensionContext) {
 	// Refresh node type tree list in tree command
 	context.subscriptions.push(
 		vscode.commands.registerCommand('anki-editor.refreshNoteTypesTree', () => {
+			ankiConnect.clearCache();
 			noteTypesProvider.refresh();
 		}));
 

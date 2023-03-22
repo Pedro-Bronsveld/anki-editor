@@ -19,10 +19,16 @@
   "contributes": {
     "commands": [
       {
-        "command": "anki-editor.openAsFolder",
-        "title": "Open as folder",
+        "command": "anki-editor.openAsWorkspaceFolder",
+        "title": "Open as workspace folder",
         "category": "Anki Editor",
         "icon": "$(root-folder-opened)"
+      },
+      {
+        "command": "anki-editor.addFolderToWorkspace",
+        "title": "Add as folder to current workspace",
+        "category": "Anki Editor",
+        "icon": "$(folder-library)"
       },
       {
         "command": "anki-editor.refreshNoteTypesTree",
@@ -62,7 +68,12 @@
           "group": "navigation"
         },
         {
-          "command": "anki-editor.openAsFolder",
+          "command": "anki-editor.openAsWorkspaceFolder",
+          "when": "view == note-types-tree",
+          "group": "navigation"
+        },
+        {
+          "command": "anki-editor.addFolderToWorkspace",
           "when": "view == note-types-tree",
           "group": "navigation"
         }
