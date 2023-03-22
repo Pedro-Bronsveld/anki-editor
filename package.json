@@ -26,7 +26,7 @@
       },
       {
         "command": "anki-editor.addFolderToWorkspace",
-        "title": "Add as folder to current workspace",
+        "title": "Add to current workspace as folder",
         "category": "Anki Editor",
         "icon": "$(folder-library)"
       },
