@@ -54,20 +54,44 @@ export default class TemplateHighlightsProvider extends LanguageFeatureProviderB
             }
             else if (replacement.type === AstItemType.replacement) {
 
-                // Highlight all filters in the document with the same name
-                const thisFilter = getItemAtOffset(replacement.filterSegments
+                // Highlighting of filter names, filter arguments, and filter options
+                const inFilterSegment = getItemAtOffset(replacement.filterSegments
                     .filter((filterSegment): filterSegment is RequiredProp<FilterSegment, "filter"> =>
-                        filterSegment.filter !== undefined)
-                    .map(filterSegment => filterSegment.filter), offset);
+                        filterSegment.filter !== undefined), offset);
                 
-                if (!thisFilter)
-                    return;
+                if (!inFilterSegment)
+                    return
                 
-                const filterOccurences = getFiltersByName(templateDocument.replacements, thisFilter.content);
+                if (inItem(inFilterSegment.filter, offset)) {
+                    // Highlight filter name and all other occurences of this filter name
+                    const filterOccurences = getFiltersByName(templateDocument.replacements, inFilterSegment.filter.content);
+    
+                    highlights.push(...filterOccurences.map((filter) => new vscode.DocumentHighlight(
+                        documentRange(document, filter.start, filter.end)
+                    )));
+                }
+                else if (inFilterSegment.filter.content === "tts" ) {
 
-                highlights.push(...filterOccurences.map(filter => new vscode.DocumentHighlight(
-                    documentRange(document, filter.start, filter.end)
-                )));
+                    // Highlight tts arguments
+                    const inArgument = getItemAtOffset(inFilterSegment.filter.arguments, offset);
+                    
+                    if (inArgument?.type === AstItemType.filterArgument)
+                        // Highlight tts language argument
+                        highlights.push(new vscode.DocumentHighlight(
+                            documentRange(document, inArgument.start, inArgument.end)
+                        ));
+                    else if (inArgument?.type === AstItemType.filterArgumentKeyValue) {
+                        // Highlight tts options keys and values
+                        const inKeyValuePart = getItemAtOffset([inArgument.key, ...inArgument.values], offset)
+
+                        if (inKeyValuePart)
+                            highlights.push(new vscode.DocumentHighlight(
+                                documentRange(document, inKeyValuePart.start, inKeyValuePart.end)
+                            ));
+                        
+                    }
+                    
+                }
                 
             }
 
