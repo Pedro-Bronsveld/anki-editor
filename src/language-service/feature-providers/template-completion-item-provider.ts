@@ -72,7 +72,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                     .map(fieldName => createCompletionItem(fieldName, vscode.CompletionItemKind.Field, "1", replaceRange)));
 
                 // Show FrontSide suggestion only when in back side template
-                if(replacement.type === AstItemType.replacement && templateIsBackSide)
+                if(replacement.type === AstItemType.replacement && templateIsBackSide && replacement.filterSegments.length === 0)
                     completionItemList.push(createCompletionItem("FrontSide", vscode.CompletionItemKind.Reference, "2", undefined, specialFields.get("FrontSide")?.description));
             }
             
@@ -163,7 +163,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                 .flatMap(({start, detail}, index) => {
                     const isConditionalStart = start.match(/[#^]/)
                     const options = optionFieldNames
-                        .filter(option => !(option === "FrontSide" && (isConditionalStart || !templateIsBackSide)) )
+                        .filter(option => !(option === "FrontSide" && (isConditionalStart || !templateIsBackSide || start.length > 0)) )
                         .join(",");
 
                     return (isConditionalStart ? [false, true] : [false]).map(closeBlock => {

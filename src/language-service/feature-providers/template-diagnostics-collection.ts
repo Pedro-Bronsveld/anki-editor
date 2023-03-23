@@ -109,6 +109,14 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                             allDiagnostics.push(matchToDiagnostic(document, invalidStartSpaceMatch, replacement.fieldSegment.start,
                                 "A field name can't be preceded by a space when the replacement contains one or more ':' characters.",
                                 DiagnosticCode.invalidSpace));
+                        
+                        if (field.content === "FrontSide" && replacement.filterSegments.length > 0 && validFields.has("FrontSide"))
+                            // Provide warning diagnostic when FrontSide field is preceded by a filter
+                            allDiagnostics.push(createDiagnostic(document, replacement.start + 2, field.start,
+                                "Filters have no effect on the special 'FrontSide' field.",
+                                DiagnosticCode.invalidFilter,
+                                vscode.DiagnosticSeverity.Warning
+                            ));
                     }
 
                     // Get a set of field names that are unavailable in this replacement
