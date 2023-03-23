@@ -93,7 +93,7 @@ export function activate(context: vscode.ExtensionContext) {
 	const ankiModelDataProvider: AnkiModelDataProvider = new AnkiModelDataProvider(ankiConnect);
 	
 	const templateSemanticTokenProvider = new TemplateSemanticTokenProvider(embeddedHandler);
-	const templateHoverProvider = new TemplateHoverProvider(embeddedHandler);
+	const templateHoverProvider = new TemplateHoverProvider(embeddedHandler, ankiModelDataProvider);
 	const templateCompletionItemProvider = new TemplateCompletionItemProvider(embeddedHandler, ankiModelDataProvider);
 	const templateSignatureHelpProvider = new TemplateSignatureHelpProvider(embeddedHandler);
 	const templateRenameProvider = new TemplateRenameProvider(embeddedHandler);

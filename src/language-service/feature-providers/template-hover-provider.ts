@@ -1,13 +1,20 @@
 import * as vscode from 'vscode';
-import { TEMPLATE_LANGUAGE_ID } from '../../constants';
+import { ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID } from '../../constants';
+import { uriPathToParts } from '../../note-types/uri-parser';
 import { ttsDefaultLanguage, ttsOptions } from '../anki-builtin';
 import { getExtendedFilters, getExtendedSpecialFields } from '../anki-custom';
+import AnkiModelDataProvider from '../anki-model-data-provider';
 import { documentRange } from '../document-util';
+import EmbeddedHandler from '../embedded-handler';
 import { AstItemType, FilterArgumentKeyValue } from '../parser/ast-models';
 import { getItemAtOffset, inItem } from '../parser/ast-utils';
 import LanguageFeatureProviderBase from './language-feature-provider-base';
 
 export default class TemplateHoverProvider extends LanguageFeatureProviderBase implements vscode.HoverProvider {
+
+    constructor(embeddedHandler: EmbeddedHandler, private ankiModelDataProvider: AnkiModelDataProvider) {
+        super(embeddedHandler);
+    }
 
     async provideHover(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Promise<vscode.Hover | null | undefined> {
         
@@ -26,13 +33,27 @@ export default class TemplateHoverProvider extends LanguageFeatureProviderBase i
             const { field } = replacement.fieldSegment;
 
             if (field && inItem(field, offset)) {
+                const fieldRange = documentRange(document, field.start, field.end);
+                
+                // Provide hover info for special builtin field names and custom field names
                 const knownField = getExtendedSpecialFields().get(field.content);
-                if (!knownField)
-                    return;
-                return new vscode.Hover(
-                    new vscode.MarkdownString(knownField.description),
-                    documentRange(document, field.start, field.end)
-                );
+                if (knownField)
+                    return new vscode.Hover(
+                        new vscode.MarkdownString(knownField.description),
+                        documentRange(document, field.start, field.end)
+                    );
+                
+                // Try to provide hover info for field of note type
+                if (document.uri.scheme === ANKI_EDITOR_SCHEME_BASE) {
+                    const uriParts = uriPathToParts(document.uri);
+                    const modelName = uriParts[1];
+                    const modelFieldNames = new Set(await this.ankiModelDataProvider.getFieldNames(modelName));
+                    
+                    if (modelFieldNames.has(field.content))
+                        return new vscode.Hover(new vscode.MarkdownString(`Field in note type "${modelName}"`), fieldRange);
+                }
+                
+                return;
             }
             else if (replacement.type === AstItemType.replacement) {
 
@@ -44,7 +65,9 @@ export default class TemplateHoverProvider extends LanguageFeatureProviderBase i
                 const { filter } = filterSegment;
 
                 if (inItem(filterSegment.filter, offset)) {
+                    // Provide hover info for builtin and custom filters
                     const knownFilter = getExtendedFilters().get(filter.content);
+                    
                     if (!knownFilter)
                         return;
                     return new vscode.Hover(
@@ -54,12 +77,14 @@ export default class TemplateHoverProvider extends LanguageFeatureProviderBase i
                 }
                 else if (filterSegment.filter.content === "tts") {
 
+                    // Provide hover info for tts language argument
                     const languageArg = filterSegment.filter.arguments[0];
                     if (languageArg && languageArg.type === AstItemType.filterArgument && inItem(languageArg, offset)) {
                         return new vscode.Hover(new vscode.MarkdownString(ttsDefaultLanguage.description),
                             documentRange(document, languageArg.start, languageArg.end));
                     }
 
+                    // Provide hover info for tts option key
                     const filterOptionKey = getItemAtOffset(filterSegment.filter.arguments.slice(1)
                         .filter((arg): arg is FilterArgumentKeyValue => 
                         arg.type === AstItemType.filterArgumentKeyValue)

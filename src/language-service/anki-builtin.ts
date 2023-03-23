@@ -48,7 +48,7 @@ export const builtinFiltersList: readonly BuiltIn[] = [
         name: "tts",
         description: "Converts the value of the field in this replacement to spoken words.\n\n" +
             "Must be followed directly by a language code such as `en_US`.\n\n" +
-            "The options `voices` and `speed` can optionally be specified to set the voice used for conversion, and the speed at which the audio is played.\n\n" +
+            "The options `voices` and `speed` can optionally be used to set the voice used for conversion, and the speed at which the audio is played.\n\n" +
             "Example usage:\n\n`{{tts en_US voices=Microsoft_George,Microsoft_Hazel speed=1.0:Front}}`"
     },
     {
@@ -67,7 +67,7 @@ export const builtinFiltersList: readonly BuiltIn[] = [
     },
     {
         name: "hint",
-        description: "Hides the content of the field until the user clicks it."
+        description: "Hides the content of the field until clicked."
     },
     {
         name: "type",
