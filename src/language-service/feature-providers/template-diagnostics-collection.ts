@@ -147,7 +147,7 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                         if (i > 0 && startSpaceMatch && replacement.filterSegments.slice(0, i).some(({ filter }) => filter !== undefined))
                             allDiagnostics.push(matchToDiagnostic(document, startSpaceMatch, filterSegment.start,
                                 startSpaceMatch[0].length === filterSegment.end - filterSegment.start
-                                    ? "Empty filter segments are not allowed between filters and fields."
+                                    ? "Empty filter segments are not allowed when preceded by other filters."
                                     : "Consecutive filters can't start with a space.",
                                 DiagnosticCode.invalidSpace));
 
