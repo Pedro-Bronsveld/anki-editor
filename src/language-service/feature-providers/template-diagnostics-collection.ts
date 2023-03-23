@@ -144,14 +144,14 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
 
                         // Check for invalid spacing at the start of filter segment
                         const startSpaceMatch = filterSegment.content.match(/^\s+/);
-                        if (i > 0 && startSpaceMatch)
+                        if (i > 0 && startSpaceMatch && replacement.filterSegments.slice(0, i).some(({ filter }) => filter !== undefined))
                             allDiagnostics.push(matchToDiagnostic(document, startSpaceMatch, filterSegment.start,
                                 "Consecutive filters can't start with a space.",
                                 DiagnosticCode.invalidSpace));
 
                         // Check for invalid spacing at the end of filter segment
                         const endSpaceMatch = filterSegment.content.match(/\s+$/g)
-                        if (endSpaceMatch && filterSegment.filter?.content !== "tts")
+                        if (endSpaceMatch && filterSegment.filter && filterSegment.filter?.content !== "tts")
                             allDiagnostics.push(matchToDiagnostic(document, endSpaceMatch, filterSegment.end - endSpaceMatch[0].length,
                                 "Filters can't end with a space, tab or new line character.",
                                 DiagnosticCode.invalidSpace));
