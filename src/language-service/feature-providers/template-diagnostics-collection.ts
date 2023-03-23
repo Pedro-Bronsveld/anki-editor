@@ -146,7 +146,9 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                         const startSpaceMatch = filterSegment.content.match(/^\s+/);
                         if (i > 0 && startSpaceMatch && replacement.filterSegments.slice(0, i).some(({ filter }) => filter !== undefined))
                             allDiagnostics.push(matchToDiagnostic(document, startSpaceMatch, filterSegment.start,
-                                "Consecutive filters can't start with a space.",
+                                startSpaceMatch[0].length === filterSegment.end - filterSegment.start
+                                    ? "Empty filter segments are not allowed between filters and fields."
+                                    : "Consecutive filters can't start with a space.",
                                 DiagnosticCode.invalidSpace));
 
                         // Check for invalid spacing at the end of filter segment
