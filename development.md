@@ -1,5 +1,7 @@
 # Development
 
+Some notes and links used for reference during development of this extension, may be out of date.
+
 ##  Uri Schema
 `anki-editor:Note Types/<ModelName>/<Card #|Styling>/<Back|Front>`
 
@@ -27,7 +29,7 @@ Anki documentation:
 Match field name
 
 ```javascript
-/[^#^\/\s:\"{}]+([^:\"{}\s]|\s(?!\s*(}}|$)))*/g
+/[^#^\/\s:\"{}]+([^:\"{}\s]|\s(?!\s*(}}|$)))*(?!.*:)/g
 ```
 
 Match first character

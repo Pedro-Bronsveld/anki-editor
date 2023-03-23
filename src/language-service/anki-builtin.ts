@@ -57,7 +57,8 @@ export const builtinFiltersList: readonly BuiltIn[] = [
     },
     {
         name: "cloze",
-        description: "Displays the field in this replacement as a cloze deletion."
+        description: "Displays the field in this replacement as a cloze deletion.\n\n" +
+            "**Note:** Cloze deletions may only be used on the cloze note type and on note types created by cloning the cloze note type."
     },
     {
         name: "cloze-only",
