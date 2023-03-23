@@ -152,24 +152,27 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                 ).map(option => option.replace(/([,|])/g, "\\$1"));
             const isPreChar = preChar.match(/[#^/]/) !== null;
             builtinCompletionList.items.push(...[
-                    { char: "",  detail: "Anki template replacement"},
-                    { char: "#", detail: "Anki if filled opening tag"},
-                    { char: "^", detail: "Anki if empty opening tag"},
-                    { char: "/", detail: "Anki if block closing tag" }
+                    { start: "",  detail: "Anki template replacement"},
+                    { start: "cloze:",  detail: "Anki cloze filter and field replacement"},
+                    { start: "hint:",  detail: "Anki hint filter and field replacement"},
+                    { start: "type:",  detail: "Anki type filter and field replacement"},
+                    { start: "#", detail: "Anki if filled opening tag"},
+                    { start: "^", detail: "Anki if empty opening tag"},
+                    { start: "/", detail: "Anki if block closing tag" }
                 ]
-                .flatMap(({char, detail}, index) => {
-                    const isConditional = char.match(/[#^]/)
+                .flatMap(({start, detail}, index) => {
+                    const isConditionalStart = start.match(/[#^]/)
                     const options = optionFieldNames
-                        .filter(option => !(option === "FrontSide" && (isConditional || !templateIsBackSide)) )
+                        .filter(option => !(option === "FrontSide" && (isConditionalStart || !templateIsBackSide)) )
                         .join(",");
 
-                    return (isConditional ? [false, true] : [false]).map(closeBlock => {
-                        const completion = createCompletionItem(`{{${char}Field}}` + (closeBlock ? " ... {{/Field}}" : ""),
+                    return (isConditionalStart ? [false, true] : [false]).map(closeBlock => {
+                        const completion = createCompletionItem(`{{${start}Field}}` + (closeBlock ? " ... {{/Field}}" : ""),
                                 vscode.CompletionItemKind.Snippet,
-                                `anki-${closeBlock}${index}${char}`,
+                                `anki-${closeBlock}${index}${start}`,
                                 documentRange(document, offset - (isPreChar ? 1 : 0), offset)
                             );
-                        completion.insertText = new vscode.SnippetString("{{" + char + "${1|" + options + "|}}}" + (closeBlock ? "\n\t$0\n{{/${1|" + options + "|}}}" : "$0"));
+                        completion.insertText = new vscode.SnippetString("{{" + start + "${1|" + options + "|}}}" + (closeBlock ? "\n\t$0\n{{/${1|" + options + "|}}}" : "$0"));
                         completion.detail = `${detail}${closeBlock ? " and close block" : ""}.`;
                         completion.preselect = isPreChar;
                         return completion;
