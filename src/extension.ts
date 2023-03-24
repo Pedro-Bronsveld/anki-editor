@@ -1,5 +1,3 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import { AnkiEditorFs } from './anki-editor-filesystem';
 import { ANKI_EDITOR_CONFIG, ANKI_EDITOR_EMBEDDED_SCHEME_BASE, ANKI_EDITOR_SCHEME, ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID, TEMPLATE_SELECTOR } from './constants';
@@ -27,13 +25,7 @@ import AnkiConnect from './anki-connect/anki-connect';
 import EmbeddedHandler from './language-service/embedded-handler';
 import { updateAllDiagnostics } from './language-service/run-diagnostics';
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
-
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "anki-editor" is now active!');
 
 	// Setup Anki-Connect class and cache handling
 	const ankiConnect = new AnkiConnect();
@@ -215,15 +207,9 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.languages.registerFoldingRangeProvider(TEMPLATE_SELECTOR, templateFoldingRangeProvider)
 	);
-
-	// Hack to work around vscode only providing hover information after the first 2 hovers
-	// for embedded javascript. Simply performs two dummy hovers when the extension activates.
-	// (commented out because a loader keeps spinning in the bottom left corner saying "activating js/ts server")
-	// runHoverProviderDummy(virtualDocumentProvider);
 	
 }
 
-// This method is called when your extension is deactivated
 export function deactivate(context: vscode.ExtensionContext) {
 	context.subscriptions.forEach(subscription => subscription.dispose());
 }
