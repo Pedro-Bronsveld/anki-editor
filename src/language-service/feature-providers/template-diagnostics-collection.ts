@@ -160,17 +160,17 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                                 
                         // Diagnostics for tts filter
                         if (filter?.content === "tts") {
-                            const arg0 = filter.arguments[0];
+                            const languageArg = filter.arguments[0];
 
                             // Check if the required language argument is set for the tts filter
-                            if (!arg0)
+                            if (!languageArg)
                                 allDiagnostics.push(createDiagnostic(document, filter.start, filterSegment.end,
                                     "The tts filter name must be followed by a language code.\nFor example: en_US",
                                     DiagnosticCode.missingTtsLanguageArg
                                 ));
                             // Check if the first argument of the tts filter is the language argument
-                            else if (arg0.type === AstItemType.filterArgumentKeyValue) {
-                                allDiagnostics.push(createDiagnostic(document, filter.end + 1, arg0.end,
+                            else if (languageArg.type === AstItemType.filterArgumentKeyValue) {
+                                allDiagnostics.push(createDiagnostic(document, filter.end + 1, languageArg.end,
                                     "The tts filter name must be followed by a language code.\nFor example: en_US\n" + 
                                     "Key value arguments can only be used after the language code argument.",
                                     DiagnosticCode.invalidTtsLanguageArg
@@ -178,8 +178,8 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                             }
                             
                             // Check if there is more than one space between the tts filter name and the language argument
-                            if (arg0?.type === AstItemType.filterArgument && arg0.start - filter.end > 1) {
-                                allDiagnostics.push(createDiagnostic(document, filter.end + 1, arg0.start,
+                            if (languageArg?.type === AstItemType.filterArgument && languageArg.start - filter.end > 1) {
+                                allDiagnostics.push(createDiagnostic(document, filter.end + 1, languageArg.start,
                                     "There must be exactly one space between the tts filter name and the language argument.",
                                     DiagnosticCode.invalidSpace
                                 ));
