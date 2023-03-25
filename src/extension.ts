@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { AnkiEditorFs } from './anki-editor-filesystem';
-import { ANKI_EDITOR_CONFIG, ANKI_EDITOR_EMBEDDED_SCHEME_BASE, ANKI_EDITOR_SCHEME, ANKI_EDITOR_SCHEME_BASE, STYLING_SELECTOR, TEMPLATE_LANGUAGE_ID, TEMPLATE_SELECTOR } from './constants';
+import { ANKI_EDITOR_CONFIG, ANKI_EDITOR_EMBEDDED_SCHEME_BASE, ANKI_EDITOR_SCHEME, ANKI_EDITOR_SCHEME_BASE, EMBEDDED_STYLING_SELECTOR, STYLING_SELECTOR, TEMPLATE_LANGUAGE_ID, TEMPLATE_SELECTOR } from './constants';
 import TemplateCompletionItemProvider from './language-service/feature-providers/template-completion-item-provider';
 import TemplateDefinitionProvider from './language-service/feature-providers/template-definition-provider';
 import TemplateDiagnosticsProvider from './language-service/feature-providers/template-diagnostics-collection';
@@ -139,10 +139,6 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 
 	context.subscriptions.push(
-		vscode.languages.registerCompletionItemProvider(STYLING_SELECTOR, stylingCompletionItemProvider, ".")
-	);
-
-	context.subscriptions.push(
 		vscode.languages.registerSignatureHelpProvider(TEMPLATE_SELECTOR, templateSignatureHelpProvider, "(")
 	);
 
@@ -213,6 +209,12 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(
 		vscode.languages.registerFoldingRangeProvider(TEMPLATE_SELECTOR, templateFoldingRangeProvider)
+	);
+
+	// Styling language features
+
+	context.subscriptions.push(
+		vscode.languages.registerCompletionItemProvider([STYLING_SELECTOR, EMBEDDED_STYLING_SELECTOR], stylingCompletionItemProvider, ".")
 	);
 	
 }
