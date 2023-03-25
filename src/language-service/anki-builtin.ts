@@ -84,15 +84,15 @@ export const builtinFiltersList: readonly BuiltIn[] = [
     },
     {
         name: "furigana",
-        description: "Allows for the usage of logographic and ruby characters in a field.\nRuby characters will be displayed above the logographic characters of the field."
+        description: "Allows for the usage of logographic and ruby characters in a field.\n\nRuby characters will be displayed above the logographic characters of the field."
     },
     {
         name: "kana",
-        description: "Allows for the usage of logographic and ruby characters in a field.\nOnly the ruby characters will be displayed."
+        description: "Allows for the usage of logographic and ruby characters in a field.\n\nOnly the ruby characters will be displayed."
     },
     {
         name: "kanji",
-        description: "Allows for the usage of logographic and ruby characters in a field.\nOnly the logographic characters will be displayed."
+        description: "Allows for the usage of logographic and ruby characters in a field.\n\nOnly the logographic characters will be displayed."
     }
 ];
 
@@ -212,10 +212,24 @@ export const builtinCssClassesList: readonly BuiltIn[] = [
     ),
     {
         name: ".card",
-        description: "Buil-in Anki CSS class to define styling for the current card.\n\nThis class is automatically attached to the `<body>` element of a rendered card."
+        description: "Built-in Anki CSS class to define styling for the current card.\n\nThis class is automatically attached to the `<body>` element of a rendered card."
     },
     {
         name: ".replay-button",
         description: "Built-in Anki CSS class to define styling for the replay button shown when audio is included in a field, or when using the `tts` filter."
+    },
+    {
+        name: ".cloze",
+        description: "Built-in Anki CSS class to define styling for a `<span>` element shown when the `cloze` filter is used in a card template."
+    },
+    {
+        name: ".hint",
+        description: "Built-in Anki CSS class to define styling for a `<a>` tag shown when the `hint` filter is used in a card template."
+    },
+    {
+        name: "#typeans",
+        description: "Built-in Anki CSS id to define styling for the text input element shown when the `type` filter is used in a card template."
     }
 ];
+
+export const builtinCssClasses = toMap(builtinCssClassesList);

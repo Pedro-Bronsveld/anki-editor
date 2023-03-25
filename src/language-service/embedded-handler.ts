@@ -1,6 +1,6 @@
 import { createProjectSync, Project, ts } from '@ts-morph/bootstrap';
 import * as vscode from 'vscode';
-import { getCSSLanguageService } from 'vscode-css-languageservice';
+import { getCSSLanguageService, getDefaultCSSDataProvider } from 'vscode-css-languageservice';
 import { createCachedFunction } from "../cache/cached-function";
 import { EmbeddedDocument } from '../models/embedded-document';
 import { embeddedLanguages, LanguageId } from '../models/embedded-languages';
