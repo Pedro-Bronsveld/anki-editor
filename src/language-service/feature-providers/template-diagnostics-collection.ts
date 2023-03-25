@@ -12,6 +12,7 @@ import { DiagnosticCode } from '../diagnostic-codes';
 import { conditionalStartChar, getParentConditionals, getUnavailableFieldNames } from '../parser/ast-utils';
 import EmbeddedHandler from '../embedded-handler';
 import { getExtendedFilterNames, getExtendedSpecialFieldNames } from '../anki-custom';
+import { RequiredProp } from '../../models/required-prop';
 
 export default class TemplateDiagnosticsProvider extends LanguageFeatureProviderBase {
 
@@ -76,9 +77,16 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                         DiagnosticCode.invalidCharacter)
                 ));
                 
+                // Check if this replacement contains a valid tts-voices filter
+                const ttsVoicesFilterSegmentIndex = replacement.type === AstItemType.replacement
+                    ? replacement.filterSegments
+                        .findIndex(filterSegment => filterSegment.filter?.content === "tts-voices" && filterSegment.end === filterSegment.filter.end)
+                    : -1;
+                const containsTtsVoicesFilter = ttsVoicesFilterSegmentIndex >= 0;
+
                 // Check if field exists in model
                 const { field } = replacement.fieldSegment;
-                if (!field) {
+                if (!field && !containsTtsVoicesFilter) {
                     // Provide diagnostic for missing field name
                     allDiagnostics.push(createDiagnostic(document, replacement.fieldSegment.start, replacement.fieldSegment.end,
                         "Missing field name."));
@@ -131,12 +139,30 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                             DiagnosticCode.invalidField,
                             vscode.DiagnosticSeverity.Warning));
                     }
+
+                    if (field && containsTtsVoicesFilter)
+                        // Provide warning for ineffective field in this replacement
+                        allDiagnostics.push(createDiagnostic(document, field.start, field.end,
+                            "This field will not be visible because a 'tts-voices' filter is used in this replacement.",
+                            undefined,
+                            vscode.DiagnosticSeverity.Warning));
                     
                     for (const [i, filterSegment] of replacement.filterSegments.entries()) {
 
                         const { filter } = filterSegment;
+
+                        if (filter && containsTtsVoicesFilter && i !== ttsVoicesFilterSegmentIndex) {
+                            // Provide warning when the tts-voices filter is present in this replacement
+                            allDiagnostics.push(createDiagnostic(document, filter.start, filter.arguments[filter.arguments.length - 1]?.end ?? filter.end,
+                                `This filter will have no effect because ${
+                                    filter.content === "tts-voices" ? "another" : "a"
+                                } 'tts-voices' filter is used in this replacement.`,
+                                undefined,
+                                vscode.DiagnosticSeverity.Warning));
+                            continue;
+                        }
                         // Check if filter name exists
-                        if(config.get("invalidFilterDiagnostics") && filter && !getExtendedFilterNames().includes(filter.content)) {
+                        else if(config.get("invalidFilterDiagnostics") && filter && !getExtendedFilterNames().includes(filter.content)) {
                             allDiagnostics.push(createDiagnostic(document, filter.start, filter.end,
                                 `'${filter.content}' is not a built-in filter.`,
                                 DiagnosticCode.invalidFilterName));
@@ -144,12 +170,17 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
 
                         // Check for invalid spacing at the start of filter segment
                         const startSpaceMatch = filterSegment.content.match(/^\s+/);
-                        if (i > 0 && startSpaceMatch && replacement.filterSegments.slice(0, i).some(({ filter }) => filter !== undefined))
-                            allDiagnostics.push(matchToDiagnostic(document, startSpaceMatch, filterSegment.start,
-                                filterSegment.filter
-                                    ? "Consecutive filters can't start with a space."
-                                    : "Empty filter segments are not allowed when preceded by other filters.",
-                                DiagnosticCode.invalidSpace));
+                        if (i > 0 && startSpaceMatch) {
+                            if (filterSegment.filter)
+                                allDiagnostics.push(matchToDiagnostic(document, startSpaceMatch, filterSegment.start,
+                                    "Consecutive filters can't start with a space.",
+                                    DiagnosticCode.invalidSpace));
+                            // Check for empty filter segments preceded by non-empty filter segments
+                            else if (!containsTtsVoicesFilter && replacement.filterSegments.slice(0, i).some(({ filter }) => filter !== undefined))
+                                allDiagnostics.push(matchToDiagnostic(document, startSpaceMatch, filterSegment.start,
+                                    "Empty filter segments are not allowed when preceded by other filters.",
+                                    DiagnosticCode.invalidSpace));
+                        }
 
                         // Check for invalid spacing at the end of filter segment
                         const endSpaceMatch = filterSegment.content.match(/\s+$/g)

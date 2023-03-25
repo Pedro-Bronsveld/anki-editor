@@ -57,7 +57,7 @@ export const builtinFiltersList: readonly BuiltIn[] = [
     },
     {
         name: "tts-voices",
-        description: "Displays a list of all available languages/voices in the card."
+        description: "Displays a list of tts languages and voices available on the system the card or card preview is rendered on."
     },
     {
         name: "cloze",
