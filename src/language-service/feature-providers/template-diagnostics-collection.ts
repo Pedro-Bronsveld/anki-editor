@@ -12,7 +12,6 @@ import { DiagnosticCode } from '../diagnostic-codes';
 import { conditionalStartChar, getParentConditionals, getUnavailableFieldNames } from '../parser/ast-utils';
 import EmbeddedHandler from '../embedded-handler';
 import { getExtendedFilterNames, getExtendedSpecialFieldNames } from '../anki-custom';
-import { RequiredProp } from '../../models/required-prop';
 
 export default class TemplateDiagnosticsProvider extends LanguageFeatureProviderBase {
 
@@ -80,7 +79,9 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                 // Check if this replacement contains a valid tts-voices filter
                 const ttsVoicesFilterSegmentIndex = replacement.type === AstItemType.replacement
                     ? replacement.filterSegments
-                        .findIndex(filterSegment => filterSegment.filter?.content === "tts-voices" && filterSegment.end === filterSegment.filter.end)
+                        .findIndex((filterSegment, i) => filterSegment.filter?.content === "tts-voices"
+                            && filterSegment.end === filterSegment.filter.end
+                            && (i === 0 || i > 0 && filterSegment.filter.start === filterSegment.start))
                     : -1;
                 const containsTtsVoicesFilter = ttsVoicesFilterSegmentIndex >= 0;
 
@@ -132,20 +133,20 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                     const unavailableFieldNames = getUnavailableFieldNames(replacement);
 
                     // Provide warning diagnostics for unavailable fields
-                    if (field && unavailableFieldNames.has(field.content)) {
+                    if (field && unavailableFieldNames.has(field.content))
                         allDiagnostics.push(createDiagnostic(document, field.start, field.end,
                             `The field '${field.content}' has been checked to be empty in a conditonal ^ parent tag.\n` +
                             "As a result, the field will not display any content when used here.",
                             DiagnosticCode.invalidField,
                             vscode.DiagnosticSeverity.Warning));
-                    }
 
                     if (field && containsTtsVoicesFilter)
                         // Provide warning for ineffective field in this replacement
                         allDiagnostics.push(createDiagnostic(document, field.start, field.end,
                             "This field will not be visible because a 'tts-voices' filter is used in this replacement.",
                             undefined,
-                            vscode.DiagnosticSeverity.Warning));
+                            vscode.DiagnosticSeverity.Hint,
+                            vscode.DiagnosticTag.Unnecessary));
                     
                     for (const [i, filterSegment] of replacement.filterSegments.entries()) {
 
@@ -158,7 +159,8 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                                     filter.content === "tts-voices" ? "another" : "a"
                                 } 'tts-voices' filter is used in this replacement.`,
                                 undefined,
-                                vscode.DiagnosticSeverity.Warning));
+                                vscode.DiagnosticSeverity.Hint,
+                                vscode.DiagnosticTag.Unnecessary));
                             continue;
                         }
                         // Check if filter name exists
@@ -314,16 +316,14 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                                 undefined,
                                 vscode.DiagnosticSeverity.Warning));
                             
-                            if (replacementConditionalChar !== parentConditionalChar && replacement.linkedTag) {
+                            if (replacementConditionalChar !== parentConditionalChar && replacement.linkedTag)
                                 // Mark content of conditional block as dead code using a diagnostic with tag Unnecessary.
-                                const deadCodeDiagnostic = createDiagnostic(document, replacement.end, replacement.linkedTag.start,
+                                allDiagnostics.push(createDiagnostic(document, replacement.end, replacement.linkedTag.start,
                                     `This content will never be visible because it's inside a conditional ${replacementConditionalChar} block nested inside a conditional ${parentConditionalChar} ` +
                                     "block with the same name.",
                                     undefined,
-                                    vscode.DiagnosticSeverity.Hint);
-                                deadCodeDiagnostic.tags = [vscode.DiagnosticTag.Unnecessary];
-                                allDiagnostics.push(deadCodeDiagnostic);
-                            }
+                                    vscode.DiagnosticSeverity.Hint,
+                                    vscode.DiagnosticTag.Unnecessary));
                         }
                     }
 
@@ -442,13 +442,15 @@ const createDiagnostic = (
     end: number,
     message: string,
     code?: DiagnosticCode,
-    severity?: vscode.DiagnosticSeverity): vscode.Diagnostic => {
+    severity?: vscode.DiagnosticSeverity,
+    tag?: vscode.DiagnosticTag): vscode.Diagnostic => {
         const diagnostic = new vscode.Diagnostic(
             new vscode.Range(document.positionAt(start), document.positionAt(end)),
             message,
             severity
         );
         diagnostic.code = code;
+        diagnostic.tags = tag ? [tag] : undefined;
         return diagnostic;
     }
     
