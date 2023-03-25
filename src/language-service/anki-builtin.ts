@@ -53,7 +53,7 @@ export const builtinFiltersList: readonly BuiltIn[] = [
         description: "Converts the value of the field in this replacement to spoken words.\n\n" +
             "Must be followed directly by a language code such as `en_US`.\n\n" +
             "The options `voices` and `speed` can optionally be used to set the voice used for conversion, and the speed at which the audio is played.\n\n" +
-            "Example usage:\n\n`{{tts en_US voices=Microsoft_George,Microsoft_Hazel speed=1.0:Front}}`"
+            "Example usage:\n\n```anki-template\n{{tts en_US voices=Microsoft_George speed=1.0:Field}}\n```"
     },
     {
         name: "tts-voices",
@@ -67,7 +67,7 @@ export const builtinFiltersList: readonly BuiltIn[] = [
     {
         name: "cloze-only",
         description: "When used in combination with the `tts` filter, only the deleted text will be read.\n\n" +
-            "Example: `{{tts en_US:cloze-only:Field}}`."
+            "Example usage:\n\n```anki-template\n{{tts en_US:cloze-only:Field}}\n```"
     },
     {
         name: "hint",
