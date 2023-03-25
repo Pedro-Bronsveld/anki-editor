@@ -3,6 +3,8 @@ export interface BuiltIn {
     description: string;
 }
 
+// Built-in special fields
+
 export const specialFieldsList: readonly BuiltIn[] = [
     {
         name: "Card",
@@ -42,6 +44,8 @@ export const specialFieldsList: readonly BuiltIn[] = [
         description: "This field is used on the back template of a card to embed the corresponding front template."
     },
 ];
+
+// Built-in filters
 
 export const builtinFiltersList: readonly BuiltIn[] = [
     {
@@ -100,6 +104,9 @@ export const specialFieldsNames = toNames(specialFieldsList.filter(({ name }) =>
 
 export const builtinFilters = toMap(builtinFiltersList);
 export const builtinFiltersNames = toNames(builtinFiltersList);
+
+// Builtin tts filter options
+
 export interface TtsOption extends BuiltIn {
     value: string;
     validMatch: RegExp;
@@ -142,3 +149,73 @@ export const ttsDefaultLanguage: BuiltIn = {
 
 export const ttsOptions = toMap(ttsOptionsList);
 export const ttsOptionsNames = toNames(ttsOptionsList);
+
+// Builtin css selectors
+// Note: this list does not include every selector Anki can add to a rendered card,
+// only the selectors that seem the most useful to provide information for.
+
+const cssTargetBases: readonly { selectors: string[], target: string }[] = [
+    {
+        selectors: [".win"],
+        target: "Windows"
+    },
+    {
+        selectors: [".mac"],
+        target: "macOS"
+    },
+    {
+        selectors: [".linux"],
+        target: "Linux"
+    },
+    {
+        selectors: [".mobile"],
+        target: "mobile"
+    },
+    {
+        selectors: [".iphone"],
+        target: "iPhone"
+    },
+    {
+        selectors: [".ipad"],
+        target: "iPad"
+    },
+    {
+        selectors: [".android"],
+        target: "Android"
+    },
+    {
+        selectors: [".gecko", ".firefox"],
+        target: "Firefox"
+    },
+    {
+        selectors: [".chrome"],
+        target: "Google Chrome and Chromium"
+    },
+    {
+        selectors: [".webkit", ".safari"],
+        target: "Safari, Google Chrome and Chromium"
+    },
+    {
+        selectors: [".nightMode"],
+        target: "nightmode"
+    }
+];
+
+export const builtinCssClassesList: readonly BuiltIn[] = [
+    ...cssTargetBases.flatMap<BuiltIn>(targetBase => 
+        targetBase.selectors.map(selector =>
+            ({
+                name: selector,
+                description: `Built-in Anki CSS class to define styling for ${targetBase.target} only.`
+            })
+        )
+    ),
+    {
+        name: ".card",
+        description: "Buil-in Anki CSS class to define styling for the current card.\n\nThis class is automatically attached to the `<body>` element of a rendered card."
+    },
+    {
+        name: ".replay-button",
+        description: "Built-in Anki CSS class to define styling for the replay button shown when audio is included in a field, or when using the `tts` filter."
+    }
+];

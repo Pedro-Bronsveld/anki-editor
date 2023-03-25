@@ -29,7 +29,7 @@ export default class TemplateDefinitionProvider extends LanguageFeatureProviderB
 
         const definitions = definition.map(loc => loc instanceof vscode.Location 
             ? new vscode.Location(document.uri, loc.range)
-            : <vscode.LocationLink>{
+            : {
                 ...loc,
                 targetUri: document.uri
             });

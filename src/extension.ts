@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { AnkiEditorFs } from './anki-editor-filesystem';
-import { ANKI_EDITOR_CONFIG, ANKI_EDITOR_EMBEDDED_SCHEME_BASE, ANKI_EDITOR_SCHEME, ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID, TEMPLATE_SELECTOR } from './constants';
+import { ANKI_EDITOR_CONFIG, ANKI_EDITOR_EMBEDDED_SCHEME_BASE, ANKI_EDITOR_SCHEME, ANKI_EDITOR_SCHEME_BASE, STYLING_SELECTOR, TEMPLATE_LANGUAGE_ID, TEMPLATE_SELECTOR } from './constants';
 import TemplateCompletionItemProvider from './language-service/feature-providers/template-completion-item-provider';
 import TemplateDefinitionProvider from './language-service/feature-providers/template-definition-provider';
 import TemplateDiagnosticsProvider from './language-service/feature-providers/template-diagnostics-collection';
@@ -24,6 +24,7 @@ import AnkiModelDataProvider from './language-service/anki-model-data-provider';
 import AnkiConnect from './anki-connect/anki-connect';
 import EmbeddedHandler from './language-service/embedded-handler';
 import { updateAllDiagnostics } from './language-service/run-diagnostics';
+import StylingCompletionItemProvider from './language-service/feature-providers/styling-completion-item-provider';
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -101,6 +102,8 @@ export function activate(context: vscode.ExtensionContext) {
 	const templateDocumentFormattingEditProvider = new TemplateDocumentFormattingEditProvider(embeddedHandler);
 	const templateDocumentRangeFormattingEditProvider = new TemplateDocumentRangeFormattingEditProvider(embeddedHandler);
 	const templateFoldingRangeProvider = new TemplateFoldingRangeProvider(embeddedHandler);
+
+	const stylingCompletionItemProvider = new StylingCompletionItemProvider();
 	
 	context.subscriptions.push(
 		vscode.workspace.onDidChangeConfiguration((event) => {
@@ -133,6 +136,10 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(
 		vscode.languages.registerCompletionItemProvider(TEMPLATE_SELECTOR, templateCompletionItemProvider, ".", "#", "^", "/")
+	);
+
+	context.subscriptions.push(
+		vscode.languages.registerCompletionItemProvider(STYLING_SELECTOR, stylingCompletionItemProvider, ".")
 	);
 
 	context.subscriptions.push(
