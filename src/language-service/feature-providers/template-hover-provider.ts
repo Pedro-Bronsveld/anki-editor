@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID } from '../../constants';
 import { uriPathToParts } from '../../note-types/uri-parser';
-import { ttsDefaultLanguage, ttsOptions } from '../anki-builtin';
+import { conditionalCharacters, getConditionalExample, ttsDefaultLanguage, ttsOptions } from '../anki-builtin';
 import { getExtendedFilters, getExtendedSpecialFields } from '../anki-custom';
 import AnkiModelDataProvider from '../anki-model-data-provider';
 import { documentRange } from '../document-util';
@@ -104,6 +104,22 @@ export default class TemplateHoverProvider extends LanguageFeatureProviderBase i
                     );
 
                 }
+            }
+            else if ((replacement.type === AstItemType.conditionalStart || replacement.type === AstItemType.conditionalEnd)
+                && (offset >= replacement.start && offset < replacement.conditionalChar.end
+                    || offset >= replacement.end - 2 && offset < replacement.end
+                )) {
+                // Provide hover info for conditional start and end tags
+
+                const { conditionalChar } = replacement;
+                return new vscode.Hover(
+                    new vscode.MarkdownString(conditionalCharacters[conditionalChar.content].description +
+                        "\n\nExample usage:\n\n" +
+                        getConditionalExample(replacement.linkedTag?.conditionalChar.content !== "/"
+                            ? replacement.linkedTag?.conditionalChar.content
+                            : undefined)),
+                    documentRange(document, replacement.start, conditionalChar.end)
+                );
             }
                 
         }

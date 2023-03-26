@@ -233,3 +233,29 @@ export const builtinCssClassesList: readonly BuiltIn[] = [
 ];
 
 export const builtinCssClasses = toMap(builtinCssClassesList);
+
+// Conditional characters and descriptions
+
+export const conditionalCharacters: {
+    [Char in "#" | "^" | "/"]: BuiltIn & { name: Char }
+} = {
+    "#": {
+        name: "#",
+        description: "Conditional if filled opening tag, used to check if a field contains content. Must be matched by a `/` closing tag."
+    },
+    "^": {
+        name: "^",
+        description: "Conditional if empty opening tag, used to check if a field is empty. Must be matched by a `/` closing tag."
+    },
+    "/": {
+        name: "/",
+        description: "Conditional block closing tag, closes a conditional opened by a `#` or `^` opening tag."
+    }
+} as const;
+
+export const getConditionalExample = (openChar: "#" | "^" = "#") =>
+    "```anki-template\n" +
+    `{{${openChar}Field}}\n` +
+    "    ...\n" +
+    "{{/Field}}\n" +
+    "```\n\n";

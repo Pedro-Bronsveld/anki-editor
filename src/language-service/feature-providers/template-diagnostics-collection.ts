@@ -129,7 +129,7 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                     }
 
                     // Get a set of field names that are unavailable in this replacement
-                    // because they were used in conditional parent replaments.
+                    // because they were used in conditional parent replacements.
                     const unavailableFieldNames = getUnavailableFieldNames(replacement);
 
                     // Provide warning diagnostics for unavailable fields

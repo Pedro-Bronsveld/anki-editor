@@ -15,8 +15,8 @@ export enum AstItemType{
     filterArgValue = 14
 }
 
-export type AstItemBase = {
-    content: string;
+export type AstItemBase<Content extends string = string> = {
+    content: Content;
     start: number;
     end: number;
 }
@@ -41,18 +41,30 @@ export enum ConditionalType {
     empty = 2
 }
 
+export type ConditionalStartFilledChar = AstItemBase<"#">;
+
+export type ConditionalStartEmptyChar = AstItemBase<"^">;
+
+export type ConditionalEndChar = AstItemBase<"/">;
+
 export type ConditionalStart = ReplacementBase & {
     type: AstItemType.conditionalStart;
-    conditionalType: ConditionalType;
     linkedTag?: ConditionalEnd;
     fieldSegment: FieldSegment;
     childReplacements: Replacement[];
-}
+} & ({
+    conditionalType: ConditionalType.filled;
+    conditionalChar: ConditionalStartFilledChar;
+} | {
+    conditionalType: ConditionalType.empty;
+    conditionalChar: ConditionalStartEmptyChar;
+});
 
 export type ConditionalEnd = ReplacementBase & {
     type: AstItemType.conditionalEnd;
     linkedTag?: ConditionalStart;
     fieldSegment: FieldSegment;
+    conditionalChar: ConditionalEndChar;
 }
 
 export type Replacement = StandardReplacement | ConditionalStart | ConditionalEnd;

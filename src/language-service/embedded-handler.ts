@@ -72,7 +72,7 @@ export default class EmbeddedHandler {
         const languageRegions = this.getLanguageRegions(document);
         const offset = document.offsetAt(position);
     
-        const positionRegion = languageRegions.find(region => offset >= region.start && offset <= region.end)
+        const positionRegion = languageRegions.find(region => offset >= region.start && offset < region.end)
     
         if (!positionRegion)
             return this.toEmbeddedDocument(defaultLanguageRegion(document), document.uri);

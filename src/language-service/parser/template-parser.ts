@@ -1,4 +1,4 @@
-import { AstItemBase, AstItemType, ConditionalStart, ConditionalType, Field, FieldSegment, Filter, FilterArgDivider, FilterArgKey, FilterArgument, FilterArgumentKeyValue, FilterArgValue, FilterSegment, Replacement, ReplacementBase, TemplateDocument } from "./ast-models";
+import { AstItemBase, AstItemType, ConditionalEndChar, ConditionalStart, ConditionalStartEmptyChar, ConditionalStartFilledChar, ConditionalType, Field, FieldSegment, Filter, FilterArgDivider, FilterArgKey, FilterArgument, FilterArgumentKeyValue, FilterArgValue, FilterSegment, Replacement, ReplacementBase, TemplateDocument } from "./ast-models";
 
 export const parseTemplateDocument = (input: string): TemplateDocument => {
     
@@ -46,18 +46,26 @@ const parseReplacement = (replacementText: string, offset: number = 0): Replacem
             start: offset,
             end
         }
-        
+
+        const conditionalCharOffset = offset + fieldSegmentOffset - 1;
         return conditionalCharacter !== "/"
             ? {
                 ...replacementBase,
                 type: AstItemType.conditionalStart,
                 fieldSegment,
-                conditionalType: conditionalCharacter === "#" ? ConditionalType.filled : ConditionalType.empty,
-                childReplacements: []
+                childReplacements: [],
+                ...(conditionalCharacter === "#" ? {
+                    conditionalType: ConditionalType.filled,
+                    conditionalChar: createAstItemBase("#", conditionalCharOffset)
+                } : {
+                    conditionalType: ConditionalType.empty,
+                    conditionalChar: createAstItemBase("^", conditionalCharOffset)
+                })
             } : {
                 ...replacementBase,
                 type: AstItemType.conditionalEnd,
-                fieldSegment
+                fieldSegment,
+                conditionalChar: createAstItemBase("/", conditionalCharOffset)
             }
     }
     
@@ -179,7 +187,7 @@ const parseFilterArgument = (input: string, offset: number = 0): FilterArgument 
     return res;
 }
 
-const createAstItemBase = (content: string, offset: number = 0): AstItemBase => ({
+const createAstItemBase = <Content extends string>(content: Content, offset: number = 0): AstItemBase<Content> => ({
     content,
     start: offset,
     end: content.length + offset
