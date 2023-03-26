@@ -65,7 +65,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                         specialFields.has(specialField.name)
                             ? vscode.CompletionItemKind.Constant
                             : vscode.CompletionItemKind.EnumMember,
-                        "3", replaceRange, specialField.description)));
+                        "3", replaceRange, specialField.description, specialField.htmlDescription, true)));
 
                 // Create completion items for field names
                 completionItemList.push(...fieldNames
@@ -198,13 +198,14 @@ const createCompletionItem = (label: string | vscode.CompletionItemLabel,
         sortText?: string,
         range?: vscode.Range | { inserting: vscode.Range; replacing: vscode.Range },
         documentationMarkdown?: string,
-        documentationHtml?: boolean
+        documentationHtml?: boolean,
+        themeIcons?: boolean
     ): vscode.CompletionItem => {
     const completion = new vscode.CompletionItem(label, kind);
     completion.sortText = sortText;
     completion.range = range;
     if (documentationMarkdown) {
-        const markdown = new vscode.MarkdownString(documentationMarkdown);
+        const markdown = new vscode.MarkdownString(documentationMarkdown, themeIcons);
         markdown.supportHtml = documentationHtml;
         completion.documentation = markdown;
     }

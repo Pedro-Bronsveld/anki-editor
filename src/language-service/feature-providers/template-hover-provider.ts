@@ -37,11 +37,14 @@ export default class TemplateHoverProvider extends LanguageFeatureProviderBase i
                 
                 // Provide hover info for special builtin field names and custom field names
                 const knownField = getExtendedSpecialFields().get(field.content);
-                if (knownField)
+                if (knownField) {
+                    const markdown = new vscode.MarkdownString(knownField.description, true);
+                    markdown.supportHtml = knownField.htmlDescription;
                     return new vscode.Hover(
-                        new vscode.MarkdownString(knownField.description),
+                        markdown,
                         documentRange(document, field.start, field.end)
                     );
+                }
                 
                 // Try to provide hover info for field of note type
                 if (document.uri.scheme === ANKI_EDITOR_SCHEME_BASE) {

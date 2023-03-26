@@ -1,4 +1,5 @@
 import { TEMPLATE_LANGUAGE_ID } from "../constants";
+import { flagsList } from "./anki-flags";
 import { filterExample, quotedCodeBlock, rubyFilterExample } from "./filter-examples";
 
 export interface BuiltIn {
@@ -20,7 +21,8 @@ export const specialFieldsList: readonly BuiltIn[] = [
             "The 7 available flag colors and names are:\n\n" +
             "|Flag Color|Name|\n" +
             "|----------|----|\n" +
-            ["Red", "Orange", "Green", "Blue", "Pink", "Turquoise", "Purple"].map((color, index) => `|${color}|\`flag${index+1}\`|`).join("\n")
+            flagsList.map(({name, color}, index) => `|<span style="color:#${color};">$(triangle-right)</span> ${name}|\`flag${index+1}\`|`).join("\n"),
+        htmlDescription: true
     },
     {
         name: "Deck",
