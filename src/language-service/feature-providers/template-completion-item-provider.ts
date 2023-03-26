@@ -41,13 +41,14 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
 
             const offset = document.offsetAt(position);
             // Find template replacement at the trigger position
-            const replacement = templateDocument.replacements.find(replacement => inItem(replacement, offset));
+            const replacement = templateDocument.replacements.find(replacement => inItem(replacement, offset)
+                && offset >= replacement.start + 2 && offset <= replacement.end - 2);
             
             if (!replacement)
                 return undefined;
                 
             // Check if the trigger position is currently at a field position
-            if (inItem(replacement.fieldSegment, offset)) {
+            if (inItem(replacement.fieldSegment, offset, true)) {
                 // Handle completions in a field segment
 
                 // Get a list of all field names used in parent conditionals of this replacement,
