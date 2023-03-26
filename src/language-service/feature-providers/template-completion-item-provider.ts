@@ -111,7 +111,9 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                     }
                     
                 }
-                else if (filterSegment) {
+                else if (filterSegment
+                    || !replacement.fieldSegment.field
+                    || replacement.fieldSegment.field && offset <= replacement.fieldSegment.field.start ) {
                     // Create builtin and custom filter suggestions, ending with colon if not already followed by one
                     const appendColon = !replacement.content.substring(offset - replacement.start).match(/^\s*(?=:)/);
                     const suffix = (appendColon ? ":" : "");
@@ -120,7 +122,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                             builtinFilters.has(filter.name)
                                 ? vscode.CompletionItemKind.Function
                                 : vscode.CompletionItemKind.Value,
-                            "4", undefined, filter.description)
+                            "4", undefined, filter.description, filter.htmlDescription)
                     ));
     
                     // Suggest builtin tts filter as a snippet
@@ -195,12 +197,16 @@ const createCompletionItem = (label: string | vscode.CompletionItemLabel,
         kind?: vscode.CompletionItemKind,
         sortText?: string,
         range?: vscode.Range | { inserting: vscode.Range; replacing: vscode.Range },
-        documentationMarkdown?: string
+        documentationMarkdown?: string,
+        documentationHtml?: boolean
     ): vscode.CompletionItem => {
     const completion = new vscode.CompletionItem(label, kind);
     completion.sortText = sortText;
     completion.range = range;
-    if (documentationMarkdown)
-        completion.documentation = new vscode.MarkdownString(documentationMarkdown);
+    if (documentationMarkdown) {
+        const markdown = new vscode.MarkdownString(documentationMarkdown);
+        markdown.supportHtml = documentationHtml;
+        completion.documentation = markdown;
+    }
     return completion;
 }
