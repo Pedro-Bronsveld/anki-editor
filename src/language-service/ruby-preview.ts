@@ -1,4 +1,3 @@
-
 /**
  * Creates a ruby html preview for use in markdown strings with html support.
  * By default vscode renders the ruby characters very small in an on hover.
@@ -28,36 +27,3 @@ export const createRubyPreview = (text: string, ruby: string): string =>
         </ruby>
     </span>
 </h2>`;
-
-export const rubyFilterExample = (filter: "furigana" | "kana" | "kanji"): string => {
-
-    const text = "日本語";
-    const ruby = "にほんご";
-
-    const example = rubyFilterDescriptionBase(filter, text, ruby);
-
-    switch (filter) {
-        case "furigana":
-            return example + createRubyPreview(text, ruby);
-        case "kana":
-            return example + ruby;
-        case "kanji":
-            return example + text;
-    }
-}
-
-export const rubyFilterDescriptionBase = (filter:string, text: string, ruby: string): string =>
-`For example, with the card template:
-\`\`\`anki-template
-{{${filter}:Field}}
-\`\`\`
-
-Where the \`Field\` of a note contains the text:
-
-\`\`\`text
-${text}[${ruby}]
-\`\`\`
-
-The card will be rendered as:
-
-`;

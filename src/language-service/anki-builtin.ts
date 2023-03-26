@@ -1,4 +1,5 @@
-import { rubyFilterExample } from "./ruby-preview";
+import { TEMPLATE_LANGUAGE_ID } from "../constants";
+import { filterExample, quotedCodeBlock, rubyFilterExample } from "./filter-examples";
 
 export interface BuiltIn {
     name: string;
@@ -55,42 +56,54 @@ export const builtinFiltersList: readonly BuiltIn[] = [
         name: "tts",
         description: "Converts the value of the field in this replacement to spoken words.\n\n" +
             "Must be followed directly by a language code such as `en_US`.\n\n" +
-            "Example usage:\n\n" +
-            "```anki-template\n" +
-            "{{tts en_US:Field}}\n" +
-            "```\n\n" +
+            "### Example\n\n" +
+            quotedCodeBlock(TEMPLATE_LANGUAGE_ID, "{{tts en_US:Field}}") + "\n\n" +
+            "### Options Example\n\n" +
             "The options `voices` and `speed` can optionally be used to set the voice used for conversion, and the speed at which the audio is played.\n\n" +
-            "Options example usage:\n\n" +
-            "```anki-template\n" +
-            "{{tts en_US voices=Microsoft_George speed=1.0:Field}}\n" +
-            "```\n"
+            quotedCodeBlock(TEMPLATE_LANGUAGE_ID, "{{tts en_US voices=Microsoft_George speed=1.0:Field}}")
     },
     {
         name: "tts-voices",
-        description: "Displays a list of tts languages and voices available on the system the card or card preview is rendered on."
+        description: "Displays a list of tts languages and voices available on the system the card or card preview is rendered on.\n\n" +
+            "### Example\n\n" +
+            quotedCodeBlock(TEMPLATE_LANGUAGE_ID, "{{tts-voices:}}")
     },
     {
         name: "cloze",
-        description: "Displays the field in this replacement as a cloze deletion.\n\n" +
-            "**Note:** Cloze deletions may only be used on the cloze note type and on note types created by cloning the cloze note type."
+        description: "Hides the part of the field content that's marked as a cloze deletion in the field's content.\n\n" +
+            "**Note:** Cloze deletions may only be used on the cloze note type and on note types created by cloning the cloze note type.\n\n" +
+            filterExample(
+                "{{cloze:Field}}",
+                "This is a {{c1::sample}} cloze deletion.",
+                {
+                    front: "This is a **[...]** cloze deletion.",
+                    back: "This is a **sample** cloze deletion."
+                })
     },
     {
         name: "cloze-only",
         description: "When used in combination with the `tts` filter, only the deleted text will be read.\n\n" +
-            "Example usage:\n\n```anki-template\n{{tts en_US:cloze-only:Field}}\n```"
+            "### Example\n\n" +
+            quotedCodeBlock(TEMPLATE_LANGUAGE_ID, "{{tts en_US:cloze-only:Field}}")
     },
     {
         name: "hint",
-        description: "Hides the content of the field until clicked."
+        description: "Hides the content of the field until clicked.\n\n" +
+            filterExample("{{hint:Field}}", "This is some hint text.", "[Field](https://docs.ankiweb.net/templates/fields.html#hint-fields)") + "\n\n" +
+            "When the 'Field' text is clicked, the field's content is revealed:\n\n" +
+            quotedCodeBlock("text", "This is some hint text.")
     },
     {
         name: "type",
         description: "Displays a text input for the user to type in their answer when used on the front of a card template.\n\n" +
-            "Displays the correct and incorrect letters of the user's input when also used on the back of the card template."
+            "Displays the correct and incorrect letters of the user's input when also used on the back of the card template.\n\n" +
+            "### Example\n\n" +
+            quotedCodeBlock(TEMPLATE_LANGUAGE_ID, "{{type:Field}}")
     },
     {
         name: "text",
-        description: "Displays the source content of the field without any formatting."
+        description: "Displays the source content of the field without any formatting.\n\n" +
+            filterExample("{{text:Field}}", "**Bold** and *Italic* text.", "Bold and Italic text.", true)
     },
     {
         name: "furigana",
@@ -271,7 +284,7 @@ export const conditionalCharacters: {
 } as const;
 
 export const getConditionalExample = (openChar: "#" | "^" = "#") =>
-    "```anki-template\n" +
+    "```" + TEMPLATE_LANGUAGE_ID + "\n" +
     `{{${openChar}Field}}\n` +
     "    ...\n" +
     "{{/Field}}\n" +
