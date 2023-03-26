@@ -113,7 +113,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                 }
                 else if (filterSegment
                     || !replacement.fieldSegment.field
-                    || replacement.fieldSegment.field && offset <= replacement.fieldSegment.field.end ) {
+                    || replacement.fieldSegment.field && offset <= replacement.fieldSegment.field.start ) {
                     // Create builtin and custom filter suggestions, ending with colon if not already followed by one
                     const appendColon = !replacement.content.substring(offset - replacement.start).match(/^\s*(?=:)/);
                     const suffix = (appendColon ? ":" : "");
