@@ -70,8 +70,12 @@ export default class TemplateHoverProvider extends LanguageFeatureProviderBase i
                     
                     if (!knownFilter)
                         return;
+                    
+                    const markdown = new vscode.MarkdownString(knownFilter.description);
+                    markdown.supportHtml = knownFilter.htmlDescription;
+                    
                     return new vscode.Hover(
-                        new vscode.MarkdownString(knownFilter.description),
+                        markdown,
                         documentRange(document, filter.start, filter.end)
                     );
                 }

@@ -1,6 +1,9 @@
+import { createRubyPreview, rubyFilterExample } from "./ruby-preview";
+
 export interface BuiltIn {
     name: string;
     description: string;
+    htmlDescription?: boolean;
 }
 
 // Built-in special fields
@@ -52,8 +55,15 @@ export const builtinFiltersList: readonly BuiltIn[] = [
         name: "tts",
         description: "Converts the value of the field in this replacement to spoken words.\n\n" +
             "Must be followed directly by a language code such as `en_US`.\n\n" +
+            "Example usage:\n\n" +
+            "```anki-template\n" +
+            "{{tts en_US:Field}}\n" +
+            "```\n\n" +
             "The options `voices` and `speed` can optionally be used to set the voice used for conversion, and the speed at which the audio is played.\n\n" +
-            "Example usage:\n\n```anki-template\n{{tts en_US voices=Microsoft_George speed=1.0:Field}}\n```"
+            "Options example usage:\n\n" +
+            "```anki-template\n" +
+            "{{tts en_US voices=Microsoft_George speed=1.0:Field}}\n" +
+            "```\n"
     },
     {
         name: "tts-voices",
@@ -84,15 +94,25 @@ export const builtinFiltersList: readonly BuiltIn[] = [
     },
     {
         name: "furigana",
-        description: "Allows for the usage of logographic and ruby characters in a field.\n\nRuby characters will be displayed above the logographic characters of the field."
+        description: "Allows for the use of logographic and ruby characters in a field.\n\n" +
+            "Ruby characters will be displayed above the logographic characters.\n\n" +
+            rubyFilterExample("furigana") +
+            createRubyPreview("日本語", "にほんご"),
+        htmlDescription: true
     },
     {
         name: "kana",
-        description: "Allows for the usage of logographic and ruby characters in a field.\n\nOnly the ruby characters will be displayed."
+        description: "Allows for the use of logographic and ruby characters in a field.\n\n" +
+            "Only the ruby characters will be displayed.\n\n" +
+            rubyFilterExample("kana") +
+            "にほんご"
     },
     {
         name: "kanji",
-        description: "Allows for the usage of logographic and ruby characters in a field.\n\nOnly the logographic characters will be displayed."
+        description: "Allows for the use of logographic and ruby characters in a field.\n\n" +
+            "Only the logographic characters will be displayed.\n\n" +
+            rubyFilterExample("kanji") +
+            "日本語"
     }
 ];
 
