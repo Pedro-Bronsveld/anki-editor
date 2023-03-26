@@ -48,7 +48,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                 return undefined;
                 
             // Check if the trigger position is currently at a field position
-            if (inItem(replacement.fieldSegment, offset, true)) {
+            if (inItem(replacement.fieldSegment, offset)) {
                 // Handle completions in a field segment
 
                 // Get a list of all field names used in parent conditionals of this replacement,
@@ -78,7 +78,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
             }
             
             if (replacement.type === AstItemType.replacement ) {
-                const filterSegment = getItemAtOffset(replacement.filterSegments, offset, true);
+                const filterSegment = getItemAtOffset(replacement.filterSegments, offset);
                 
                 // Check if the trigger position was at the key value position inside a tts filter segment
                 if (filterSegment?.filter?.content === "tts") {
