@@ -29,8 +29,22 @@ export const createRubyPreview = (text: string, ruby: string): string =>
     </span>
 </h2>`;
 
-export const rubyFilterExample = (filter: string) =>
-    rubyFilterDescriptionBase(filter, "日本語", "にほんご");
+export const rubyFilterExample = (filter: "furigana" | "kana" | "kanji"): string => {
+
+    const text = "日本語";
+    const ruby = "にほんご";
+
+    const example = rubyFilterDescriptionBase(filter, text, ruby);
+
+    switch (filter) {
+        case "furigana":
+            return example + createRubyPreview(text, ruby);
+        case "kana":
+            return example + ruby;
+        case "kanji":
+            return example + text;
+    }
+}
 
 export const rubyFilterDescriptionBase = (filter:string, text: string, ruby: string): string =>
 `For example, with the card template:

@@ -1,4 +1,4 @@
-import { createRubyPreview, rubyFilterExample } from "./ruby-preview";
+import { rubyFilterExample } from "./ruby-preview";
 
 export interface BuiltIn {
     name: string;
@@ -96,23 +96,20 @@ export const builtinFiltersList: readonly BuiltIn[] = [
         name: "furigana",
         description: "Allows for the use of logographic and ruby characters in a field.\n\n" +
             "Ruby characters will be displayed above the logographic characters.\n\n" +
-            rubyFilterExample("furigana") +
-            createRubyPreview("日本語", "にほんご"),
+            rubyFilterExample("furigana"),
         htmlDescription: true
     },
     {
         name: "kana",
         description: "Allows for the use of logographic and ruby characters in a field.\n\n" +
             "Only the ruby characters will be displayed.\n\n" +
-            rubyFilterExample("kana") +
-            "にほんご"
+            rubyFilterExample("kana")
     },
     {
         name: "kanji",
         description: "Allows for the use of logographic and ruby characters in a field.\n\n" +
             "Only the logographic characters will be displayed.\n\n" +
-            rubyFilterExample("kanji") +
-            "日本語"
+            rubyFilterExample("kanji")
     }
 ];
 
