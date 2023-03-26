@@ -6,11 +6,11 @@ export const inItem = (item: AstItemBase, offset: number, includeEnd: boolean = 
     offset >= item.start &&
     (offset < item.end || (item.start === item.end || includeEnd) && offset === item.end);
 
-export const getItemAtOffset = <T extends AstItemBase>(items: T[], offset: number): T | undefined =>
-    items.find(item => inItem(item, offset))
+export const getItemAtOffset = <T extends AstItemBase>(items: T[], offset: number, includeEnd: boolean = false): T | undefined =>
+    items.find(item => inItem(item, offset, includeEnd))
 
-export const getFieldAtOffset = (replacements: Replacement[], offset: number): Field | undefined => {
-    const replacement = getItemAtOffset(replacements, offset);
+export const getFieldAtOffset = (replacements: Replacement[], offset: number, includeEnd: boolean = false): Field | undefined => {
+    const replacement = getItemAtOffset(replacements, offset, includeEnd);
 
     if (!replacement?.fieldSegment.field || !inItem(replacement.fieldSegment.field, offset))
         return undefined;

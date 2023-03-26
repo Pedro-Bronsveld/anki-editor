@@ -78,7 +78,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
             }
             
             if (replacement.type === AstItemType.replacement ) {
-                const filterSegment = getItemAtOffset(replacement.filterSegments, offset);
+                const filterSegment = getItemAtOffset(replacement.filterSegments, offset, true);
                 
                 // Check if the trigger position was at the key value position inside a tts filter segment
                 if (filterSegment?.filter?.content === "tts") {
@@ -110,7 +110,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                     }
                     
                 }
-                else {
+                else if (filterSegment) {
                     // Create builtin and custom filter suggestions, ending with colon if not already followed by one
                     const appendColon = !replacement.content.substring(offset - replacement.start).match(/^\s*(?=:)/);
                     const suffix = (appendColon ? ":" : "");
