@@ -211,11 +211,16 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                             }
                             
                             // Check if there is more than one space between the tts filter name and the language argument
-                            if (languageArg?.type === AstItemType.filterArgument && languageArg.start - filter.end > 1) {
-                                allDiagnostics.push(createDiagnostic(document, filter.end + 1, languageArg.start,
-                                    "There must be exactly one space between the tts filter name and the language argument.",
-                                    DiagnosticCode.invalidSpace
-                                ));
+                            if (languageArg?.type === AstItemType.filterArgument) {
+                                const separatingSpaces = filterSegment.content.substring(filter.end - filterSegment.start, languageArg.start - filterSegment.start);
+                                    
+                                if (separatingSpaces !== " ") {
+                                    const incorrectSpace = separatingSpaces.length === 1;
+                                    allDiagnostics.push(createDiagnostic(document, filter.end + (incorrectSpace ? 0 : 1), languageArg.start,
+                                        "The tts filter name and language argument must be separated by exactly one space.",
+                                        incorrectSpace ? DiagnosticCode.incorrectSpace : DiagnosticCode.invalidSpace
+                                    ));
+                                }
                             }
 
                             if (filter.arguments.length > 1) {

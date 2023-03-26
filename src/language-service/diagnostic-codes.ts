@@ -9,5 +9,6 @@ export enum DiagnosticCode {
     invalidFilterName = 8,
     missingClosingTag = 9,
     missingOpeningTag = 10,
-    missingTtsLanguageArg = 11
+    missingTtsLanguageArg = 11,
+    incorrectSpace = 12
 }

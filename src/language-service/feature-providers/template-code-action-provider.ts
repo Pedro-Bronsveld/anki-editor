@@ -119,6 +119,10 @@ export default class TemplateCodeActionProvider extends LanguageFeatureProviderB
                                 return createCodeAction(`Create matching ${oppositeChar} ${isOpening ? "closing" : "opening"} tag.`, workspaceEdit);
                             });
                         }
+                    case DiagnosticCode.incorrectSpace:
+                        const workspaceEdit = new vscode.WorkspaceEdit();
+                        workspaceEdit.replace(document.uri, diagnostic.range, " ");
+                        return createCodeAction("Replace with single space.", workspaceEdit)
                     default:
                         return;
                 }
