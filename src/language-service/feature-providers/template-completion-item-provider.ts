@@ -90,6 +90,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                         const completion = createCompletionItem("en_US", vscode.CompletionItemKind.TypeParameter, "1", undefined, ttsDefaultLanguage.description)
                         const suffix = offset === filter.arguments[0]?.start ? " " : "";
                         completion.insertText = new vscode.SnippetString("${0:en_US}" + suffix);
+                        completion.range = new vscode.Range(document.positionAt(filter.end + 1), position);
                         completionItemList.push(completion);
                     }
                     else if (offset > filter.arguments[0]?.end) {
