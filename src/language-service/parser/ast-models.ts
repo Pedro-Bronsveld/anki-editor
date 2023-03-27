@@ -24,6 +24,7 @@ export type AstItemBase<Content extends string = string> = {
 export type TemplateDocument = AstItemBase & {
     type: AstItemType.document;
     replacements: Replacement[];
+    containsCloze: boolean;
 }
 
 export type ReplacementBase = AstItemBase & {

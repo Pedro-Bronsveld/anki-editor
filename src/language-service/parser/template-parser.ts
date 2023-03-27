@@ -1,4 +1,4 @@
-import { AstItemBase, AstItemType, ConditionalEndChar, ConditionalStart, ConditionalStartEmptyChar, ConditionalStartFilledChar, ConditionalType, Field, FieldSegment, Filter, FilterArgDivider, FilterArgKey, FilterArgument, FilterArgumentKeyValue, FilterArgValue, FilterSegment, Replacement, ReplacementBase, TemplateDocument } from "./ast-models";
+import { AstItemBase, AstItemType, ConditionalStart, ConditionalType, Field, FieldSegment, Filter, FilterArgDivider, FilterArgKey, FilterArgument, FilterArgumentKeyValue, FilterArgValue, FilterSegment, Replacement, ReplacementBase, TemplateDocument } from "./ast-models";
 
 export const parseTemplateDocument = (input: string): TemplateDocument => {
     
@@ -8,6 +8,8 @@ export const parseTemplateDocument = (input: string): TemplateDocument => {
         parseReplacement(replacementMatch[0], replacementMatch.index)
     );
 
+    const containsCloze = someCloze(replacements);
+
     // link conditional opening and closing tags
     linkConditionalTags(replacements);
     
@@ -16,7 +18,8 @@ export const parseTemplateDocument = (input: string): TemplateDocument => {
         start: 0,
         end: input.length,
         type: AstItemType.document,
-        replacements
+        replacements,
+        containsCloze
     }
 }
 
@@ -125,6 +128,11 @@ const linkConditionalTags = (replacements: Replacement[]): Replacement[] => {
     
     return replacements;
 }
+
+const someCloze = (replacements: Replacement[]): boolean => 
+    replacements.some(replacement => replacement.type === AstItemType.replacement
+        && replacement.filterSegments
+    .some(filterSegment => filterSegment.filter?.content === "cloze"));
 
 const fieldRegexp = /[^#^/\s:{}\"]+([^:{}\s\"]|\s(?!\s*(}}|$)))*(?!.*:)/
 

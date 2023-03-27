@@ -12,6 +12,7 @@ import { DiagnosticCode } from '../diagnostic-codes';
 import { conditionalStartChar, getParentConditionals, getUnavailableFieldNames } from '../parser/ast-utils';
 import EmbeddedHandler from '../embedded-handler';
 import { getExtendedFilterNames, getExtendedSpecialFieldNames } from '../anki-custom';
+import { isClozeField, isClozeReplacement } from '../cloze-fields';
 
 export default class TemplateDiagnosticsProvider extends LanguageFeatureProviderBase {
 
@@ -66,6 +67,8 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                 }
             }
 
+            const modelMaybeCloze = modelAvailable && modelName !== "" && await this.ankiModelDataProvider.probablyCloze(modelName);
+
             for (const replacement of templateDocument.replacements) {
                 
                 // Check for invalid characters
@@ -92,12 +95,16 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                     allDiagnostics.push(createDiagnostic(document, replacement.fieldSegment.start, replacement.fieldSegment.end,
                         "Missing field name."));
                 }
-                else if (config.get("invalidFieldDiagnostics") && modelAvailable && field && !validFields.has(field.content)) {
+                else if (config.get("invalidFieldDiagnostics") && modelAvailable && field && 
+                    !(validFields.has(field.content) || modelMaybeCloze && isClozeReplacement(replacement))) {
                     // Provide diagnostics based on field names from model
                     allDiagnostics.push(createDiagnostic(document, field.start, field.end,
                         field.content === "FrontSide"
                             ? "The special field 'FrontSide' can only be used on the back template of a card."
-                            : `"${field.content}" is not a field name in note type "${modelName}" or a special built-in field name.`,
+                            : `"${field.content}" is not a field name in note type "${modelName}" or a special field name.` +
+                                (isClozeReplacement(replacement) && !modelMaybeCloze
+                                ? "\n\nSpecial cloze fields such as \"c1\" can only be used in conditional tags on cloze note types."
+                                : ""),
                         DiagnosticCode.invalidField));
                 }
 

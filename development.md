@@ -71,3 +71,16 @@ Any number of spaces is allowed at the start of a conditional opening or closing
 {{  #   FrontField}}
 {{ /  FrontField}}
 ```
+
+### Cloze note types
+- Only has one card type with a front and back template, cards are generated based on the number of cloze references in a note's field.
+- The name of this one card type is always `"Cloze"`.
+- Both front and back of a cloze card type must contain at least one replacement with a `cloze` filter.
+
+- Adds special fields `c1`, `c2`, `c3`, `c...` that can only used in conditional opening and closing tags to check which of a note's cloze references is being used.
+- Numbers of cloze must start at `c1` and must be defined in consecutive order in the field. So `c2` can only be defined when the field already contains a `c1`.
+  - This does not affect which `c...` special fields can be used in the card template conditional tags.
+- Leading zeros are omitted, so `c0001` used in a note field matches `c1` used in a conditional tag.
+  - Opening and closing tag must still be exactly the same string.
+- `c0` is not valid
+- `c-1` and other negative numbers are not valid.
