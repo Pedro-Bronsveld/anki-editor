@@ -67,7 +67,7 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                 }
             }
 
-            const modelMaybeCloze = modelAvailable && modelName !== "" && await this.ankiModelDataProvider.probablyCloze(modelName);
+            const modelProbablyCloze = modelAvailable && modelName !== "" && await this.ankiModelDataProvider.probablyCloze(modelName);
 
             for (const replacement of templateDocument.replacements) {
                 
@@ -96,13 +96,13 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                         "Missing field name."));
                 }
                 else if (config.get("invalidFieldDiagnostics") && modelAvailable && field && 
-                    !(validFields.has(field.content) || modelMaybeCloze && isClozeReplacement(replacement))) {
+                    !(validFields.has(field.content) || modelProbablyCloze && isClozeReplacement(replacement))) {
                     // Provide diagnostics based on field names from model
                     allDiagnostics.push(createDiagnostic(document, field.start, field.end,
                         field.content === "FrontSide"
                             ? "The special field 'FrontSide' can only be used on the back template of a card."
                             : `"${field.content}" is not a field name in note type "${modelName}" or a special field name.` +
-                                (isClozeReplacement(replacement) && !modelMaybeCloze
+                                (isClozeReplacement(replacement) && !modelProbablyCloze
                                 ? "\n\nSpecial cloze fields such as \"c1\" can only be used in conditional tags on cloze note types."
                                 : ""),
                         DiagnosticCode.invalidField));

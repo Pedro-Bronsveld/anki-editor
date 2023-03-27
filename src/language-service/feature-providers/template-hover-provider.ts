@@ -4,8 +4,10 @@ import { uriPathToParts } from '../../note-types/uri-parser';
 import { conditionalCharacters, getConditionalExample, ttsDefaultLanguage, ttsOptions } from '../anki-builtin';
 import { getExtendedFilters, getExtendedSpecialFields } from '../anki-custom';
 import AnkiModelDataProvider from '../anki-model-data-provider';
+import { isClozeReplacement } from '../cloze-fields';
 import { documentRange } from '../document-util';
 import EmbeddedHandler from '../embedded-handler';
+import { quotedCodeBlock } from '../filter-examples';
 import { AstItemType, FilterArgumentKeyValue } from '../parser/ast-models';
 import { getItemAtOffset, inItem } from '../parser/ast-utils';
 import LanguageFeatureProviderBase from './language-feature-provider-base';
@@ -51,9 +53,16 @@ export default class TemplateHoverProvider extends LanguageFeatureProviderBase i
                     const uriParts = uriPathToParts(document.uri);
                     const modelName = uriParts[1];
                     const modelFieldNames = new Set(await this.ankiModelDataProvider.getFieldNames(modelName));
+                    const modelProbablyCloze = await this.ankiModelDataProvider.probablyCloze(modelName);
                     
                     if (modelFieldNames.has(field.content))
                         return new vscode.Hover(new vscode.MarkdownString(`Field in note type "${modelName}"`), fieldRange);
+                    else if (modelProbablyCloze && isClozeReplacement(replacement))
+                        return new vscode.Hover(new vscode.MarkdownString(
+                            "References a cloze deletion number in a note's field.\n\n" +
+                            "Content in this conditional block will only be visible if the field of a note " +
+                            "contains a cloze deletion with a matching number. For example:\n\n" + 
+                            quotedCodeBlock("text", `Some {{${field.content}::Hidden Text}}`)), fieldRange);
                 }
                 
                 return;
