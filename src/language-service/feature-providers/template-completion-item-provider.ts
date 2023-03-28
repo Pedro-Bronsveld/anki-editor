@@ -7,12 +7,11 @@ import { getExtendedSpecialFieldNames, getExtendedSpecialFieldsList, getExtended
 import { documentRange } from '../document-util';
 import EmbeddedHandler from '../embedded-handler';
 import { AstItemType, ConditionalStart, FilterArgumentKeyValue } from '../parser/ast-models';
-import { getItemAtOffset, getParentConditionals, getUnavailableFieldNames, inItem } from '../parser/ast-utils';
+import { getItemAtOffset, getUnavailableFieldNames, inItem } from '../parser/ast-utils';
 import { isBackSide } from '../template-util';
 import LanguageFeatureProviderBase from './language-feature-provider-base';
 import { getClozeFieldNumber, isClozeReplacement } from '../cloze-fields';
 import { quotedCodeBlock } from '../filter-examples';
-import { RequiredProp } from '../../models/required-prop';
 
 export default class TemplateCompletionItemProvider extends LanguageFeatureProviderBase implements vscode.CompletionItemProvider {
     
