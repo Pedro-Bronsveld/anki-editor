@@ -147,20 +147,9 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                         .map<[number, string]>(content => [getClozeFieldNumber(content), content])
                         .sort(([numA], [numB]) => numA - numB);
 
-                    if (clozeNumberNames.length === 0 || clozeNumberNames[0][0] !== 1)
-                        clozeNumberNames.splice(0, 0, [1, "c1"]);
-                    
-                    for (let i = 1; i < clozeNumberNames.length; i++) {
-                        const [num] = clozeNumberNames[i];
-                        if (i !== num) {
-                            const prevIndex = i - 1;
-                            if (prevIndex >= 0) {
-                                const [prevNum, ] = clozeNumberNames[prevIndex];
-                                clozeNumberNames.splice(prevIndex, 0, [prevNum + 1, `c${prevNum + 1}`]);
-                            }
-                            break;
-                        }
-                    }                        
+                    const maxConsecutiveNum = [...clozeNumberNames].reduce((previousNum, [currentNum]) => currentNum === previousNum + 1 ? currentNum : previousNum, 0);
+
+                    clozeNumberNames.splice(maxConsecutiveNum, 0, [maxConsecutiveNum + 1, `c${maxConsecutiveNum + 1}`]);                      
                     
                     completionItemList.push(...clozeNumberNames
                         .map(([, name]) => createCompletionItem(name, vscode.CompletionItemKind.Reference, "3", undefined,
