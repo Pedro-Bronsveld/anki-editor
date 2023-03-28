@@ -6,8 +6,8 @@ import AnkiModelDataProvider from '../anki-model-data-provider';
 import { getExtendedSpecialFieldNames, getExtendedSpecialFieldsList, getExtendedFiltersList } from '../anki-custom';
 import { documentRange } from '../document-util';
 import EmbeddedHandler from '../embedded-handler';
-import { AstItemType, FilterArgumentKeyValue } from '../parser/ast-models';
-import { getItemAtOffset, getUnavailableFieldNames, inItem } from '../parser/ast-utils';
+import { AstItemType, ConditionalStart, FilterArgumentKeyValue } from '../parser/ast-models';
+import { getItemAtOffset, getParentConditionals, getUnavailableFieldNames, inItem } from '../parser/ast-utils';
 import { isBackSide } from '../template-util';
 import LanguageFeatureProviderBase from './language-feature-provider-base';
 import { getClozeFieldNumber, isClozeReplacement } from '../cloze-fields';
@@ -156,6 +156,25 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                             clozeFieldDescription + " For example:\n\n" +
                             quotedCodeBlock("text", `Some {{${name}::Hidden Text}}`)))
                     );
+                }
+
+                // Preselect the field matching the conditional opening field when providing completions in a conditional closing tag
+                if (replacement.type === AstItemType.conditionalEnd) {
+
+                    const openingTag = templateDocument.replacements
+                        .find((otherReplacement): otherReplacement is ConditionalStart => otherReplacement.type === AstItemType.conditionalStart
+                            && replacement.parentConditional === otherReplacement
+                            && !otherReplacement.linkedTag);
+                    
+                    if (openingTag) {
+                        const completionItem = completionItemList.find(completionItem =>
+                            (typeof completionItem.label === "object"
+                                ? completionItem.label.label
+                                : completionItem.label) === openingTag.fieldSegment.field?.content)
+                        if (completionItem)
+                            completionItem.preselect = true;
+                    }
+                    
                 }
             }
             
