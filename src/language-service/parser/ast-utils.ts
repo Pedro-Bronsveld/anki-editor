@@ -53,12 +53,13 @@ export const getUnavailableFieldNames = (replacement: Replacement): Set<string> 
     const unavailableFieldNames = replacement.type !== AstItemType.replacement
         ? new Set(parentConditionals
             .filter((conditional): conditional is ConditionalStart & { fieldSegment: RequiredProp<FieldSegment, "field"> } =>
-            conditional.fieldSegment.field !== undefined)
+                conditional.fieldSegment.field !== undefined
+                && !(replacement.type === AstItemType.conditionalEnd && replacement.parentConditional === conditional))
             .map(conditional => conditional.fieldSegment.field.content)) 
         : new Set(parentConditionals
             .filter((conditional): conditional is ConditionalStart & { conditionalType: ConditionalType.empty , fieldSegment: RequiredProp<FieldSegment, "field"> } =>
-            conditional.conditionalType === ConditionalType.empty &&
-            conditional.fieldSegment.field !== undefined)
+                conditional.conditionalType === ConditionalType.empty &&
+                conditional.fieldSegment.field !== undefined)
             .map(conditional => conditional.fieldSegment.field.content));
     return unavailableFieldNames;
 }
