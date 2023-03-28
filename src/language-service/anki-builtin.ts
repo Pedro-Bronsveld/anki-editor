@@ -291,3 +291,10 @@ export const getConditionalExample = (openChar: "#" | "^" = "#") =>
     "    ...\n" +
     "{{/Field}}\n" +
     "```\n\n";
+
+// Conditional cloze field
+
+export const clozeFieldDescription = 
+    "References a cloze deletion number in a note's field.\n\n" +
+    "Content in this conditional block will only be visible if the field of a note " +
+    "contains a cloze deletion with a matching number."

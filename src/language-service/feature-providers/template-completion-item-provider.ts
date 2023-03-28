@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID } from '../../constants';
 import { uriPathToParts } from '../../note-types/uri-parser';
-import { builtinFilters, specialFields, ttsDefaultLanguage, ttsOptionsList } from '../anki-builtin';
+import { builtinFilters, clozeFieldDescription, specialFields, ttsDefaultLanguage, ttsOptionsList } from '../anki-builtin';
 import AnkiModelDataProvider from '../anki-model-data-provider';
 import { getExtendedSpecialFieldNames, getExtendedSpecialFieldsList, getExtendedFiltersList } from '../anki-custom';
 import { documentRange } from '../document-util';
@@ -10,6 +10,9 @@ import { AstItemType, FilterArgumentKeyValue } from '../parser/ast-models';
 import { getItemAtOffset, getUnavailableFieldNames, inItem } from '../parser/ast-utils';
 import { isBackSide } from '../template-util';
 import LanguageFeatureProviderBase from './language-feature-provider-base';
+import { getClozeFieldNumber, isClozeReplacement } from '../cloze-fields';
+import { quotedCodeBlock } from '../filter-examples';
+import { RequiredProp } from '../../models/required-prop';
 
 export default class TemplateCompletionItemProvider extends LanguageFeatureProviderBase implements vscode.CompletionItemProvider {
     
@@ -23,6 +26,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
         const completionItemList: vscode.CompletionItem[] = [];
         const fieldNames: string[] = [];
         const templateIsBackSide = isBackSide(document);
+        let modelName: null | string = null;
 
         if (document.uri.scheme === ANKI_EDITOR_SCHEME_BASE) {
             // Field suggestions from the model can only be provided on documents loaded through Anki-Connect
@@ -30,7 +34,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
     
             if (uriParts.length >= 2) {
                 // Create field suggestions
-                const modelName = uriParts[1];
+                modelName = uriParts[1];
                 fieldNames.push(...(await this.ankiModelDataProvider.getFieldNames(modelName)));
             }
         }
@@ -131,6 +135,39 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                     completionItemList.push(ttsCompletion);
                 }
                 
+            }
+            else if (replacement.type === AstItemType.conditionalStart || replacement.type === AstItemType.conditionalEnd) {
+                if (modelName && await this.ankiModelDataProvider.probablyCloze(modelName)) {
+                    // Create cloze field suggestions
+                    const clozeNumberNames = [...new Set(templateDocument.replacements
+                        .filter(replacement => isClozeReplacement(replacement))
+                        .map(replacement => replacement.fieldSegment.field)
+                        .filter((field): field is Exclude<typeof field, undefined> => field !== undefined)
+                        .map(({ content }) => content))]
+                        .map<[number, string]>(content => [getClozeFieldNumber(content), content])
+                        .sort(([numA], [numB]) => numA - numB);
+
+                    if (clozeNumberNames.length === 0 || clozeNumberNames[0][0] !== 1)
+                        clozeNumberNames.splice(0, 0, [1, "c1"]);
+                    
+                    for (let i = 1; i < clozeNumberNames.length; i++) {
+                        const [num] = clozeNumberNames[i];
+                        if (i !== num) {
+                            const prevIndex = i - 1;
+                            if (prevIndex >= 0) {
+                                const [prevNum, ] = clozeNumberNames[prevIndex];
+                                clozeNumberNames.splice(prevIndex, 0, [prevNum + 1, `c${prevNum + 1}`]);
+                            }
+                            break;
+                        }
+                    }                        
+                    
+                    completionItemList.push(...clozeNumberNames
+                        .map(([, name]) => createCompletionItem(name, vscode.CompletionItemKind.Reference, "3", undefined,
+                            clozeFieldDescription + " For example:\n\n" +
+                            quotedCodeBlock("text", `Some {{${name}::Hidden Text}}`)))
+                    );
+                }
             }
             
             return completionItemList;
