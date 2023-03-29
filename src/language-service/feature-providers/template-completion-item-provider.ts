@@ -10,7 +10,7 @@ import { AstItemType, ConditionalStart, FilterArgumentKeyValue } from '../parser
 import { getItemAtOffset, getUnavailableFieldNames, inItem } from '../parser/ast-utils';
 import { isBackSide } from '../template-util';
 import LanguageFeatureProviderBase from './language-feature-provider-base';
-import { getClozeFieldNumber, isClozeReplacement } from '../cloze-fields';
+import { getClozeFieldSuggestions } from '../cloze-fields';
 import { quotedCodeBlock } from '../filter-examples';
 
 export default class TemplateCompletionItemProvider extends LanguageFeatureProviderBase implements vscode.CompletionItemProvider {
@@ -138,20 +138,10 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
             else if (replacement.type === AstItemType.conditionalStart || replacement.type === AstItemType.conditionalEnd) {
                 if (modelName && await this.ankiModelDataProvider.probablyCloze(modelName)) {
                     // Create cloze field suggestions
-                    const clozeNumberNames = [...new Set(templateDocument.replacements
-                        .filter(replacement => isClozeReplacement(replacement))
-                        .map(replacement => replacement.fieldSegment.field)
-                        .filter((field): field is Exclude<typeof field, undefined> => field !== undefined)
-                        .map(({ content }) => content))]
-                        .map<[number, string]>(content => [getClozeFieldNumber(content), content])
-                        .sort(([numA], [numB]) => numA - numB);
-
-                    const maxConsecutiveNum = [...clozeNumberNames].reduce((previousNum, [currentNum]) => currentNum === previousNum + 1 ? currentNum : previousNum, 0);
-
-                    clozeNumberNames.splice(maxConsecutiveNum, 0, [maxConsecutiveNum + 1, `c${maxConsecutiveNum + 1}`]);                      
+                    const clozeNumberNames = getClozeFieldSuggestions(templateDocument);
                     
                     completionItemList.push(...clozeNumberNames
-                        .map(([, name]) => createCompletionItem(name, vscode.CompletionItemKind.Reference, "3", undefined,
+                        .map(({ name }) => createCompletionItem(name, vscode.CompletionItemKind.Reference, "3", undefined,
                             clozeFieldDescription + " For example:\n\n" +
                             quotedCodeBlock("text", `Some {{${name}::Hidden Text}}`)))
                     );
@@ -193,25 +183,35 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
         const offset = document.offsetAt(position);
         const preChar = document.getText().substring(offset-1, offset);
         if (preChar.match(/[#^/{\s]/)){
+
+            const embeddedAnkiTemplate = this.getEmbeddedByLanguage(document, TEMPLATE_LANGUAGE_ID);
+            const templateDocument = this.parseTemplateDocument(embeddedAnkiTemplate?.content ?? "");
+            
             // Provide snippets for standard replacement and conditional replacement tags and blocks
-            const optionFieldNames = (fieldNames.length > 0 ? fieldNames : ["Field"])
+            const fieldNameOptions = (fieldNames.length > 0 ? fieldNames : ["Field"])
                 .concat(
                     getExtendedSpecialFieldNames().concat(templateIsBackSide ? "FrontSide" : []).sort()
                 ).map(option => option.replace(/([,|])/g, "\\$1"));
+
+            const clozeFieldsOptions = modelName && await this.ankiModelDataProvider.probablyCloze(modelName)
+                ? getClozeFieldSuggestions(templateDocument).map(({ name }) => name)
+                : [];
+            
             const isPreChar = preChar.match(/[#^/]/) !== null;
             builtinCompletionList.items.push(...[
-                    { start: "",  detail: "Anki template replacement"},
-                    { start: "cloze:",  detail: "Anki cloze filter and field replacement"},
-                    { start: "hint:",  detail: "Anki hint filter and field replacement"},
-                    { start: "type:",  detail: "Anki type filter and field replacement"},
-                    { start: "#", detail: "Anki if filled opening tag"},
-                    { start: "^", detail: "Anki if empty opening tag"},
-                    { start: "/", detail: "Anki if block closing tag" }
+                    { start: "",  detail: "Anki template replacement"} as const,
+                    { start: "cloze:",  detail: "Anki cloze filter and field replacement"} as const,
+                    { start: "hint:",  detail: "Anki hint filter and field replacement"} as const,
+                    { start: "type:",  detail: "Anki type filter and field replacement"} as const,
+                    { start: "#", detail: "Anki if filled opening tag"} as const,
+                    { start: "^", detail: "Anki if empty opening tag"} as const,
+                    { start: "/", detail: "Anki if block closing tag" } as const
                 ]
                 .flatMap(({start, detail}, index) => {
-                    const isConditionalStart = start.match(/[#^]/)
-                    const options = optionFieldNames
+                    const isConditionalStart = start.match(/[#^]/);
+                    const options = fieldNameOptions
                         .filter(option => !(option === "FrontSide" && (isConditionalStart || !templateIsBackSide || start.length > 0)) )
+                        .concat(start === "/" || isConditionalStart ? clozeFieldsOptions : [])
                         .join(",");
 
                     return (isConditionalStart ? [false, true] : [false]).map(closeBlock => {
