@@ -183,9 +183,6 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
         const offset = document.offsetAt(position);
         const preChar = document.getText().substring(offset-1, offset);
         if (preChar.match(/[#^/{\s]/)){
-
-            const embeddedAnkiTemplate = this.getEmbeddedByLanguage(document, TEMPLATE_LANGUAGE_ID);
-            const templateDocument = this.parseTemplateDocument(embeddedAnkiTemplate?.content ?? "");
             
             // Provide snippets for standard replacement and conditional replacement tags and blocks
             const fieldNameOptions = (fieldNames.length > 0 ? fieldNames : ["Field"])
@@ -194,7 +191,8 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                 ).map(option => option.replace(/([,|])/g, "\\$1"));
 
             const clozeFieldsOptions = modelName && await this.ankiModelDataProvider.probablyCloze(modelName)
-                ? getClozeFieldSuggestions(templateDocument).map(({ name }) => name)
+                ? getClozeFieldSuggestions(this.parseTemplateDocument(this.getEmbeddedByLanguage(document, TEMPLATE_LANGUAGE_ID)?.content ?? ""))
+                    .map(({ name }) => name)
                 : [];
             
             const isPreChar = preChar.match(/[#^/]/) !== null;
