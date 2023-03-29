@@ -12,6 +12,7 @@ import { isBackSide } from '../template-util';
 import LanguageFeatureProviderBase from './language-feature-provider-base';
 import { getClozeFieldSuggestions } from '../cloze-fields';
 import { quotedCodeBlock } from '../filter-examples';
+import { getFieldsInTemplate } from '../parser/template-fields';
 
 export default class TemplateCompletionItemProvider extends LanguageFeatureProviderBase implements vscode.CompletionItemProvider {
     
@@ -49,7 +50,12 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
             
             if (!replacement)
                 return undefined;
-                
+
+            // Get field suggestions from template if Anki model is not available
+            if (document.uri.scheme !== ANKI_EDITOR_SCHEME_BASE)
+                fieldNames.push(...getFieldsInTemplate(templateDocument, { start: replacement.start, end: replacement.end })
+                    .map(({ content }) => content));
+            
             // Check if the trigger position is currently at a field position
             if (inItem(replacement.fieldSegment, offset)) {
                 // Handle completions in a field segment
@@ -184,6 +190,13 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
         const preChar = document.getText().substring(offset-1, offset);
         if (preChar.match(/[#^/{\s]/)){
             
+            const embeddedAnkiTemplate = this.getEmbeddedByLanguage(document, TEMPLATE_LANGUAGE_ID);
+            const templateDocument = this.parseTemplateDocument(embeddedAnkiTemplate?.content ?? "");
+
+            // Get field suggestions from template if Anki model is not available
+            if (document.uri.scheme !== ANKI_EDITOR_SCHEME_BASE)
+                fieldNames.push(...getFieldsInTemplate(templateDocument).map(({ content }) => content));
+            
             // Provide snippets for standard replacement and conditional replacement tags and blocks
             const fieldNameOptions = (fieldNames.length > 0 ? fieldNames : ["Field"])
                 .concat(
@@ -191,7 +204,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                 ).map(option => option.replace(/([,|])/g, "\\$1"));
 
             const clozeFieldsOptions = modelName && await this.ankiModelDataProvider.probablyCloze(modelName)
-                ? getClozeFieldSuggestions(this.parseTemplateDocument(this.getEmbeddedByLanguage(document, TEMPLATE_LANGUAGE_ID)?.content ?? ""))
+                ? getClozeFieldSuggestions(templateDocument)
                     .map(({ name }) => name)
                 : [];
             
