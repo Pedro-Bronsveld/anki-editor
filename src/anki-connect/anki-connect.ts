@@ -42,8 +42,15 @@ export default class AnkiConnect {
         return this.apiKey;
     }
 
-    public requestPermission = createCachedFunction(async () =>
-        requestPermission(this.origin));
+    public requestPermission = createCachedFunction(async () => {
+        const permissionResult = await requestPermission(this.origin);
+
+        if (permissionResult.permission === "denied")
+            vscode.window.showErrorMessage("Permission to access Anki-Connect api from this origin was denied.\n" +
+                "Trust this origin in the pop-up in Anki.");
+
+        return permissionResult;
+    });
 
     public getModelNames = createCachedFunction(async () =>
         getModelNames(this.origin, await this.getApiKey()));
