@@ -4,7 +4,7 @@ import AnkiConnect from "../anki-connect/anki-connect";
 import { TEMPLATE_EXTENSION } from "../constants";
 import { uriPathToParts } from "./uri-parser";
 
-export const writeNoteType = (uri: vscode.Uri, content: Uint8Array, ankiConnect: AnkiConnect): Promise<void> => {
+export const writeNoteType = (uri: vscode.Uri, content: Uint8Array, ankiConnect: AnkiConnect): Promise<null> => {
 
     const parts = uriPathToParts(uri).slice(1);
     if (parts.length === 0)
