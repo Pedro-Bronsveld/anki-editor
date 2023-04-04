@@ -1,27 +1,54 @@
 import * as vscode from "vscode";
 import { builtinCssClasses, builtinCssClassesList } from "../anki-builtin";
-import EmbeddedHandler from "../embedded-handler";
-import { getCSSLanguageService, newCSSDataProvider, TextDocument as CssTextDocument, ClientCapabilities, getSCSSLanguageService, CompletionItemKind as CssCompletionItemKind } from "vscode-css-languageservice";
+import { 
+    newCSSDataProvider,
+    TextDocument as CssTextDocument, 
+    CompletionItemKind as CssCompletionItemKind,
+    DocumentUri as CssDocumentUri,
+    FileStat as CssFileStat, 
+    FileType as CssFileType, 
+    LanguageService as CssLanguageService,
+    getCSSLanguageService} from "vscode-css-languageservice";
+import AnkiConnect from "../../anki-connect/anki-connect";
 
 export default class StylingCompletionItemProvider implements vscode.CompletionItemProvider {
 
-    private cssLanguageService = getSCSSLanguageService({
-        useDefaultDataProvider: false,
-        customDataProviders: [newCSSDataProvider({
-            version: 1.1,
-            pseudoClasses: builtinCssClassesList.map(builtinCss => ({
-                name: builtinCss.name,
-                description: {
-                    kind: "markdown",
-                    value: builtinCss.description
+    private cssLanguageService: CssLanguageService;
+
+    constructor(ankiConnect: AnkiConnect) {
+        this.cssLanguageService = getCSSLanguageService({
+            useDefaultDataProvider: true,
+            customDataProviders: [newCSSDataProvider({
+                version: 1.1,
+                pseudoClasses: builtinCssClassesList.map(builtinCss => ({
+                    name: builtinCss.name,
+                    description: {
+                        kind: "markdown",
+                        value: builtinCss.description
+                    }
+                })),
+                properties: [{
+                    name: "DUMMY_PROPERTY",
+                    status: "nonstandard"
+                }]
+            })],
+            fileSystemProvider: {
+                async stat(uri: CssDocumentUri): Promise<CssFileStat> {
+                    return {
+                        type: CssFileType.Unknown,
+                        ctime: 0,
+                        mtime: 0,
+                        size: 0
+                    }
+                },            
+                async readDirectory(uri: CssDocumentUri): Promise<[string, CssFileType][]> {
+                    console.log("Styling read directory");
+                    const fileNames = (await ankiConnect.getMediaFilesNames("_*"));
+                    return fileNames.map(fileName => [fileName, CssFileType.File]);
                 }
-            })),
-            properties: [{
-                name: "DUMMY_PROPERTY",
-                status: "nonstandard"
-            }]
-        })]
-    })
+            }
+        });
+    }
 
     async provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext): Promise<vscode.CompletionItem[] | vscode.CompletionList<vscode.CompletionItem> | null | undefined> {
 
@@ -32,13 +59,19 @@ export default class StylingCompletionItemProvider implements vscode.CompletionI
         const stylesheet = this.cssLanguageService.parseStylesheet(cssTextDocument);
         
         // Get all css completion items, filter out only Anki built-in completion items
-        const allCssCompletions = this.cssLanguageService.doComplete(cssTextDocument, position, stylesheet);
+        const allCssCompletions = await this.cssLanguageService.doComplete2(cssTextDocument, position, stylesheet, {
+            resolveReference(ref: string, baseUrl: string): string | undefined { 
+                return ref;
+            }
+        });
         // Only show Anki selectors when no properties are provided
         const ankiCompletionItems = (allCssCompletions.items.some(item => item.kind === CssCompletionItemKind.Property)
                 ? []
                 : allCssCompletions.items)
             .filter(item => item.kind === CssCompletionItemKind.Function)
             .filter(item => builtinCssClasses.has(item.label));
+        
+        const fileCompletionItems = allCssCompletions.items.filter(item => item.kind === CssCompletionItemKind.File);
 
         completionItemList.push(...ankiCompletionItems.map<vscode.CompletionItem>(cssCompletionItem => {
             const completionItem = new vscode.CompletionItem(cssCompletionItem.label,
@@ -48,6 +81,9 @@ export default class StylingCompletionItemProvider implements vscode.CompletionI
                 : undefined;
             return completionItem;
         }));
+
+        completionItemList.push(...fileCompletionItems
+            .map<vscode.CompletionItem>(cssCompletionItem => new vscode.CompletionItem(cssCompletionItem.label, vscode.CompletionItemKind.File)));
 
         return completionItemList;
     }

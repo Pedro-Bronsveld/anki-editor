@@ -103,7 +103,7 @@ export function activate(context: vscode.ExtensionContext) {
 	const templateDocumentRangeFormattingEditProvider = new TemplateDocumentRangeFormattingEditProvider(embeddedHandler);
 	const templateFoldingRangeProvider = new TemplateFoldingRangeProvider(embeddedHandler);
 
-	const stylingCompletionItemProvider = new StylingCompletionItemProvider();
+	const stylingCompletionItemProvider = new StylingCompletionItemProvider(ankiConnect);
 	
 	context.subscriptions.push(
 		vscode.workspace.onDidChangeConfiguration((event) => {

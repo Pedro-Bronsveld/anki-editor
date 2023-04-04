@@ -10,6 +10,7 @@ import { getModelTemplates } from "./get-model-templates";
 import { requestPermission } from './request-permission';
 import { updateModelStyling } from "./update-model-styling";
 import { updateModelTemplates } from "./update-model-templates";
+import { getMediaFilesNames } from './get-media-files-names';
 
 export default class AnkiConnect {
 
@@ -64,6 +65,8 @@ export default class AnkiConnect {
     public getModelStyling = createCachedFunction(async (modelName: string, cardName: string) =>
         getModelStyling(modelName, cardName, this.origin, await this.getApiKey()));
 
+    public getMediaFilesNames = createCachedFunction(getMediaFilesNames);
+
     public updateModelTemplates = async (modelName: string, cardName: string, side: Side, html: string) => {
         this.clearCacheForModel(modelName);
         return updateModelTemplates(modelName, cardName, side, html, this.origin, await this.getApiKey());
@@ -81,7 +84,8 @@ export default class AnkiConnect {
         this.getModelNames,
         this.getModelFieldNames,
         this.getModelTemplates,
-        this.getModelStyling
+        this.getModelStyling,
+        this.getMediaFilesNames
     ] as const;
         
     public clearCache() {
