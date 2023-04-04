@@ -8,7 +8,7 @@ import {
     FileStat as CssFileStat, 
     FileType as CssFileType, 
     LanguageService as CssLanguageService,
-    getCSSLanguageService} from "vscode-css-languageservice";
+    getCSSLanguageService } from "vscode-css-languageservice";
 import AnkiConnect from "../../anki-connect/anki-connect";
 
 export default class StylingCompletionItemProvider implements vscode.CompletionItemProvider {
@@ -42,7 +42,6 @@ export default class StylingCompletionItemProvider implements vscode.CompletionI
                     }
                 },            
                 async readDirectory(uri: CssDocumentUri): Promise<[string, CssFileType][]> {
-                    console.log("Styling read directory");
                     const fileNames = (await ankiConnect.getMediaFilesNames("_*"));
                     return fileNames.map(fileName => [fileName, CssFileType.File]);
                 }
