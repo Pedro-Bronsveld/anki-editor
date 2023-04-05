@@ -1,6 +1,6 @@
 import { TEMPLATE_LANGUAGE_ID } from "../constants";
 import { flagsList } from "./anki-flags";
-import { filterExample, quotedCodeBlock, rubyFilterExample } from "./filter-examples";
+import { docsLink, filterExample, quotedCodeBlock, rubyFilterExample } from "./filter-examples";
 
 export interface BuiltIn {
     name: string;
@@ -13,7 +13,8 @@ export interface BuiltIn {
 export const specialFieldsList: readonly BuiltIn[] = [
     {
         name: "Card",
-        description: "Contains the type name of the card template that this field is used in."
+        description: "Contains the name of the card template that this field is used in." +
+            docsLink("Card Templates", "https://docs.ankiweb.net/templates/intro.html")
     },
     {
         name: "CardFlag",
@@ -21,17 +22,20 @@ export const specialFieldsList: readonly BuiltIn[] = [
             "The 7 available flag colors and names are:\n\n" +
             "|Flag Color|Name|\n" +
             "|----------|----|\n" +
-            flagsList.map(({name, color}, index) => `|<span style="color:#${color};">$(triangle-right)</span> ${name}|\`flag${index+1}\`|`).join("\n"),
+            flagsList.map(({name, color}, index) => `|<span style="color:#${color};">$(triangle-right)</span> ${name}|\`flag${index+1}\`|`).join("\n") +
+            docsLink("Using Flags", "https://docs.ankiweb.net/editing.html#using-flags"),
         htmlDescription: true
     },
     {
         name: "Deck",
-        description: "Contains the name of the deck that the active card is in."
+        description: "Contains the name of the deck that the active card is in." +
+            docsLink("Deck Options", "https://docs.ankiweb.net/deck-options.html")
     },
     {
         name: "Subdeck",
         description: "Contains the name of the subdeck that the active card is directly nested in.\n\n" +
-            "If the card is not in a subdeck, this field contains the same value as the `Deck` field."
+            "If the card is not in a subdeck, this field contains the same value as the `Deck` field." +
+            docsLink("Subdecks", "https://docs.ankiweb.net/deck-options.html#subdecks")
     },
     {
         name: "Tags",
@@ -39,15 +43,19 @@ export const specialFieldsList: readonly BuiltIn[] = [
             "If multiple tags are attached to a card, the tag names will be separated by a single space.\n\n" +
             "For example:\n" +
             "- One tag: `\"tag_1\"`\n" +
-            "- Two tags: `\"tag_1 tag_2\"`"
+            "- Two tags: `\"tag_1 tag_2\"`" +
+            docsLink("Using Tags", "https://docs.ankiweb.net/editing.html#using-tags")
     },
     {
         name: "Type",
-        description: "Contains the name of the note type that the active card is a part of."
+        description: "Contains the name of the note type that the active card is a part of." +
+            docsLink("Note Types", "https://docs.ankiweb.net/getting-started.html#note-types")
     },
     {
         name: "FrontSide",
-        description: "This field is used on the back template of a card to embed the corresponding front template."
+        description: "This field is used on the back template of a card to embed the corresponding front template." +
+            docsLink("Basic Replacements", "https://docs.ankiweb.net/templates/fields.html#basic-replacements") +
+            docsLink("Special Fields", "https://docs.ankiweb.net/templates/fields.html#special-fields")
     },
 ];
 
@@ -62,13 +70,15 @@ export const builtinFiltersList: readonly BuiltIn[] = [
             quotedCodeBlock(TEMPLATE_LANGUAGE_ID, "{{tts en_US:Field}}") + "\n\n" +
             "### Options Example\n\n" +
             "The options `voices` and `speed` can optionally be used to set the voice used for conversion, and the speed at which the audio is played.\n\n" +
-            quotedCodeBlock(TEMPLATE_LANGUAGE_ID, "{{tts en_US voices=Microsoft_George speed=1.0:Field}}")
+            quotedCodeBlock(TEMPLATE_LANGUAGE_ID, "{{tts en_US voices=Microsoft_George speed=1.0:Field}}") +
+            docsLink("Text to Speech", "https://docs.ankiweb.net/templates/fields.html#text-to-speech")
     },
     {
         name: "tts-voices",
         description: "Displays a list of tts languages and voices available on the system the card or card preview is rendered on.\n\n" +
             "### Example\n\n" +
-            quotedCodeBlock(TEMPLATE_LANGUAGE_ID, "{{tts-voices:}}")
+            quotedCodeBlock(TEMPLATE_LANGUAGE_ID, "{{tts-voices:}}") +
+            docsLink("Text to Speech", "https://docs.ankiweb.net/templates/fields.html#text-to-speech")
     },
     {
         name: "cloze",
@@ -80,51 +90,59 @@ export const builtinFiltersList: readonly BuiltIn[] = [
                 {
                     front: "This is a **[...]** cloze deletion.",
                     back: "This is a **sample** cloze deletion."
-                })
+                }) +
+            docsLink("Cloze Deletion", "https://docs.ankiweb.net/editing.html#cloze-deletion")
     },
     {
         name: "cloze-only",
         description: "When used in combination with the `tts` filter, only the deleted text will be read.\n\n" +
             "### Example\n\n" +
-            quotedCodeBlock(TEMPLATE_LANGUAGE_ID, "{{tts en_US:cloze-only:Field}}")
+            quotedCodeBlock(TEMPLATE_LANGUAGE_ID, "{{tts en_US:cloze-only:Field}}") +
+            docsLink("Text to Speech", "https://docs.ankiweb.net/templates/fields.html#text-to-speech")
     },
     {
         name: "hint",
         description: "Hides the content of the field until clicked.\n\n" +
             filterExample("{{hint:Field}}", "This is some hint text.", "[Field](https://docs.ankiweb.net/templates/fields.html#hint-fields)") + "\n\n" +
             "When the 'Field' text is clicked, the field's content is revealed:\n\n" +
-            quotedCodeBlock("text", "This is some hint text.")
+            quotedCodeBlock("text", "This is some hint text.") +
+            docsLink("Hint Fields", "https://docs.ankiweb.net/templates/fields.html#hint-fields")
     },
     {
         name: "type",
         description: "Displays a text input for the user to type in their answer when used on the front of a card template.\n\n" +
             "Displays the correct and incorrect letters of the user's input when also used on the back of the card template.\n\n" +
             "### Example\n\n" +
-            quotedCodeBlock(TEMPLATE_LANGUAGE_ID, "{{type:Field}}")
+            quotedCodeBlock(TEMPLATE_LANGUAGE_ID, "{{type:Field}}") +
+            docsLink("Checking Your Answer", "https://docs.ankiweb.net/templates/fields.html#checking-your-answer")
     },
     {
         name: "text",
         description: "Displays the source content of the field without any formatting.\n\n" +
-            filterExample("{{text:Field}}", "**Bold** and *Italic* text.", "Bold and Italic text.", true)
+            filterExample("{{text:Field}}", "**Bold** and *Italic* text.", "Bold and Italic text.", true) +
+            docsLink("HTML Stripping", "https://docs.ankiweb.net/templates/fields.html#html-stripping")
     },
     {
         name: "furigana",
         description: "Allows for the use of logographic and ruby characters in a field.\n\n" +
             "Ruby characters will be displayed above the logographic characters.\n\n" +
-            rubyFilterExample("furigana"),
+            rubyFilterExample("furigana") +
+            docsLink("Ruby Characters", "https://docs.ankiweb.net/templates/fields.html#ruby-characters"),
         htmlDescription: true
     },
     {
         name: "kana",
         description: "Allows for the use of logographic and ruby characters in a field.\n\n" +
             "Only the ruby characters will be displayed.\n\n" +
-            rubyFilterExample("kana")
+            rubyFilterExample("kana") +
+            docsLink("Additional Ruby Character Filters", "https://docs.ankiweb.net/templates/fields.html#additional-ruby-character-filters")
     },
     {
         name: "kanji",
         description: "Allows for the use of logographic and ruby characters in a field.\n\n" +
             "Only the logographic characters will be displayed.\n\n" +
-            rubyFilterExample("kanji")
+            rubyFilterExample("kanji") +
+            docsLink("Additional Ruby Character Filters", "https://docs.ankiweb.net/templates/fields.html#additional-ruby-character-filters")
     }
 ];
 
@@ -151,7 +169,8 @@ export const ttsOptionsList: readonly TtsOption[] = [
         name: "voices",
         description: "The `voices` options is used to specify one or more voices that will be used for text-to-speech conversion.\n\n" +
             "When multiple values are provided, each value must be sepparated by a comma.\n\n" +
-            "Use the `tts-voices` filter on a card template to display a list of available voices on a system.",
+            "Use the `tts-voices` filter on a card template to display a list of available voices on a system." +
+            docsLink("Text to Speech", "https://docs.ankiweb.net/templates/fields.html#text-to-speech"),
         value: "Voice_Name",
         validMatch: /^[^\s]+$/,
         invalidMessage: "Invalid value format for voices option.\n\n" +
@@ -163,7 +182,8 @@ export const ttsOptionsList: readonly TtsOption[] = [
         name: "speed",
         description: "The `speed` option is used to specify the speed by which to speed up or slow down the spoken text as a decimal number.\n\n" +
             "By default, this is set to `1.0`.\n\n" +
-            "For example: to increase the speed by 50%, a value of `1.5` can be set.",
+            "For example: to increase the speed by 50%, a value of `1.5` can be set." +
+            docsLink("Text to Speech", "https://docs.ankiweb.net/templates/fields.html#text-to-speech"),
         value: "1.0",
         validMatch: /^\d*\.?\d*$/,
         invalidMessage: "Invalid decimal number.\n\n" +
@@ -176,7 +196,8 @@ export const ttsOptionsList: readonly TtsOption[] = [
 export const ttsDefaultLanguage: BuiltIn = {
     name: "en_US",
     description: "Code of the language that the tts command will use for speech conversion.\n\n" +
-        "Use the `tts-voices` filter on a card template to display a list of available tts languages on a system."
+        "Use the `tts-voices` filter on a card template to display a list of available tts languages on a system." +
+        docsLink("Text to Speech", "https://docs.ankiweb.net/templates/fields.html#text-to-speech")
 }
 
 export const ttsOptions = toMap(ttsOptionsList);
@@ -273,28 +294,31 @@ export const conditionalCharacters: {
 } = {
     "#": {
         name: "#",
-        description: "Conditional if filled opening tag, used to check if a field contains content. Must be matched by a `/` closing tag."
+        description: "Conditional 'if filled' opening tag, used to check if a field contains content. Must be matched by a `/` closing tag." +
+            docsLink("Conditional Replacement", "https://docs.ankiweb.net/templates/generation.html?highlight=conditional#conditional-replacement")
     },
     "^": {
         name: "^",
-        description: "Conditional if empty opening tag, used to check if a field is empty. Must be matched by a `/` closing tag."
+        description: "Conditional 'if empty' opening tag, used to check if a field is empty. Must be matched by a `/` closing tag." +
+            docsLink("Conditional Replacement", "https://docs.ankiweb.net/templates/generation.html?highlight=conditional#conditional-replacement")
     },
     "/": {
         name: "/",
-        description: "Conditional block closing tag, closes a conditional opened by a `#` or `^` opening tag."
+        description: "Conditional block closing tag, closes a conditional block opened by a `#` or `^` opening tag." +
+            docsLink("Conditional Replacement", "https://docs.ankiweb.net/templates/generation.html?highlight=conditional#conditional-replacement")
     }
 } as const;
 
 export const getConditionalExample = (openChar: "#" | "^" = "#") =>
-    "```" + TEMPLATE_LANGUAGE_ID + "\n" +
+    quotedCodeBlock(TEMPLATE_LANGUAGE_ID, 
     `{{${openChar}Field}}\n` +
     "    ...\n" +
-    "{{/Field}}\n" +
-    "```\n\n";
+    "{{/Field}}\n");
 
 // Conditional cloze field
 
 export const clozeFieldDescription = 
     "References a cloze deletion number in a note's field.\n\n" +
     "Content in this conditional block will only be visible if the field of a note " +
-    "contains a cloze deletion with a matching number."
+    "contains a cloze deletion with a matching number." +
+    docsLink("Conditional Cloze Templates", "https://docs.ankiweb.net/templates/generation.html?highlight=conditional#cloze-templates")

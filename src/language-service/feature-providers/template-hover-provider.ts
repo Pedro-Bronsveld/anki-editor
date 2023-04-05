@@ -7,7 +7,7 @@ import AnkiModelDataProvider from '../anki-model-data-provider';
 import { isClozeReplacement } from '../cloze-fields';
 import { documentRange } from '../document-util';
 import EmbeddedHandler from '../embedded-handler';
-import { quotedCodeBlock } from '../filter-examples';
+import { docsLink, quotedCodeBlock } from '../filter-examples';
 import { AstItemType, FilterArgumentKeyValue } from '../parser/ast-models';
 import { getItemAtOffset, inItem } from '../parser/ast-utils';
 import LanguageFeatureProviderBase from './language-feature-provider-base';
@@ -56,7 +56,8 @@ export default class TemplateHoverProvider extends LanguageFeatureProviderBase i
                     const modelProbablyCloze = await this.ankiModelDataProvider.probablyCloze(modelName);
                     
                     if (modelFieldNames.has(field.content))
-                        return new vscode.Hover(new vscode.MarkdownString(`Field in note type "${modelName}"`), fieldRange);
+                        return new vscode.Hover(new vscode.MarkdownString(`Field in note type "${modelName}"` +
+                            docsLink("Basic Replacements", "https://docs.ankiweb.net/templates/fields.html#basic-replacements")), fieldRange);
                     else if (modelProbablyCloze && isClozeReplacement(replacement))
                         return new vscode.Hover(new vscode.MarkdownString(
                             clozeFieldDescription + " For example:\n\n" +
@@ -128,7 +129,7 @@ export default class TemplateHoverProvider extends LanguageFeatureProviderBase i
                 const { conditionalChar } = replacement;
                 return new vscode.Hover(
                     new vscode.MarkdownString(conditionalCharacters[conditionalChar.content].description +
-                        "\n\nExample usage:\n\n" +
+                        "\n\n### Example\n\n" +
                         getConditionalExample(replacement.linkedTag?.conditionalChar.content !== "/"
                             ? replacement.linkedTag?.conditionalChar.content
                             : undefined)),
