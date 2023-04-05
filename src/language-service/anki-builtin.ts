@@ -1,6 +1,7 @@
 import { TEMPLATE_LANGUAGE_ID } from "../constants";
+import { docsLink } from "../documentation";
 import { flagsList } from "./anki-flags";
-import { docsLink, filterExample, quotedCodeBlock, rubyFilterExample } from "./filter-examples";
+import { filterExample, quotedCodeBlock, rubyFilterExample } from "./filter-examples";
 
 export interface BuiltIn {
     name: string;
@@ -294,18 +295,15 @@ export const conditionalCharacters: {
 } = {
     "#": {
         name: "#",
-        description: "Conditional 'if filled' opening tag, used to check if a field contains content. Must be matched by a `/` closing tag." +
-            docsLink("Conditional Replacement", "https://docs.ankiweb.net/templates/generation.html?highlight=conditional#conditional-replacement")
+        description: "Conditional 'if filled' opening tag, used to check if a field contains content. Must be matched by a `/` closing tag."
     },
     "^": {
         name: "^",
-        description: "Conditional 'if empty' opening tag, used to check if a field is empty. Must be matched by a `/` closing tag." +
-            docsLink("Conditional Replacement", "https://docs.ankiweb.net/templates/generation.html?highlight=conditional#conditional-replacement")
+        description: "Conditional 'if empty' opening tag, used to check if a field is empty. Must be matched by a `/` closing tag."
     },
     "/": {
         name: "/",
-        description: "Conditional block closing tag, closes a conditional block opened by a `#` or `^` opening tag." +
-            docsLink("Conditional Replacement", "https://docs.ankiweb.net/templates/generation.html?highlight=conditional#conditional-replacement")
+        description: "Conditional block closing tag, closes a conditional block opened by a `#` or `^` opening tag."
     }
 } as const;
 

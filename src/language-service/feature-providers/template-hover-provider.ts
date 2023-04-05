@@ -7,10 +7,11 @@ import AnkiModelDataProvider from '../anki-model-data-provider';
 import { isClozeReplacement } from '../cloze-fields';
 import { documentRange } from '../document-util';
 import EmbeddedHandler from '../embedded-handler';
-import { docsLink, quotedCodeBlock } from '../filter-examples';
+import { quotedCodeBlock } from '../filter-examples';
 import { AstItemType, FilterArgumentKeyValue } from '../parser/ast-models';
 import { getItemAtOffset, inItem } from '../parser/ast-utils';
 import LanguageFeatureProviderBase from './language-feature-provider-base';
+import { docsLink } from '../../documentation';
 
 export default class TemplateHoverProvider extends LanguageFeatureProviderBase implements vscode.HoverProvider {
 
@@ -132,7 +133,8 @@ export default class TemplateHoverProvider extends LanguageFeatureProviderBase i
                         "\n\n### Example\n\n" +
                         getConditionalExample(replacement.linkedTag?.conditionalChar.content !== "/"
                             ? replacement.linkedTag?.conditionalChar.content
-                            : undefined)),
+                            : undefined) +
+                        docsLink("Conditional Replacement", "https://docs.ankiweb.net/templates/generation.html?highlight=conditional#conditional-replacement")),
                     documentRange(document, replacement.start, conditionalChar.end)
                 );
             }
