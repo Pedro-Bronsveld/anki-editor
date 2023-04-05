@@ -70,8 +70,6 @@ export default class StylingCompletionItemProvider implements vscode.CompletionI
             .filter(item => item.kind === CssCompletionItemKind.Function)
             .filter(item => builtinCssClasses.has(item.label));
         
-        const fileCompletionItems = allCssCompletions.items.filter(item => item.kind === CssCompletionItemKind.File);
-
         completionItemList.push(...ankiCompletionItems.map<vscode.CompletionItem>(cssCompletionItem => {
             const completionItem = new vscode.CompletionItem(cssCompletionItem.label,
                 vscode.CompletionItemKind.Class);
@@ -80,6 +78,9 @@ export default class StylingCompletionItemProvider implements vscode.CompletionI
                 : undefined;
             return completionItem;
         }));
+
+        // Provide completion items for media files
+        const fileCompletionItems = allCssCompletions.items.filter(item => item.kind === CssCompletionItemKind.File);
 
         completionItemList.push(...fileCompletionItems
             .map<vscode.CompletionItem>(cssCompletionItem => new vscode.CompletionItem(cssCompletionItem.label, vscode.CompletionItemKind.File)));

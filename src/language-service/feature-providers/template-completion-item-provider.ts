@@ -13,11 +13,33 @@ import LanguageFeatureProviderBase from './language-feature-provider-base';
 import { getClozeFieldSuggestions } from '../cloze-fields';
 import { quotedCodeBlock } from '../filter-examples';
 import { getFieldsInTemplate } from '../parser/template-fields';
+import { FileStat as HtmlFileStat, DocumentUri as HtmlDocumentUri, getLanguageService, FileType as HtmlFileType, TextDocument as HtmlTextDocument, CompletionItemKind as HtmlCompletionItemKind } from 'vscode-html-languageservice';
+import { LanguageService as HtmlLanguageService } from 'vscode-html-languageservice';
 
 export default class TemplateCompletionItemProvider extends LanguageFeatureProviderBase implements vscode.CompletionItemProvider {
-    
+
+    private htmlLanguageService: HtmlLanguageService;
+
     constructor(embeddedHandler: EmbeddedHandler, private ankiModelDataProvider: AnkiModelDataProvider) {
         super(embeddedHandler);
+
+        this.htmlLanguageService = getLanguageService({
+            useDefaultDataProvider: false,
+            fileSystemProvider: {
+                async stat(uri: HtmlDocumentUri): Promise<HtmlFileStat> {
+                    return {
+                        type: HtmlFileType.Unknown,
+                        ctime: 0,
+                        mtime: 0,
+                        size: 0
+                    }
+                },            
+                async readDirectory(uri: HtmlDocumentUri): Promise<[string, HtmlFileType][]> {
+                    const fileNames = (await ankiModelDataProvider.ankiConnect.getMediaFilesNames("_*"));
+                    return fileNames.map(fileName => [fileName, HtmlFileType.File]);
+                }
+            }
+        });
     }
     
     async provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext): Promise<vscode.CompletionItem[] | vscode.CompletionList<vscode.CompletionItem> | null | undefined> {        
@@ -184,7 +206,25 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
             context.triggerCharacter
         );
 
-        completionItemList.push(...builtinCompletionList.items);
+        completionItemList.push(...builtinCompletionList.items.filter(item => item.kind !== vscode.CompletionItemKind.Text));
+
+        // Media files suggestions
+        if (document.uri.scheme === ANKI_EDITOR_SCHEME_BASE && embeddedDocument.languageId === "html") {
+
+            const htmlTextDocument = HtmlTextDocument.create(embeddedDocument.virtualUri.toString(), embeddedDocument.languageId, document.version, embeddedDocument.content);
+            const htmlDocument = this.htmlLanguageService.parseHTMLDocument(htmlTextDocument);
+            
+            const allHtmlCompletions = await this.htmlLanguageService.doComplete2(htmlTextDocument, position, htmlDocument, {
+                resolveReference(ref: string, baseUrl: string): string | undefined {
+                    return ref;
+                }
+            });
+
+            const fileCompletionItems = allHtmlCompletions.items.filter(htmlCompletionItem => htmlCompletionItem.kind === HtmlCompletionItemKind.File);
+
+            completionItemList.push(...fileCompletionItems
+                .map<vscode.CompletionItem>(htmlCompletionItem => createCompletionItem(htmlCompletionItem.label, vscode.CompletionItemKind.File)));
+        }
 
         const offset = document.offsetAt(position);
         const preChar = document.getText().substring(offset-1, offset);
@@ -209,7 +249,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                 : [];
             
             const isPreChar = preChar.match(/[#^/]/) !== null;
-            builtinCompletionList.items.push(...[
+            completionItemList.push(...[
                     { start: "",  detail: "Anki template replacement"} as const,
                     { start: "cloze:",  detail: "Anki cloze filter and field replacement"} as const,
                     { start: "hint:",  detail: "Anki hint filter and field replacement"} as const,
@@ -243,7 +283,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
 
         return {
             ...builtinCompletionList,
-            items: builtinCompletionList.items.filter(item => item.kind !== vscode.CompletionItemKind.Text)
+            items: completionItemList
         };
     }
 }
