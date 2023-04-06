@@ -315,8 +315,10 @@ export const getConditionalExample = (openChar: "#" | "^" = "#") =>
 
 // Conditional cloze field
 
-export const clozeFieldDescription = 
+export const getClozeFieldDescription = (exampleField: string) =>
     "References a cloze deletion number in a note's field.\n\n" +
     "Content in this conditional block will only be visible if the field of a note " +
-    "contains a cloze deletion with a matching number." +
-    docsLink("Conditional Cloze Templates", "https://docs.ankiweb.net/templates/generation.html?highlight=conditional#cloze-templates")
+    "contains a cloze deletion with a matching number.\n\n" +
+    "### Field Example\n\n" +
+    quotedCodeBlock("text", `Some {{${exampleField}::Hidden Text}}`) +
+    docsLink("Conditional Cloze Templates", "https://docs.ankiweb.net/templates/generation.html?highlight=conditional#cloze-templates");

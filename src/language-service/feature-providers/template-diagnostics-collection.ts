@@ -12,7 +12,7 @@ import { DiagnosticCode } from '../diagnostic-codes';
 import { conditionalStartChar, getParentConditionals, getUnavailableFieldNames } from '../parser/ast-utils';
 import EmbeddedHandler from '../embedded-handler';
 import { getExtendedFilterNames, getExtendedSpecialFieldNames } from '../anki-custom';
-import { isClozeField, isClozeReplacement } from '../cloze-fields';
+import { isClozeReplacement } from '../cloze-fields';
 
 export default class TemplateDiagnosticsProvider extends LanguageFeatureProviderBase {
 

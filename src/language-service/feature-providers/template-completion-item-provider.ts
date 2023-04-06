@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID } from '../../constants';
 import { uriPathToParts } from '../../note-types/uri-parser';
-import { builtinFilters, clozeFieldDescription, specialFields, ttsDefaultLanguage, ttsOptionsList } from '../anki-builtin';
+import { builtinFilters, getClozeFieldDescription, specialFields, ttsDefaultLanguage, ttsOptionsList } from '../anki-builtin';
 import AnkiModelDataProvider from '../anki-model-data-provider';
 import { getExtendedSpecialFieldNames, getExtendedSpecialFieldsList, getExtendedFiltersList } from '../anki-custom';
 import { documentRange } from '../document-util';
@@ -11,7 +11,6 @@ import { getItemAtOffset, getUnavailableFieldNames, inItem } from '../parser/ast
 import { isBackSide } from '../template-util';
 import LanguageFeatureProviderBase from './language-feature-provider-base';
 import { getClozeFieldSuggestions } from '../cloze-fields';
-import { quotedCodeBlock } from '../filter-examples';
 import { getFieldsInTemplate } from '../parser/template-fields';
 import { FileStat as HtmlFileStat, DocumentUri as HtmlDocumentUri, getLanguageService, FileType as HtmlFileType, TextDocument as HtmlTextDocument, CompletionItemKind as HtmlCompletionItemKind } from 'vscode-html-languageservice';
 import { LanguageService as HtmlLanguageService } from 'vscode-html-languageservice';
@@ -170,8 +169,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                     
                     completionItemList.push(...clozeNumberNames
                         .map(({ name }) => createCompletionItem(name, vscode.CompletionItemKind.Reference, "3", undefined,
-                            clozeFieldDescription + " For example:\n\n" +
-                            quotedCodeBlock("text", `Some {{${name}::Hidden Text}}`)))
+                            getClozeFieldDescription(name)))
                     );
                 }
 
