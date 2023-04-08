@@ -6,6 +6,7 @@ import { AstItemType, ConditionalStart } from '../parser/ast-models';
 import LanguageFeatureProviderBase from './language-feature-provider-base';
 import { ts } from "@ts-morph/bootstrap";
 import { documentRange } from '../document-util';
+import { TextDocument as CssTextDocument } from "vscode-css-languageservice";
 
 export default class TemplateFoldingRangeProvider extends LanguageFeatureProviderBase implements vscode.FoldingRangeProvider {
 
@@ -55,6 +56,7 @@ export default class TemplateFoldingRangeProvider extends LanguageFeatureProvide
         {
             const embeddedJsDocument = this.getEmbeddedByLanguage(document, "javascript");
             if (embeddedJsDocument) {
+                // javascript parsing
                 const fileName = embeddedJsDocument.virtualUri.toString();
                 
                 const jsSourceFile = this.embeddedHandler.tsProject.createSourceFile(
@@ -69,12 +71,28 @@ export default class TemplateFoldingRangeProvider extends LanguageFeatureProvide
 
                 this.embeddedHandler.tsProject.removeSourceFile(jsSourceFile);
 
+                // Get javascript folding ranges
                 const jsFoldingRanges = jsOutliningSpans.map<vscode.FoldingRange>(outliningSpan => {
                     const { textSpan } = outliningSpan;
                     const range = documentRange(document, textSpan.start, textSpan.start + textSpan.length);
                     return new vscode.FoldingRange(range.start.line, range.end.line - 1, tsFoldingRangeKindMap[outliningSpan.kind]);
                 });
                 allFoldingRanges.push(...jsFoldingRanges);
+            }
+        }
+
+        // CSS folding
+        {
+            const embeddedCssDocument = this.getEmbeddedByLanguage(document, "css");
+            if (embeddedCssDocument) {
+                // CSS Parsing
+                const cssTextDocument = CssTextDocument.create(document.uri.toString(), document.languageId, document.version, embeddedCssDocument.content);
+
+                // Get CSS folding ranges
+                const cssFoldingRanges = this.embeddedHandler.cssLanguageService.getFoldingRanges(cssTextDocument);
+                const vscodeFoldingRanges = cssFoldingRanges.map<vscode.FoldingRange>(cssFoldingRange => new vscode.FoldingRange(cssFoldingRange.startLine, cssFoldingRange.endLine));
+
+                allFoldingRanges.push(...vscodeFoldingRanges);
             }
         }
         
