@@ -1,9 +1,11 @@
 import * as vscode from 'vscode';
-import { getLanguageService, LanguageService, TextDocument, FoldingRangeKind } from 'vscode-html-languageservice';
+import { getLanguageService, LanguageService, TextDocument, FoldingRangeKind as HtmlFoldingRangeKind } from 'vscode-html-languageservice';
 import { TEMPLATE_LANGUAGE_ID } from '../../constants';
 import { RequiredProp } from '../../models/required-prop';
 import { AstItemType, ConditionalStart } from '../parser/ast-models';
 import LanguageFeatureProviderBase from './language-feature-provider-base';
+import { ts } from "@ts-morph/bootstrap";
+import { documentRange } from '../document-util';
 
 export default class TemplateFoldingRangeProvider extends LanguageFeatureProviderBase implements vscode.FoldingRangeProvider {
 
@@ -45,8 +47,35 @@ export default class TemplateFoldingRangeProvider extends LanguageFeatureProvide
                 new vscode.FoldingRange(
                     foldingRange.startLine,
                     foldingRange.endLine,
-                    foldingRange.kind ? foldingRangeKindMap[foldingRange.kind] : undefined
+                    foldingRange.kind ? htmlFoldingRangeKindMap[foldingRange.kind] : undefined
                 )));
+        }
+
+        // javascript folding
+        {
+            const embeddedJsDocument = this.getEmbeddedByLanguage(document, "javascript");
+            if (embeddedJsDocument) {
+                const fileName = embeddedJsDocument.virtualUri.toString();
+                
+                const jsSourceFile = this.embeddedHandler.tsProject.createSourceFile(
+                    fileName,
+                    embeddedJsDocument.content,
+                    {
+                        scriptKind: ts.ScriptKind.JS
+                    }
+                );
+
+                const jsOutliningSpans = this.embeddedHandler.tsLanguageService.getOutliningSpans(fileName);
+
+                this.embeddedHandler.tsProject.removeSourceFile(jsSourceFile);
+
+                const jsFoldingRanges = jsOutliningSpans.map<vscode.FoldingRange>(outliningSpan => {
+                    const { textSpan } = outliningSpan;
+                    const range = documentRange(document, textSpan.start, textSpan.start + textSpan.length);
+                    return new vscode.FoldingRange(range.start.line, range.end.line - 1, tsFoldingRangeKindMap[outliningSpan.kind]);
+                });
+                allFoldingRanges.push(...jsFoldingRanges);
+            }
         }
         
         return allFoldingRanges;
@@ -54,8 +83,15 @@ export default class TemplateFoldingRangeProvider extends LanguageFeatureProvide
 
 }
 
-const foldingRangeKindMap: Record<string, vscode.FoldingRangeKind> = {
-    [FoldingRangeKind.Comment]: vscode.FoldingRangeKind.Comment,
-    [FoldingRangeKind.Imports]: vscode.FoldingRangeKind.Imports,
-    [FoldingRangeKind.Region]: vscode.FoldingRangeKind.Region
+const htmlFoldingRangeKindMap: Record<string, vscode.FoldingRangeKind> = {
+    [HtmlFoldingRangeKind.Comment]: vscode.FoldingRangeKind.Comment,
+    [HtmlFoldingRangeKind.Imports]: vscode.FoldingRangeKind.Imports,
+    [HtmlFoldingRangeKind.Region]: vscode.FoldingRangeKind.Region
+} as const;
+
+const tsFoldingRangeKindMap: Record<string, vscode.FoldingRangeKind> = {
+    [ts.OutliningSpanKind.Comment]: vscode.FoldingRangeKind.Comment,
+    [ts.OutliningSpanKind.Imports]: vscode.FoldingRangeKind.Imports,
+    [ts.OutliningSpanKind.Region]: vscode.FoldingRangeKind.Region,
+    [ts.OutliningSpanKind.Code]: vscode.FoldingRangeKind.Region
 } as const;

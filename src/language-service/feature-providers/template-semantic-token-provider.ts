@@ -1,10 +1,10 @@
 import * as vscode from 'vscode';
 import LanguageFeatureProviderBase from './language-feature-provider-base';
-import { createProjectSync, Project, ts } from "@ts-morph/bootstrap";
+import { Project as TsProject, ts } from "@ts-morph/bootstrap";
 import EmbeddedHandler from '../embedded-handler';
 export default class TemplateSemanticTokenProvider extends LanguageFeatureProviderBase implements vscode.DocumentSemanticTokensProvider {
 
-    private tsProject: Project;
+    private tsProject: TsProject;
     private tsLanguageService: ts.LanguageService;
 
     constructor(protected embeddedHandler: EmbeddedHandler) {
