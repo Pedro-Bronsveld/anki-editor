@@ -2,10 +2,10 @@ import * as vscode from 'vscode';
 import { getLanguageService, LanguageService, TextDocument, FoldingRangeKind as HtmlFoldingRangeKind } from 'vscode-html-languageservice';
 import { TEMPLATE_LANGUAGE_ID } from '../../constants';
 import { RequiredProp } from '../../models/required-prop';
-import { AstItemType, ConditionalStart } from '../parser/ast-models';
+import { AstItemType, ConditionalStart, StandardReplacement } from '../parser/ast-models';
 import LanguageFeatureProviderBase from './language-feature-provider-base';
 import { ts } from "@ts-morph/bootstrap";
-import { documentRange } from '../document-util';
+import { documentRange, isMultiLineAstItem } from '../document-util';
 import { TextDocument as CssTextDocument } from "vscode-css-languageservice";
 
 export default class TemplateFoldingRangeProvider extends LanguageFeatureProviderBase implements vscode.FoldingRangeProvider {
@@ -22,19 +22,31 @@ export default class TemplateFoldingRangeProvider extends LanguageFeatureProvide
 
             if (embeddedDocument) {
                 const templateDocument = this.parseTemplateDocument(embeddedDocument.content);
-                
+
                 // Create folding ranges for linked conditional opening and closing tags
-                const conditionalFoldingRanges = templateDocument.replacements
-                    .filter((conditional): conditional is RequiredProp<ConditionalStart, "linkedTag"> =>
-                        conditional.type === AstItemType.conditionalStart &&
-                        conditional.linkedTag !== undefined)
-                    .map(conditional =>
-                    new vscode.FoldingRange(
-                        document.positionAt(conditional.start).line,
-                        document.positionAt(conditional.linkedTag.start).line - 1
-                    ));
+                // and standard replacements stretching multiple lines.
+
+                const foldableReplacements = templateDocument.replacements
+                    .filter((replacement): replacement is RequiredProp<ConditionalStart, "linkedTag"> | StandardReplacement =>
+                        replacement.type === AstItemType.conditionalStart &&
+                        replacement.linkedTag !== undefined
+                        ||
+                        replacement.type === AstItemType.replacement &&
+                        isMultiLineAstItem(document, replacement, 2));
                 
-                allFoldingRanges.push(...conditionalFoldingRanges);
+                const templateFoldingRanges = foldableReplacements
+                    .map(replacement =>
+                        new vscode.FoldingRange(
+                            document.positionAt(replacement.start).line,
+                            document.positionAt(
+                                replacement.type === AstItemType.conditionalStart
+                                    ? replacement.linkedTag.start
+                                    : replacement.end
+                                ).line - 1
+                        )
+                    );
+                
+                allFoldingRanges.push(...templateFoldingRanges);
             }
         }
 
@@ -86,7 +98,7 @@ export default class TemplateFoldingRangeProvider extends LanguageFeatureProvide
             const embeddedCssDocument = this.getEmbeddedByLanguage(document, "css");
             if (embeddedCssDocument) {
                 // CSS Parsing
-                const cssTextDocument = CssTextDocument.create(document.uri.toString(), document.languageId, document.version, embeddedCssDocument.content);
+                const cssTextDocument = CssTextDocument.create(embeddedCssDocument.virtualUri.toString(), document.languageId, document.version, embeddedCssDocument.content);
 
                 // Get CSS folding ranges
                 const cssFoldingRanges = this.embeddedHandler.cssLanguageService.getFoldingRanges(cssTextDocument);
