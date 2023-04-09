@@ -53,7 +53,7 @@
         {
           "id": "anki-editor",
           "title": "Anki Editor",
-          "icon": "resources/pages.svg"
+          "icon": "resources/icons/activity-bar-icon.svg"
         }
       ]
     },
