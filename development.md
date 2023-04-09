@@ -10,7 +10,7 @@ Anki documentation:
 - [Card Templates](https://docs.ankiweb.net/templates/intro.html)
   - [Field Replacements](https://docs.ankiweb.net/templates/fields.html)
   - [Card Generation](https://docs.ankiweb.net/templates/generation.html)
-  - [Styling & HTML](https://docs.ankiweb.net/templates/generation.html)
+  - [Styling & HTML](https://docs.ankiweb.net/templates/styling.html)
   - [Checks and Errors](https://docs.ankiweb.net/templates/errors.html)
 - [Filter Demo](https://github.com/ankitects/anki-addons/blob/main/demos/field_filter/__init__.py)
 
