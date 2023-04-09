@@ -5,9 +5,9 @@
   "version": "0.0.1",
   "author": "Pedro Bronsveld",
   "repository": {
-		"type": "git",
-		"url": "https://github.com/Pedro-Bronsveld/anki-editor"
-	},
+    "type": "git",
+    "url": "https://github.com/Pedro-Bronsveld/anki-editor"
+  },
   "icon": "resources/icons/anki-editor-icon.png",
   "engines": {
     "vscode": "^1.74.0"
@@ -155,7 +155,7 @@
         },
         "anki-editor.customFieldNames": {
           "title": "Custom Fields",
-          "type":"array",
+          "type": "array",
           "items": {
             "type": "string",
             "pattern": "^[^#^/\\s:{}\"]+([^:{}\\s\"]|\\s(?!\\s*(}}|$)))*$",
@@ -166,7 +166,7 @@
         },
         "anki-editor.customFilterNames": {
           "title": "Custom Filters",
-          "type":"array",
+          "type": "array",
           "items": {
             "type": "string",
             "pattern": "^[^#^/\\s:{}\"]+$",
@@ -186,16 +186,18 @@
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
     "test": "node ./out/test/runTest.js",
-    "test-compile": "tsc -p ./"
+    "test-compile": "tsc -p ./",
+    "package": "vsce package"
   },
   "devDependencies": {
     "@types/glob": "^8.0.0",
     "@types/mocha": "^10.0.1",
     "@types/node": "16.x",
-    "@types/vscode": "^1.76.0",
+    "@types/vscode": "^1.74.0",
     "@typescript-eslint/eslint-plugin": "^5.45.0",
     "@typescript-eslint/parser": "^5.45.0",
     "@vscode/test-electron": "^2.2.0",
+    "@vscode/vsce": "^2.18.0",
     "esbuild": "^0.16.17",
     "eslint": "^8.28.0",
     "glob": "^8.0.3",

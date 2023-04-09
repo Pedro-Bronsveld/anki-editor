@@ -1,6 +1,7 @@
-# anki-editor README
+# Anki Editor
 
-This is the README for your extension "anki-editor". After writing up a brief description, we recommend including the following sections.
+A Visual Studio Code extension to edit [Anki](https://apps.ankiweb.net/) card templates through [Anki Connect](https://ankiweb.net/shared/info/2055492159),
+with syntax highlighting, autocomplete and other intellisense language features.
 
 ## Features
 

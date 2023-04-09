@@ -5,7 +5,7 @@ import { partsToUri } from '../note-types/uri-parser';
 import { Side } from './template';
 
 export class NoteTypeTreeItem extends vscode.TreeItem {
-    iconPath = new vscode.ThemeIcon("files");
+    iconPath = new vscode.ThemeIcon("preview");
 }
 
 export class CardFolderTreeItem extends vscode.TreeItem {
