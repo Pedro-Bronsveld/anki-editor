@@ -19,11 +19,11 @@ export const specialFieldsList: readonly BuiltIn[] = [
     },
     {
         name: "CardFlag",
-        description: "If a card is marked with a flag, this variable will contain the name of the flag it's marked with.\n\n" +
+        description: "Contains the name of the flag the active card is marked with.\n\n" +
             "The 7 available flag colors and names are:\n\n" +
             "|Flag Color|Name|\n" +
             "|----------|----|\n" +
-            flagsList.map(({name, color}, index) => `|<span style="color:#${color};">$(triangle-right)</span> ${name}|\`flag${index+1}\`|`).join("\n") +
+            flagsList.map(({name, color}, index) => `|<span style="color:#${color};">$(triangle-right)</span> ${name}|\`flag${index}\`|`).join("\n") +
             docsLink("Using Flags", "https://docs.ankiweb.net/editing.html#using-flags"),
         htmlDescription: true
     },

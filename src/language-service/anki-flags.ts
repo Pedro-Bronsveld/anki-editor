@@ -1,5 +1,8 @@
 // Anki flags and colors
 export const flagsList: readonly {name: string, color: string}[] = [{
+    name: "No Flag",
+    color: "FFFFFF",
+}, {
     name: "Red",
     color: "ef4444",
 }, {
