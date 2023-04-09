@@ -94,7 +94,11 @@
         "extensions": [
           ".template.anki"
         ],
-        "configuration": "./languages/language-configuration.json"
+        "configuration": "./languages/language-configuration.json",
+        "icon": {
+          "dark": "resources/icons/anki-template-file-icon.svg",
+          "light": "resources/icons/anki-template-file-icon.svg"
+        }
       }
     ],
     "grammars": [

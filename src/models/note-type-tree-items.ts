@@ -34,7 +34,6 @@ export class CardTemplateTreeItem extends vscode.TreeItem {
     ) {
         super(partsToUri(["Note Types", String(cardFolder.noteType.label), String(cardFolder.label), `${side}${TEMPLATE_EXTENSION}`]));
         this.label = side;
-        this.iconPath = new vscode.ThemeIcon("bracket");
     }
 }
 export class CardStylingTreeItem extends vscode.TreeItem {
@@ -49,6 +48,7 @@ export class CardStylingTreeItem extends vscode.TreeItem {
         public readonly noteType: NoteTypeTreeItem,
     ) {
         super(partsToUri(["Note Types", escapeText(String(noteType.label)), "Styling.css"]));
+        this.label = "Styling";
     }
 }
 
