@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID } from '../../constants';
 import { uriPathToParts } from '../../note-types/uri-parser';
-import { conditionalCharacters, getClozeFieldDescription, getConditionalExample, ttsDefaultLanguage, ttsOptions } from '../anki-builtin';
+import { conditionalCharacters, getClozeFieldDescription, getConditionalExample, standardReplacementDescription, ttsDefaultLanguage, ttsOptions } from '../anki-builtin';
 import { getExtendedFilters, getExtendedSpecialFields } from '../anki-custom';
 import AnkiModelDataProvider from '../anki-model-data-provider';
 import { isClozeReplacement } from '../cloze-fields';
@@ -67,6 +67,14 @@ export default class TemplateHoverProvider extends LanguageFeatureProviderBase i
             }
             else if (replacement.type === AstItemType.replacement) {
 
+                // Provide hover info when hovering over the double braces of a standard replacement
+                if (offset >= replacement.start && offset <= replacement.start + 2
+                    || offset >= replacement.end - 2 && offset <= replacement.end)
+                    return new vscode.Hover(
+                        new vscode.MarkdownString(standardReplacementDescription)
+                    );
+
+                // Check if hovering over a filter
                 const filterSegment = getItemAtOffset(replacement.filterSegments, offset);
 
                 if (!filterSegment || !filterSegment.filter)

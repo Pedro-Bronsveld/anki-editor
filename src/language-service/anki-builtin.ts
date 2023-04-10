@@ -313,6 +313,12 @@ export const getConditionalExample = (openChar: "#" | "^" = "#") =>
     "    ...\n" +
     "{{/Field}}\n");
 
+// Standard replacement description
+export const standardReplacementDescription = "Replacement in this card template.\n\n" +
+    "This will be replaced by the content of a note's field when Anki renders the card.\n\n" +
+    filterExample("Hello, {{Field}}", "World", "Hello, World") +
+    docsLink("Basic Replacements", "https://docs.ankiweb.net/templates/fields.html#basic-replacements");
+
 // Conditional cloze field
 
 export const getClozeFieldDescription = (exampleField: string) =>
