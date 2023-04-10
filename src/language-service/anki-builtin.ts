@@ -23,7 +23,7 @@ export const specialFieldsList: readonly BuiltIn[] = [
             "The 7 available flag colors and names are:\n\n" +
             "|Flag Color|Name|\n" +
             "|----------|----|\n" +
-            flagsList.map(({name, color}, index) => `|<span style="color:#${color};">$(triangle-right)</span> ${name}|\`flag${index}\`|`).join("\n") +
+            flagsList.map(({name, color}, index) => `|<span style="color:#${color};">⚑</span> ${name}|\`flag${index}\`|`).join("\n") +
             docsLink("Using Flags", "https://docs.ankiweb.net/editing.html#using-flags"),
         htmlDescription: true
     },
