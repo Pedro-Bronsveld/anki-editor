@@ -1,7 +1,8 @@
-import { ApiKey, invoke, InvokeResponse } from "@autoanki/anki-connect";
+import { InvokeResponse } from "@autoanki/anki-connect";
+import { wrappedInvoke } from "./wrapper-invoke";
 
 export const requestPermission = async (origin?: string) =>
-    await invoke({
+    await wrappedInvoke({
         action: "requestPermission",
         version: 6,
         request: undefined,

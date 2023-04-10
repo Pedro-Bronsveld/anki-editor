@@ -1,9 +1,10 @@
-import { ApiKey, invoke } from "@autoanki/anki-connect";
+import { ApiKey } from "@autoanki/anki-connect";
 import { TextEncoder } from "util";
 import File from "../models/file";
+import { wrappedInvoke } from "./wrapper-invoke";
 
 export const getModelStyling = async (modelName: string, cardName: string, origin?: string, key?: ApiKey) =>
-    await invoke({
+    await wrappedInvoke({
         action: "modelStyling",
         version: 6,
         request: {

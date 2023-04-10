@@ -1,8 +1,9 @@
-import { ApiKey, invoke } from "@autoanki/anki-connect";
+import { ApiKey } from "@autoanki/anki-connect";
 import { Side } from "../models/template";
+import { wrappedInvoke } from "./wrapper-invoke";
 
 export const updateModelTemplates = async (modelName: string, cardName: string, side: Side, html: string, origin?: string, key?: ApiKey): Promise<null> =>
-    await invoke({
+    await wrappedInvoke({
         action: "updateModelTemplates",
         version: 6,
         request: {

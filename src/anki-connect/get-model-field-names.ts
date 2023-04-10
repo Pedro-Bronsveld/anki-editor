@@ -1,7 +1,8 @@
-import { ApiKey, invoke } from "@autoanki/anki-connect";
+import { ApiKey } from "@autoanki/anki-connect";
+import { wrappedInvoke } from "./wrapper-invoke";
 
 export const getModelFieldNames = async (modelName: string, origin?: string, key?: ApiKey): Promise<string[]> =>
-    await invoke({
+    await wrappedInvoke({
         action: "modelFieldNames",
         version: 6,
         request: {
