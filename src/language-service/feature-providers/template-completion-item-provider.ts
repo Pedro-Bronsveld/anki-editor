@@ -93,7 +93,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                     .filter(specialField => specialField.name !== "FrontSide" && !unavailableFieldNames.has(specialField.name))
                     .map(specialField => createCompletionItem(specialField.name,
                         specialFields.has(specialField.name)
-                            ? vscode.CompletionItemKind.Constant
+                            ? vscode.CompletionItemKind.Enum
                             : vscode.CompletionItemKind.EnumMember,
                         "3", replaceRange, specialField.description, specialField.htmlDescription, true)));
 
