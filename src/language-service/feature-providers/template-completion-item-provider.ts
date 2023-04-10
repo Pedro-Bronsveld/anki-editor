@@ -266,7 +266,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                     return (isConditionalStart ? [false, true] : [false]).map(closeBlock => {
                         const completion = createCompletionItem(`{{${start}Field}}` + (closeBlock ? " ... {{/Field}}" : ""),
                                 vscode.CompletionItemKind.Snippet,
-                                `anki-${closeBlock}${index}${start}`,
+                                `{{${closeBlock}${index}${start}`,
                                 documentRange(document, offset - (isPreChar ? 1 : 0), offset)
                             );
                         completion.insertText = new vscode.SnippetString("{{" + start + "${1|" + options + "|}}}" + (closeBlock ? "\n\t$0\n{{/${1|" + options + "|}}}" : "$0"));
