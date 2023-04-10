@@ -68,7 +68,7 @@ export default class TemplateHoverProvider extends LanguageFeatureProviderBase i
             else if (replacement.type === AstItemType.replacement) {
 
                 // Provide hover info when hovering over the double braces of a standard replacement
-                if (offset >= replacement.start && offset <= replacement.start + 2
+                if (offset >= replacement.start && offset < replacement.start + 2
                     || offset >= replacement.end - 2 && offset <= replacement.end)
                     return new vscode.Hover(
                         new vscode.MarkdownString(standardReplacementDescription)
