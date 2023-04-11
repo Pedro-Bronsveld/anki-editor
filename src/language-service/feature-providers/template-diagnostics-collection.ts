@@ -13,6 +13,8 @@ import { conditionalStartChar, getParentConditionals, getUnavailableFieldNames }
 import EmbeddedHandler from '../embedded-handler';
 import { getExtendedFilterNames, getExtendedSpecialFieldNames } from '../anki-custom';
 import { isClozeReplacement } from '../cloze-fields';
+import { filterExample } from '../filter-examples';
+import { docsLink } from '../../documentation';
 
 export default class TemplateDiagnosticsProvider extends LanguageFeatureProviderBase {
 
@@ -352,6 +354,11 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                 
             }
             
+        }
+        else {
+            // Show error if there's no replacements in the template
+            allDiagnostics.push(createDiagnostic(document, 0, 0,
+                "No replacement found. There must be at least one replacement in a card's template."));
         }
 
         const cssEmbeddedDocument = this.getEmbeddedByLanguage(document, "css");
