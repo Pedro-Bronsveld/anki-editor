@@ -171,11 +171,14 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                             continue;
                         }
                         // Check if filter name exists
-                        else if(config.get("invalidFilterDiagnostics") && filter && !getExtendedFilterNames().includes(filter.content)) {
+                        else if (config.get("invalidFilterDiagnostics") && filter && !getExtendedFilterNames().includes(filter.content))
                             allDiagnostics.push(createDiagnostic(document, filter.start, filter.end,
                                 `'${filter.content}' is not a built-in filter.`,
                                 DiagnosticCode.invalidFilterName));
-                        }
+                        // Check for cloze filter used on non-cloze template
+                        else if (!modelProbablyCloze && filter?.content === "cloze")
+                            allDiagnostics.push(createDiagnostic(document, filter.start, filter.end,
+                                "The 'cloze' filter may only be used on the cloze note type and on note types created by cloning the cloze note type."));
 
                         // Check for invalid spacing at the start of filter segment
                         const startSpaceMatch = filterSegment.content.match(/^\s+/);
