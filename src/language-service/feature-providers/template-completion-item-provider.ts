@@ -229,7 +229,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
         }
 
         const offset = document.offsetAt(position);
-        const preChar = document.getText().substring(offset-1, offset);
+        const preChar = offset === 0 ? " " : document.getText().substring(offset-1, offset);
         if (preChar.match(/[#^/{\s]/)){
             
             const embeddedAnkiTemplate = this.getEmbeddedByLanguage(document, TEMPLATE_LANGUAGE_ID);

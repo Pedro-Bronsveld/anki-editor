@@ -71,6 +71,12 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
 
             const modelProbablyCloze = modelAvailable && modelName !== "" && await this.ankiModelDataProvider.probablyCloze(modelName);
 
+            // Check if a cloze template contains at least one standard replacement
+            if (modelProbablyCloze && !templateDocument.replacements.some(replacement => replacement.type === AstItemType.replacement)) {
+                allDiagnostics.push(createDiagnostic(document, 0, 0,
+                    "No replacement with cloze filter found. A cloze template must contain at least one replacement with a cloze filter."));
+            }
+
             for (const replacement of templateDocument.replacements) {
                 
                 // Check for invalid characters
@@ -366,7 +372,7 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
         else {
             // Show error if there's no replacements in the template
             allDiagnostics.push(createDiagnostic(document, 0, 0,
-                "No replacement found. There must be at least one replacement in a card's template."));
+                "No replacement found. A card template must contain at least one replacement."));
         }
 
         const cssEmbeddedDocument = this.getEmbeddedByLanguage(document, "css");
