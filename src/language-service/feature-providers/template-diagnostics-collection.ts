@@ -3,7 +3,7 @@ import LanguageFeatureProviderBase from './language-feature-provider-base';
 import { TextDocument as CssTextDocument, LanguageService as CSSLanguageService } from 'vscode-css-languageservice';
 import { Project, ts } from "@ts-morph/bootstrap";
 import { ANKI_EDITOR_CONFIG, ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID } from '../../constants';
-import { AstItemType } from '../parser/ast-models';
+import { AstItemType, StandardReplacement } from '../parser/ast-models';
 import { ttsOptionsList, ttsOptions } from '../anki-builtin';
 import { isBackSide } from '../template-util';
 import AnkiModelDataProvider from '../anki-model-data-provider';
@@ -70,6 +70,16 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
             }
 
             const modelProbablyCloze = modelAvailable && modelName !== "" && await this.ankiModelDataProvider.probablyCloze(modelName);
+
+            // Check if cloze template contains at least one cloze filter
+            if (modelProbablyCloze && !templateDocument.containsCloze) {
+                const standardReplacement = templateDocument.replacements.find((replacement): replacement is StandardReplacement => replacement.type === AstItemType.replacement);
+                if (standardReplacement) {
+                    allDiagnostics.push(createDiagnostic(document, standardReplacement.start + 2,
+                        standardReplacement.filterSegments.find(filterSegment => filterSegment.filter)?.start ?? standardReplacement.fieldSegment.field?.start ?? (standardReplacement.end - 2),
+                        "The template of a cloze note type must contain at least one replacement with a cloze filter.", DiagnosticCode.missingClozeFilter));
+                }
+            }
 
             for (const replacement of templateDocument.replacements) {
                 

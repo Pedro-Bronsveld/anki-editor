@@ -83,7 +83,7 @@ export default class TemplateCodeActionProvider extends LanguageFeatureProviderB
                                     replaceRanges.forEach(range => {
                                         workspaceEdit.replace(document.uri, range, similarValue);
                                     });
-                                    return createCodeAction(`Replace field with '${similarValue}'`, workspaceEdit);
+                                    return createCodeAction(`Replace with '${similarValue}'`, workspaceEdit);
                                 });
                         }
                     case DiagnosticCode.invalidTtsLanguageArg:
@@ -120,9 +120,17 @@ export default class TemplateCodeActionProvider extends LanguageFeatureProviderB
                             });
                         }
                     case DiagnosticCode.incorrectSpace:
-                        const workspaceEdit = new vscode.WorkspaceEdit();
-                        workspaceEdit.replace(document.uri, diagnostic.range, " ");
-                        return createCodeAction("Replace with single space.", workspaceEdit)
+                        {
+                            const workspaceEdit = new vscode.WorkspaceEdit();
+                            workspaceEdit.replace(document.uri, diagnostic.range, " ");
+                            return createCodeAction("Replace with single space.", workspaceEdit)
+                        }
+                    case DiagnosticCode.missingClozeFilter:
+                        {
+                            const workspaceEdit = new vscode.WorkspaceEdit();
+                            workspaceEdit.replace(document.uri, diagnostic.range, "cloze:");
+                            return createCodeAction("Insert cloze filter.", workspaceEdit);
+                        }
                     default:
                         return;
                 }
