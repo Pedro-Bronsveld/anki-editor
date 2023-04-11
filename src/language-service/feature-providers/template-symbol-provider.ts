@@ -33,21 +33,21 @@ export default class TemplateSymbolProvider extends LanguageFeatureProviderBase 
         // html symbols
         {
             const embeddedDocument = this.getEmbeddedByLanguage(document, "html");
-            // console.log("symbols");
-            if (!embeddedDocument)
-                return;
-            
-            const symbols = await vscode.commands.executeCommand<vscode.DocumentSymbol[]>(
-                'vscode.executeDocumentSymbolProvider',
-                embeddedDocument.virtualUri
-            );
-            
-            const flattenedSymbols = this.flattenSymbols(symbols);
-
-            allDocumentSymbols.push(...flattenedSymbols);
+            if (embeddedDocument) {
+                const symbols = await vscode.commands.executeCommand<vscode.DocumentSymbol[]>(
+                    'vscode.executeDocumentSymbolProvider',
+                    embeddedDocument.virtualUri
+                );
+                
+                if (symbols) {
+                    const flattenedSymbols = this.flattenSymbols(symbols);
+    
+                    allDocumentSymbols.push(...flattenedSymbols);
+                }
+            }
         }
 
-    return allDocumentSymbols;
+        return allDocumentSymbols;
     }
 
     private flattenSymbols(documentSymbols: vscode.DocumentSymbol[]): vscode.DocumentSymbol[] {
