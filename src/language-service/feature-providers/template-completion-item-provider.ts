@@ -146,9 +146,12 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                     || replacement.fieldSegment.field && offset <= replacement.fieldSegment.field.start
                     || replacement.fieldSegment.field && replacement.filterSegments.length === 0 && offset <= replacement.fieldSegment.field.end ) {
                     // Create builtin and custom filter suggestions, ending with colon if not already followed by one
+                    const modelProbablyCloze = document.uri.scheme === ANKI_EDITOR_SCHEME_BASE && modelName && await this.ankiModelDataProvider.probablyCloze(modelName);
                     const appendColon = !replacement.content.substring(offset - replacement.start).match(/^\s*(?=:)/);
                     const suffix = (appendColon ? ":" : "");
-                    completionItemList.push(...getExtendedFiltersList().map(filter =>
+                    completionItemList.push(...getExtendedFiltersList()
+                    .filter(({ name }) => name !== "cloze" && name !== "cloze-only" || modelProbablyCloze)
+                    .map(filter =>
                         createCompletionItem(filter.name + suffix, 
                             builtinFilters.has(filter.name)
                                 ? vscode.CompletionItemKind.Function
