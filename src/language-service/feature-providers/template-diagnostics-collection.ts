@@ -71,16 +71,6 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
 
             const modelProbablyCloze = modelAvailable && modelName !== "" && await this.ankiModelDataProvider.probablyCloze(modelName);
 
-            // Check if cloze template contains at least one cloze filter
-            if (modelProbablyCloze && !templateDocument.containsCloze) {
-                const standardReplacement = templateDocument.replacements.find((replacement): replacement is StandardReplacement => replacement.type === AstItemType.replacement);
-                if (standardReplacement) {
-                    allDiagnostics.push(createDiagnostic(document, standardReplacement.start + 2,
-                        standardReplacement.filterSegments.find(filterSegment => filterSegment.filter)?.start ?? standardReplacement.fieldSegment.field?.start ?? (standardReplacement.end - 2),
-                        "The template of a cloze note type must contain at least one replacement with a cloze filter.", DiagnosticCode.missingClozeFilter));
-                }
-            }
-
             for (const replacement of templateDocument.replacements) {
                 
                 // Check for invalid characters
@@ -131,6 +121,14 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                 
                 if (replacement.type === AstItemType.replacement) {
                     // Provide diagnostics for standard replacement
+
+                    // Check if cloze template contains at least one cloze filter
+                    if (modelProbablyCloze && !templateDocument.containsCloze && replacement.type === AstItemType.replacement)
+                        allDiagnostics.push(createDiagnostic(document, replacement.start + 2,
+                            replacement.filterSegments.find(filterSegment => filterSegment.filter)?.start ?? replacement.fieldSegment.field?.start ?? (replacement.end - 2),
+                            "The template of a cloze note type must contain at least one replacement with a cloze filter.", DiagnosticCode.missingClozeFilter));
+                    
+                    // Check field
                     if (field) {
                         const invalidStartSpaceMatch = replacement.fieldSegment.content.match(/^\s+/);
                         if (invalidStartSpaceMatch && replacement.filterSegments.length > 0)
