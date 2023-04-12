@@ -192,7 +192,7 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                                 `'${filter.content}' is not a built-in filter.`,
                                 DiagnosticCode.invalidFilterName));
                         // Check for cloze filter used on non-cloze template
-                        else if (!modelProbablyCloze && (filter?.content === "cloze" || filter?.content === "cloze-only"))
+                        else if (modelAvailable && !modelProbablyCloze && (filter?.content === "cloze" || filter?.content === "cloze-only"))
                             allDiagnostics.push(createDiagnostic(document, filter.start, filter.end,
                                 `The '${filter.content}' filter may only be used on the cloze note type and on note types created by cloning the cloze note type.`));
 

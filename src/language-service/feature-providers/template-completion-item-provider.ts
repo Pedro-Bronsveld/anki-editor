@@ -48,8 +48,9 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
         const fieldNames: string[] = [];
         const templateIsBackSide = isBackSide(document);
         let modelName: null | string = null;
+        const modelAvailable = document.uri.scheme === ANKI_EDITOR_SCHEME_BASE;
 
-        if (document.uri.scheme === ANKI_EDITOR_SCHEME_BASE) {
+        if (modelAvailable) {
             // Field suggestions from the model can only be provided on documents loaded through Anki-Connect
             const uriParts = uriPathToParts(document.uri);
     
@@ -146,11 +147,11 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                     || replacement.fieldSegment.field && offset <= replacement.fieldSegment.field.start
                     || replacement.fieldSegment.field && replacement.filterSegments.length === 0 && offset <= replacement.fieldSegment.field.end ) {
                     // Create builtin and custom filter suggestions, ending with colon if not already followed by one
-                    const modelProbablyCloze = document.uri.scheme === ANKI_EDITOR_SCHEME_BASE && modelName && await this.ankiModelDataProvider.probablyCloze(modelName);
+                    const modelProbablyCloze = modelAvailable && modelName && await this.ankiModelDataProvider.probablyCloze(modelName);
                     const appendColon = !replacement.content.substring(offset - replacement.start).match(/^\s*(?=:)/);
                     const suffix = (appendColon ? ":" : "");
                     completionItemList.push(...getExtendedFiltersList()
-                    .filter(({ name }) => name !== "cloze" && name !== "cloze-only" || modelProbablyCloze)
+                    .filter(({ name }) => !modelAvailable || modelProbablyCloze || name !== "cloze" && name !== "cloze-only")
                     .map(filter =>
                         createCompletionItem(filter.name + suffix, 
                             builtinFilters.has(filter.name)
@@ -211,7 +212,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
         completionItemList.push(...builtinCompletionList.items.filter(item => item.kind !== vscode.CompletionItemKind.Text));
 
         // Media files suggestions
-        if (document.uri.scheme === ANKI_EDITOR_SCHEME_BASE && embeddedDocument.languageId === "html") {
+        if (modelAvailable && embeddedDocument.languageId === "html") {
 
             const htmlTextDocument = HtmlTextDocument.create(embeddedDocument.virtualUri.toString(), embeddedDocument.languageId, document.version, embeddedDocument.content);
             const htmlDocument = this.htmlLanguageService.parseHTMLDocument(htmlTextDocument);
@@ -278,7 +279,6 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                         completion.preselect = isPreChar;
                         return completion;
                     });
-                    
                 }
             ));            
         }
