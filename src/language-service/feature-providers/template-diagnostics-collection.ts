@@ -2,19 +2,18 @@ import * as vscode from 'vscode';
 import LanguageFeatureProviderBase from './language-feature-provider-base';
 import { TextDocument as CssTextDocument, LanguageService as CSSLanguageService } from 'vscode-css-languageservice';
 import { Project, ts } from "@ts-morph/bootstrap";
-import { ANKI_EDITOR_CONFIG, ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID } from '../../constants';
+import { ANKI_EDITOR_CONFIG, ANKI_EDITOR_SCHEME_BASE, TEMPLATE_EXTENSION, TEMPLATE_LANGUAGE_ID } from '../../constants';
 import { AstItemType, StandardReplacement } from '../parser/ast-models';
 import { ttsOptionsList, ttsOptions } from '../anki-builtin';
 import { isBackSide } from '../template-util';
 import AnkiModelDataProvider from '../anki-model-data-provider';
-import { uriPathToParts } from '../../note-types/uri-parser';
+import { partsToUri, uriPathToParts } from '../../note-types/uri-parser';
 import { DiagnosticCode } from '../diagnostic-codes';
 import { conditionalStartChar, getParentConditionals, getUnavailableFieldNames } from '../parser/ast-utils';
 import EmbeddedHandler from '../embedded-handler';
 import { getExtendedFilterNames, getExtendedSpecialFieldNames } from '../anki-custom';
 import { isClozeReplacement } from '../cloze-fields';
-import { filterExample } from '../filter-examples';
-import { docsLink } from '../../documentation';
+import { objectEntries } from '../../util/object-utilities';
 
 export default class TemplateDiagnosticsProvider extends LanguageFeatureProviderBase {
 
@@ -60,12 +59,34 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
 
             if (modelAvailable) {
                 getExtendedSpecialFieldNames().forEach(validFields.add, validFields);
-                if (isBackSide(document))
+                const backSide = isBackSide(document)
+                if (backSide)
                     validFields.add("FrontSide");
                 const uriParts = uriPathToParts(document.uri);
+                let cardName = "";
                 if (uriParts.length >= 2) {
                     modelName = uriParts[1];
+                    cardName = uriParts[2];
                     (await this.ankiModelDataProvider.getFieldNames(modelName)).forEach(validFields.add, validFields);
+                }
+
+                // For front sides, check if template is identical to front side of other card in the same note type
+                if (!backSide && uriParts.length >= 2) {
+                    const templates = await this.ankiModelDataProvider.ankiConnect.getModelTemplates(modelName);
+                    const documentText = document.getText();
+                    allDiagnostics.push(...objectEntries(templates)
+                        .filter(([name, template]) => name !== cardName && template.Front === documentText)
+                        .map(([name, ]) => {
+                            const diagnostic = createDiagnostic(document, 0, 0,
+                                `Template is identical to front side of card '${name}' in this note type.`);
+                            
+                            // Provide link to identical front side
+                            diagnostic.relatedInformation = [new vscode.DiagnosticRelatedInformation(new vscode.Location(
+                                    partsToUri([...uriParts.slice(0, 2), name, `Front${TEMPLATE_EXTENSION}`]),
+                                    document.positionAt(0)
+                                ), `identical front side in '${name}'.`)];
+                            return diagnostic;
+                        }));
                 }
             }
 
