@@ -74,9 +74,9 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                 return undefined;
 
             // Get field suggestions from template if Anki model is not available
-            if (document.uri.scheme !== ANKI_EDITOR_SCHEME_BASE)
-                fieldNames.push(...getFieldsInTemplate(templateDocument, { start: replacement.start, end: replacement.end })
-                    .map(({ content }) => content));
+            if (!modelAvailable)
+                fieldNames.push(...new Set(getFieldsInTemplate(templateDocument, { start: replacement.start, end: replacement.end })
+                    .map(({ content }) => content)));
             
             // Check if the trigger position is currently at a field position
             if (inItem(replacement.fieldSegment, offset)) {
@@ -237,8 +237,8 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
             const templateDocument = this.parseTemplateDocument(embeddedAnkiTemplate?.content ?? "");
 
             // Get field suggestions from template if Anki model is not available
-            if (document.uri.scheme !== ANKI_EDITOR_SCHEME_BASE)
-                fieldNames.push(...getFieldsInTemplate(templateDocument).map(({ content }) => content));
+            if (!modelAvailable)
+                fieldNames.push(...[...new Set(getFieldsInTemplate(templateDocument).map(({ content }) => content))].sort());
             
             // Provide snippets for standard replacement and conditional replacement tags and blocks
             const fieldNameOptions = (fieldNames.length > 0 ? fieldNames : ["Field"])
