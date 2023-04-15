@@ -60,7 +60,7 @@ export class AnkiEditorFs implements vscode.FileSystemProvider {
         const topFolder = parts[0];
 
         if (topFolder === "Note Types")
-            return writeNoteType(uri, content, this.ankiConnect);
+            return writeNoteType(uri, content, this.ankiConnect).then(() => undefined);
         
         throw vscode.FileSystemError.FileNotFound(`Writing to ${uri} is not supported by this extension.`);
     }
