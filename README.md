@@ -41,6 +41,7 @@ Save changes as if they're any other file.
 ![Card Template Tree View](resources/videos/tree-view-example.gif)
 
 - Completions for fields, special fields and filters inside field replacements.
+Can be triggered using `Ctrl` + `Space` by default, when the cursor is inside a replacement.
 
 ![Completion Items](resources/images/completion-field-2.png)
 
@@ -68,13 +69,16 @@ Save changes as if they're any other file.
 
 ![Nested Conditional Diagnostic](resources/images/diagnostic-nested-conditional.png)
 
-- Suggestions of some built-in CSS classes in Anki when writing selectors in a card's stylesheet.
+- Completions of some built-in CSS classes in Anki when writing selectors in a card's stylesheet.
 
 ![Anki CSS Classes Suggestions](resources/images/completion-css-classes.png)
 
 - Forwarding of HTML, CSS and Javascript intellisense to VSCode's language services.
 
 - Syntax highlighting.
+
+- Snippets for some field replacements and conditional blocks when the cursor is outside a field replacement.
+Can be triggered using `Ctrl` + `Space` by default.
 
 ## Extension Settings
 
