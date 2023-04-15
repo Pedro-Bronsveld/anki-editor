@@ -61,6 +61,8 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
             }
         }
 
+        const modelProbablyCloze = modelAvailable && modelName && await this.ankiModelDataProvider.probablyCloze(modelName);
+
         if (embeddedDocument.languageId === TEMPLATE_LANGUAGE_ID) {
 
             const templateDocument = this.parseTemplateDocument(embeddedDocument.content);
@@ -147,7 +149,6 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                     || replacement.fieldSegment.field && offset <= replacement.fieldSegment.field.start
                     || replacement.fieldSegment.field && replacement.filterSegments.length === 0 && offset <= replacement.fieldSegment.field.end ) {
                     // Create builtin and custom filter suggestions, ending with colon if not already followed by one
-                    const modelProbablyCloze = modelAvailable && modelName && await this.ankiModelDataProvider.probablyCloze(modelName);
                     const appendColon = !replacement.content.substring(offset - replacement.start).match(/^\s*(?=:)/);
                     const suffix = (appendColon ? ":" : "");
                     completionItemList.push(...getExtendedFiltersList()
@@ -261,6 +262,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                     { start: "^", detail: "Anki if empty opening tag"} as const,
                     { start: "/", detail: "Anki if block closing tag" } as const
                 ]
+                .filter(({start}) => !(modelAvailable && !modelProbablyCloze && start === "cloze:"))
                 .flatMap(({start, detail}, index) => {
                     const isConditionalStart = start.match(/[#^]/);
                     const options = fieldNameOptions

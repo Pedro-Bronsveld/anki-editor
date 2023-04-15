@@ -27,9 +27,11 @@ export default class TemplateCodeActionProvider extends LanguageFeatureProviderB
             return [];
         
         const uriParts = uriPathToParts(document.uri);
-        const modelName = document.uri.scheme === ANKI_EDITOR_SCHEME_BASE && uriParts.length >= 2 ? uriParts[1] : "";
-        const fieldNames = (document.uri.scheme === ANKI_EDITOR_SCHEME_BASE ? await this.ankiModelDataProvider.getFieldNames(modelName) : [])
+        const modelAvailable = document.uri.scheme === ANKI_EDITOR_SCHEME_BASE;
+        const modelName = modelAvailable && uriParts.length >= 2 ? uriParts[1] : "";
+        const fieldNames = (modelAvailable ? await this.ankiModelDataProvider.getFieldNames(modelName) : [])
             .concat(getExtendedSpecialFieldNames());
+        const modelProbablyCloze = modelAvailable && modelName && await this.ankiModelDataProvider.probablyCloze(modelName);
         
         const isBackside = isBackSide(document);
 
@@ -76,7 +78,9 @@ export default class TemplateCodeActionProvider extends LanguageFeatureProviderB
                             // Replace 
                             return findSimilarStartEnd(diagnostic.code === DiagnosticCode.invalidField
                                     ? subFieldNames
-                                    : nameReplacements[diagnostic.code](),
+                                    : nameReplacements[diagnostic.code]()
+                                        .filter(option => diagnostic.code !== DiagnosticCode.invalidFilterName
+                                            || !(modelAvailable && !modelProbablyCloze && (option === "cloze" || option === "cloze-only"))),
                                 diagnosticContent.toLowerCase(), false)
                                 .map(similarValue => {
                                     const workspaceEdit = new vscode.WorkspaceEdit();
