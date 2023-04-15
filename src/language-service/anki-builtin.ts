@@ -20,7 +20,7 @@ export const specialFieldsList: readonly BuiltIn[] = [
     {
         name: "CardFlag",
         description: "Contains the name of the flag the active card is marked with.\n\n" +
-            "The 7 available flag colors and names are:\n\n" +
+            "Available flag colors and names:\n\n" +
             "|Flag Color|Name|\n" +
             "|----------|----|\n" +
             flagsList.map(({name, color}, index) => `|<span style="color:#${color};">⚑</span> ${name}|\`flag${index}\`|`).join("\n") +
