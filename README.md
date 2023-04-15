@@ -9,14 +9,14 @@ with syntax highlighting, autocomplete and other intellisense language features.
 
 - [Anki Connect](https://ankiweb.net/shared/info/2055492159) add-on for Anki
 
-- [Anki Preview Reloader](https://github.com/Pedro-Bronsveld/anki-preview-reloader) add-on for Anki - Automatically reloads previews when card templates are updated through Anki Connect.
+- [Anki Preview Reloader](https://github.com/Pedro-Bronsveld/anki-preview-reloader) add-on for Anki - Automatically reloads preview windows in Anki when card templates are updated through Anki Connect.
 
 - (optional) [AnkiWebView Inspector](https://ankiweb.net/shared/info/31746032) - Recommended because it completes the *"frontend development setup"* when editing card templates.
 
 ## Installation
 
 While this extension has been tested, its functionality may break in unexpected ways after an update of Anki, VSCode, or other dependencies.
-Because Anki Editor modifies card templates saved in your Anki collection, you should make a backup before using this or any other add-on that modifies your collection.
+Because Anki Editor modifies card templates saved in your Anki collection, you should create a [backup](https://docs.ankiweb.net/backups.html) of your collection before using this or any other add-on that modifies your collection.
 
 ## Live Template Preview
 
