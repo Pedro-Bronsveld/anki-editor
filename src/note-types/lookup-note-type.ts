@@ -1,4 +1,3 @@
-import { TextEncoder } from "util";
 import * as vscode from "vscode";
 import AnkiConnect from "../anki-connect/anki-connect";
 import { TEMPLATE_EXTENSION } from "../constants";

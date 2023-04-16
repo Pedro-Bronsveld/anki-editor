@@ -1,5 +1,4 @@
 import { ApiKey } from "@autoanki/anki-connect";
-import { TextEncoder } from "util";
 import File from "../models/file";
 import { wrappedInvoke } from "./wrapper-invoke";
 
