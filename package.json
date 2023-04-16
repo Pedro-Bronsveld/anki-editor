@@ -21,6 +21,7 @@
     "onFileSystem:anki-editor"
   ],
   "main": "./out/extension.js",
+  "browser": "./out/web-extension.js",
   "contributes": {
     "commands": [
       {
@@ -180,9 +181,9 @@
   },
   "scripts": {
     "esbuild-common": "esbuild ./src/extension.ts --bundle --external:vscode --format=cjs",
-    "esbuild-native": "esbuild-common -- --outfile=out/extension.js --main-fields=module,main --platform=node",
-    "esbuild-web": "esbuild-common -- --outfile=out/web-extension.js --main-fields=browser,module,main --platform=browser",
-    "build": "npm run esbuild-native -- --minify",
+    "esbuild-native": "npm run esbuild-common -- --outfile=out/extension.js --main-fields=module,main --platform=node",
+    "esbuild-web": "npm run esbuild-common -- --outfile=out/web-extension.js --main-fields=browser,module,main --platform=browser",
+    "build": "npm run esbuild-native -- --minify & npm run esbuild-web -- --minify",
     "build:dev": "npm run esbuild-native -- --sourcemap",
     "watch": "build:dev -- --watch",
     "pretest": "npm run compile && npm run lint",
