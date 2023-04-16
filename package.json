@@ -179,10 +179,12 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "npm run esbuild-base -- --minify",
-    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/extension.js --external:vscode --main-fields=module,main --format=cjs --platform=node",
-    "build": "npm run esbuild-base -- --sourcemap",
-    "watch": "npm run esbuild-base -- --sourcemap --watch",
+    "esbuild-common": "esbuild ./src/extension.ts --bundle --external:vscode --format=cjs",
+    "esbuild-native": "esbuild-common -- --outfile=out/extension.js --main-fields=module,main --platform=node",
+    "esbuild-web": "esbuild-common -- --outfile=out/web-extension.js --main-fields=browser,module,main --platform=browser",
+    "build": "npm run esbuild-native -- --minify",
+    "build:dev": "npm run esbuild-native -- --sourcemap",
+    "watch": "build:dev -- --watch",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
     "test": "node ./out/test/runTest.js",
