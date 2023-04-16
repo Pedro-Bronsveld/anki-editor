@@ -1,8 +1,8 @@
 {
   "name": "anki-editor",
-  "displayName": "anki-editor",
+  "displayName": "Anki Editor",
   "description": "Edit Anki card templates in Visual Studio Code with syntax highlighting and intellisense.",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "author": "Pedro Bronsveld",
   "repository": {
     "type": "git",
@@ -13,7 +13,8 @@
     "vscode": "^1.74.0"
   },
   "categories": [
-    "Other"
+    "Programming Languages",
+    "Education"
   ],
   "activationEvents": [
     "onCommand:anki-editor.helloWorld",

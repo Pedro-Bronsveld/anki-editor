@@ -13,7 +13,7 @@ with syntax highlighting, autocomplete and other intellisense language features.
 
 - (optional) [AnkiWebView Inspector](https://ankiweb.net/shared/info/31746032) - Recommended because it completes the *"frontend development setup"* when editing card templates.
 
-## Installation
+## Pre-Installation
 
 While this extension has been tested, its functionality may break in unexpected ways after an update of Anki, VSCode, or other dependencies.
 Because Anki Editor modifies card templates saved in your Anki collection, you should create a [backup](https://docs.ankiweb.net/backups.html) of your collection before using this or any other add-on that modifies your collection.
@@ -98,7 +98,7 @@ This can be used when an Anki add-on is installed that adds extra special fields
 * `anki-editor.customFilterNames`: Add extra filter names that will be allowed in template replacements, and will be used for completion suggestions.
 This can be used when an Anki add-on is installed that adds extra filters.
 
-## Attribution
+## Credits
 
 Anki Editor was, in part, made possible by the following projects:
 
@@ -113,9 +113,3 @@ Anki Editor was, in part, made possible by the following projects:
 
 Anki Editor was created to work together with Anki and the attributed projects listed above.
 It is not developed by the Anki developers.
-
-## Release Notes
-
-### 1.0.0
-
-Initial release of Anki Editor.
