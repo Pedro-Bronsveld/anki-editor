@@ -10,7 +10,9 @@ vsc-extension-quickstart.md
 **/*.ts
 resources/images/
 resources/videos/
+resources/icons/anki-editor-icon.svg
 node_modules/
 development.md
 .eslintrc
 *.vsix
+out/*.js.map

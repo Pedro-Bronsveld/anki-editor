@@ -1,7 +1,7 @@
 {
   "name": "anki-editor",
   "displayName": "anki-editor",
-  "description": "Edit HTML and CSS of Anki card templates in Visual Studio Code.",
+  "description": "Edit Anki card templates in Visual Studio Code with syntax highlighting and intellisense.",
   "version": "0.0.1",
   "author": "Pedro Bronsveld",
   "repository": {
@@ -183,13 +183,14 @@
     "esbuild-common": "esbuild ./src/extension.ts --bundle --external:vscode --format=cjs",
     "esbuild-native": "npm run esbuild-common -- --outfile=out/extension.js --main-fields=module,main --platform=node",
     "esbuild-web": "npm run esbuild-common -- --outfile=out/web-extension.js --main-fields=browser,module,main --platform=browser",
-    "build": "npm run esbuild-native -- --minify & npm run esbuild-web -- --minify",
-    "build:dev": "npm run esbuild-native -- --sourcemap",
-    "watch": "build:dev -- --watch",
+    "build-prod": "npm run esbuild-native -- --minify & npm run esbuild-web -- --minify",
+    "build": "npm run esbuild-native -- --sourcemap",
+    "watch": "npm run build -- --watch",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
     "test": "node ./out/test/runTest.js",
     "test-compile": "tsc -p ./",
+    "vscode:prepublish": "npm run build-prod",
     "package": "vsce package",
     "typecheck": "tsc --noEmit"
   },
