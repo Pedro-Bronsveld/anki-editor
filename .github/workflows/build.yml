@@ -1,0 +1,27 @@
+name: Build Extension
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+jobs:
+  build-and-release:
+    permissions:
+      contents: write
+    name: Build and Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Install Packages
+        run: npm ci
+      - name: Build and package extension
+        run: npm run package -- (cut -c 2- <<< $GITHUB_REF_NAME)
+      - name: Upload vsix file to GitHub release 
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: ./*.vsix
+          allowUpdates: true
+          replacesArtifacts: true
+          draft: true
