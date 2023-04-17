@@ -1,6 +1,6 @@
 # Anki Editor
 
-An extension for Visual Studio Code to edit [Anki](https://apps.ankiweb.net/) card templates through [Anki Connect](https://ankiweb.net/shared/info/2055492159)
+An extension for Visual Studio Code to edit [Anki](https://apps.ankiweb.net/) card templates through [Anki-Connect](https://ankiweb.net/shared/info/2055492159)
 with syntax highlighting, autocomplete and other intellisense language features.
 
 ![Anki Editor extension and Anki Preview Reloader add-on demo](resources/videos/anki-editor-example.gif)
@@ -9,22 +9,22 @@ with syntax highlighting, autocomplete and other intellisense language features.
 
 - [Anki](https://apps.ankiweb.net/) desktop application
 
-- [Anki Connect](https://ankiweb.net/shared/info/2055492159) add-on for Anki
+- [Anki-Connect](https://ankiweb.net/shared/info/2055492159) add-on for Anki
 
-- [Anki Preview Reloader](https://github.com/Pedro-Bronsveld/anki-preview-reloader) add-on for Anki - Automatically reloads preview windows in Anki when card templates are updated through Anki Connect.
+- [Anki Preview Reloader](https://github.com/Pedro-Bronsveld/anki-preview-reloader) add-on for Anki - Automatically reloads preview windows in Anki when card templates are updated through Anki-Connect.
 
 - (optional) [AnkiWebView Inspector](https://ankiweb.net/shared/info/31746032) - Recommended because it completes the *"frontend development setup"* when editing card templates.
 
 ## Setup
 
-1. Add [Anki Connect](https://ankiweb.net/shared/info/2055492159) to Anki.
+1. Add [Anki-Connect](https://ankiweb.net/shared/info/2055492159) to Anki.
 2. Install the extension from the Visual Studio Code marketplace.
 3. Make sure Anki is running.
 4. Click the double star icon in the activity bar on the left of VSCode to open the note type tree view.
 5. Find the front or back of the card template you want to edit in the note type and card template tree hierarchy.
 
-The steps above assume you're running VSCode and Anki on the same computer, and that Anki-Connect uses its default port.
-If you're running over a network or have modified the Anki-Connect configuration, you may need to change some of the [extension settings](#extension-settings) to setup the connection between VSCode and Anki Connect.
+The steps above assume you're running VSCode and Anki on the same computer, and that Anki-Connect uses its default port and is listening on localhost.
+If you're running over a network or have modified the Anki-Connect configuration, you may need to change some of the [extension settings](#extension-settings) to establish the connection between VSCode and Anki-Connect.
 
 ### Backup
 
