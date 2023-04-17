@@ -7,13 +7,26 @@ with syntax highlighting, autocomplete and other intellisense language features.
 
 ## Requirements
 
+- [Anki](https://apps.ankiweb.net/) desktop application
+
 - [Anki Connect](https://ankiweb.net/shared/info/2055492159) add-on for Anki
 
 - [Anki Preview Reloader](https://github.com/Pedro-Bronsveld/anki-preview-reloader) add-on for Anki - Automatically reloads preview windows in Anki when card templates are updated through Anki Connect.
 
 - (optional) [AnkiWebView Inspector](https://ankiweb.net/shared/info/31746032) - Recommended because it completes the *"frontend development setup"* when editing card templates.
 
-## Pre-Installation
+## Setup
+
+1. Add [Anki Connect](https://ankiweb.net/shared/info/2055492159) to Anki.
+2. Install the extension from the Visual Studio Code marketplace.
+3. Make sure Anki is running.
+4. Click the double star icon in the activity bar on the left of VSCode to open the note type tree view.
+5. Find the front or back of the card template you want to edit in the note type and card template tree hierarchy.
+
+The steps above assume you're running VSCode and Anki on the same computer, and that Anki-Connect uses its default port.
+If you're running over a network or have modified the Anki-Connect configuration, you may need to change some of the [extension settings](#extension-settings) to setup the connection between VSCode and Anki Connect.
+
+### Backup
 
 While this extension has been tested, its functionality may break in unexpected ways after an update of Anki, VSCode, or other dependencies.
 Because Anki Editor modifies card templates saved in your Anki collection, you should create a [backup](https://docs.ankiweb.net/backups.html) of your collection before using this or any other add-on that modifies your collection.
