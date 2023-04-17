@@ -14,10 +14,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      - name: Install Packages
+      - name: Install packages
         run: npm ci
       - name: Build and package extension
-        run: npm run package -- (cut -c 2- <<< $GITHUB_REF_NAME)
+        run: npm run package -- $(cut -c 2- <<< $GITHUB_REF_NAME)
       - name: Upload vsix file to GitHub release 
         uses: ncipollo/release-action@v1
         with:
