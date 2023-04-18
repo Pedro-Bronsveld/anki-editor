@@ -1,0 +1,20 @@
+name: Publish Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish-release:
+    name: Publish Release
+    runs-on: ubuntu-latest
+    env:
+      VSIX_FILE: "anki-editor-${{ github.ref_name }}.vsix"
+    steps:
+      - name: Download vsix release asset
+        uses: dsaltares/fetch-gh-release-asset@master
+        with:
+          version: "tags/${{ github.ref_name }}"
+          file: ${{ env.VSIX_FILE }}
+      - name: List directory content
+        run: ls -l
