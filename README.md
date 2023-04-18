@@ -26,6 +26,8 @@ with syntax highlighting, autocomplete and other intellisense language features.
 The steps above assume you're running VSCode and Anki on the same computer, and that Anki-Connect uses its default port and is listening on localhost.
 If you're running over a network or have modified the Anki-Connect configuration, you may need to change some of the [extension settings](#extension-settings) to establish the connection between VSCode and Anki-Connect.
 
+> Note: you may need to reload VSCode after installing the extension before file icons for `.template.anki` files become visible.
+
 ### Backup
 
 While this extension has been tested, its functionality may break in unexpected ways after an update of Anki, VSCode, or other dependencies.
