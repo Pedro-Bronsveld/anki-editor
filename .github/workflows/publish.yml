@@ -9,14 +9,14 @@ jobs:
     name: Publish Release
     runs-on: ubuntu-latest
     env:
-      VSIX_FILE: 
+      VSIX_FILE: "anki-editor-${{ github.ref_name }}.vsix"
     steps:
-      - name: Set vsix variable
-        run: echo "VSIX_FILE=anki-editor-$(echo $GITHUB_REF_NAME | cut -c 2-).vsix" >> $GITHUB_ENV
       - name: Download vsix release asset
         uses: dsaltares/fetch-gh-release-asset@master
         with:
           version: "tags/${{ github.ref_name }}"
           file: ${{ env.VSIX_FILE }}
-      - name: List directory content
+      - name: (test) List directory content
         run: ls -l
+      - name : (test) Show node & npm version & python version
+        run: node --version && npm --version && python --version
