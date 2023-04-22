@@ -11,7 +11,7 @@ with syntax highlighting, autocomplete and other intellisense language features.
 
 - [Anki-Connect](https://ankiweb.net/shared/info/2055492159) add-on for Anki
 
-- [Anki Preview Reloader](https://github.com/Pedro-Bronsveld/anki-preview-reloader) add-on for Anki - Automatically reloads preview windows in Anki when card templates are updated through Anki-Connect.
+- [Anki Preview Reloader](https://ankiweb.net/shared/info/571150035) add-on for Anki - Automatically reloads preview windows in Anki when card templates are updated through Anki-Connect.
 
 - (optional) [AnkiWebView Inspector](https://ankiweb.net/shared/info/31746032) - Recommended because it completes the *"frontend development setup"* when editing card templates.
 
@@ -38,7 +38,7 @@ Because Anki Editor modifies card templates saved in your Anki collection, you s
 When you're editing a card template in Anki's [template screen](https://docs.ankiweb.net/templates/intro.html#the-templates-screen), its preview is updated as you type.
 However, this preview will not update when the card template is updated through Anki-Connect.
 
-To solve this, the Anki add-on [Anki Preview Reloader](https://github.com/Pedro-Bronsveld/anki-preview-reloader) was developed alongside Anki Editor.
+To solve this, the Anki add-on [Anki Preview Reloader](https://ankiweb.net/shared/info/571150035) was developed alongside Anki Editor.
 When changes to a template are saved through Anki-Connect, this add-on will reload the preview in the card template screen, or the card preview window opened from the card editor.
 
 ## Standalone
