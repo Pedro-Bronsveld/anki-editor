@@ -95,6 +95,39 @@ Can be triggered using `Ctrl` + `Space` by default, when the cursor is inside a 
 - Snippets for some field replacements and conditional blocks when the cursor is outside a field replacement.
 Can be triggered using `Ctrl` + `Space` by default.
 
+## Running on vscode.dev
+
+[vscode.dev](https://vscode.dev/) is a version of Visual Studio Code that runs entirely in the browser.
+Anki Editor can be installed and used on vscode.dev with some technical limitations and things to keep in mind:
+
+A connection from Anki Editor running in vscode.dev to Anki-Connect can only be established when the browser and Anki are running on the same computer.
+This is because of [mixed content](https://developer.mozilla.org/en-US/docs/Web/Security/Mixed_content#loading_locally_delivered_mixed-resources) limitations set by web browsers.
+
+Because vscode.dev is seen as a foreign website that's trying to access your locally running Anki-Connect add-on, Anki-Connect will show a pop-up asking you to allow permission to allow cross origin requests from vscode.dev.
+
+![VSCode.dev request](resources/images/vscode-dev-request.png)
+
+By clicking `Yes`, the origin that the Anki Editor extension is served from will be added to the `"webCorsOriginList"` property in the Anki-Connect configuration.
+Unfortunately, because vscode.dev loads its content from a cdn, a different `*.vscode-cdn.net` origin is sent with requests to Anki Connect every time Anki Editor is loaded on vscode.dev.
+As a result, the list of allowed cors origins in the Anki-Connect configuration grows every time the extension is loaded on vscode.dev.
+
+![VSCode.dev origins](resources/images/vscode-dev-origins.png)
+
+This behavior can be prevented by setting the allowed origins to `"*"`.
+However, this is not recommended, as it allows any website to interact with Anki-Connect without requesting permission.
+
+```json
+{
+    // ...
+    "webCorsOriginList": [
+        "*"
+    ]
+}
+```
+
+When using Anki Editor on vscode.dev, all content is still transferred locally between Anki-Connect and Anki Editor.
+This means none of your templates are sent to vscode.dev or other online services.
+
 ## Extension Settings
 
 * `anki-editor.origin`: The url and port that Anki-Connect can be reached at. 
