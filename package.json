@@ -178,6 +178,22 @@
           },
           "default": [],
           "description": "Extra filter names to show in completion suggestions, and to ignore when checking errors."
+        },
+        "anki-editor.checkJsLevel": {
+          "title": "Javascript type checking level",
+          "type": ["string"],
+          "enum": [
+            "strict",
+            "default",
+            "off"
+          ],
+          "enumDescriptions": [
+            "Strict Typescript-like type checking in embedded javascript in Anki card templates.",
+            "Type checking similar VSCode's default type checking in HTML and Javascript files.",
+            "No type checking of embedded Javascript in Anki card templates."
+          ],
+          "default": "default",
+          "description": "Set the level of type checking used for embedded Javascript in Anki card templates."
         }
       }
     }

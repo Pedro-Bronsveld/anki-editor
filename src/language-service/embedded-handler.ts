@@ -9,6 +9,7 @@ import { createVirtualUri } from './feature-providers/embedded-functions';
 import { combineLanguageRegionsById, defaultLanguageRegion, getLanguageRegions, LanguageRegion } from './language-regions';
 import { parseTemplateDocument } from './parser/template-parser';
 import VirtualDocumentProvider from "./virtual-documents-provider";
+import { getCheckJsLevelSetting } from './javascript-type-checking';
 
 export default class EmbeddedHandler {
 
@@ -22,12 +23,21 @@ export default class EmbeddedHandler {
             useInMemoryFileSystem: true,
             compilerOptions: {
                 allowJs: true,
-                checkJs: true
+                checkJs: getCheckJsLevelSetting(),
             }
         });
 
         this.tsLanguageService = this.tsProject.getLanguageService();
 
+    }
+
+    /**
+     * Update `checkJs` compiler option when setting is changed in VSCode settings.
+     */
+    public updateCompilerOptions() {
+        this.tsProject.compilerOptions.set({
+            checkJs: getCheckJsLevelSetting()
+        });
     }
     
     public clearCache(document?: vscode.TextDocument) {
