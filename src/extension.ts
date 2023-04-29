@@ -36,7 +36,7 @@ export function activate(context: vscode.ExtensionContext) {
 				ankiConnect.clearCache();
 			}
 			else {
-				updateAllDiagnostics(templateDiagnosticsProvider);
+				updateAllDiagnostics(templateDiagnosticsProvider, true);
 			}
 		})
 	);
