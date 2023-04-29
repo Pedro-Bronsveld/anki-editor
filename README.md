@@ -146,6 +146,9 @@ This can be used when an Anki add-on is installed that adds extra special fields
 * `anki-editor.customFilterNames`: Add extra filter names that will be allowed in template replacements, and will be used for completion suggestions.
 This can be used when an Anki add-on is installed that adds extra filters.
 
+* `anki-editor.checkJsLevel`: Sets the level of type checking for embedded Javascript type errors.
+  The values `"on"`, `"default"` and `"off"` correspond to the values `true`, `undefined` and `false` of the [`checkJs`](https://www.typescriptlang.org/tsconfig#checkJs) property of TypeScript compiler options.
+
 ## Credits
 
 Anki Editor was, in part, made possible by the following projects:
