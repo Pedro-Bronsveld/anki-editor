@@ -18,7 +18,7 @@ with syntax highlighting, autocomplete and other intellisense language features.
 ## Setup
 
 1. Add [Anki-Connect](https://ankiweb.net/shared/info/2055492159) to Anki.
-2. Install the extension from the Visual Studio Code marketplace.
+2. Install the extension from the [Visual Studio Code marketplace](https://marketplace.visualstudio.com/items?itemName=pedro-bronsveld.anki-editor).
 3. Make sure Anki is running.
 4. Click the double star icon in the activity bar on the left of VSCode to open the note type tree view.
 5. Find the front or back of the card template you want to edit in the note type and card template tree hierarchy.
@@ -147,7 +147,7 @@ This can be used when an Anki add-on is installed that adds extra special fields
 This can be used when an Anki add-on is installed that adds extra filters.
 
 * `anki-editor.checkJsLevel`: Sets the level of type checking for embedded Javascript type errors.
-  The values `"on"`, `"default"` and `"off"` correspond to the values `true`, `undefined` and `false` of the [`checkJs`](https://www.typescriptlang.org/tsconfig#checkJs) property of TypeScript compiler options.
+  The values `"on"`, `"default"` and `"off"` correspond to the values `true`, `undefined` and `false` of the [`checkJs`](https://www.typescriptlang.org/tsconfig#checkJs) property in the TypeScript compiler options.
 
 ## Credits
 
