@@ -1,5 +1,11 @@
 # Change Log
 
+## [1.0.2] - 2023-05-06
+
+Small bug fix.
+
+* Fixed an issue where the field name in a field replacement did not receive syntax highlighting when the replacement was followed by a `:` character on the same line.
+
 ## [1.0.1] - 2023-04-29
 
 Small Javascript type checking level fix and readme updates.
