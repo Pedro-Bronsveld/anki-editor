@@ -134,7 +134,7 @@ const someCloze = (replacements: Replacement[]): boolean =>
         && replacement.filterSegments
     .some(filterSegment => filterSegment.filter?.content === "cloze"));
 
-const fieldRegexp = /[^#^/\s:{}\"]+([^:{}\s\"]|\s(?!\s*(}}|$)))*(?!.*:)/
+const fieldRegexp = /[^#^/\s:{}\"]([^:{}\s\"]|\s(?!\s*(}}|$)))*(?![^}]*:)/
 
 const parseField = (input: string, offset: number = 0): Field | undefined => {
     const fieldMatch = input.match(fieldRegexp);

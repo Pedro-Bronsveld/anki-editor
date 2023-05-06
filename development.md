@@ -29,13 +29,13 @@ Anki documentation:
 Match field name
 
 ```javascript
-/[^#^\/\s:\"{}]+([^:\"{}\s]|\s(?!\s*(}}|$)))*(?!.*:)/g
+/[^#^/\s:{}\"]([^:{}\s\"]|\s(?!\s*(}}|$)))*(?![^}]*:)/g
 ```
 
 Match first character
 
 ```javascript
-/[^#^\/\s:\"{}]+/
+/[^#^/\s:{}\"]/
 
 ```
 

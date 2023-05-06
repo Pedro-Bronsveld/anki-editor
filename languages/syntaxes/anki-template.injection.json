@@ -166,7 +166,7 @@
 		},
 		"anki-field": {
 			"name": "variable.anki.field",
-			"match": "[^#^\/\\s:{}\"]+([^:{}\\s\"]|\\s(?!\\s*(}}|$)))*(?!.*:)",
+			"match": "[^#^/\\s:{}\"]([^:{}\\s\"]|\\s(?!\\s*(}}|$)))*(?![^}]*:)",
 			"captures": {
 				"0": { "patterns": [{ "include": "#anki-field-special" }] }
 			}
