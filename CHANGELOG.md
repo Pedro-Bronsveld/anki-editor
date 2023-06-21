@@ -1,5 +1,12 @@
 # Change Log
 
+## [1.0.3] - 2023-06-21
+
+Updated extension settings for custom filters and field diagnostics.
+
+* Custom filters can now be defined as both strings and objects in the extension settings. When adding a custom filter as an object, the boolean property `fieldRequired` can be set to specify if the replacement must contain a field name when this filter is used.
+* Added a setting to toggle diagnostics for missing field names in replacements globally.
+
 ## [1.0.2] - 2023-05-06
 
 Small bug fix.
