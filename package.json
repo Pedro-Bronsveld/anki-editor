@@ -157,6 +157,12 @@
           "default": true,
           "description": "Show errors for filter names that are not built into Anki."
         },
+        "anki-editor.missingFieldDiagnostics": {
+          "title": "Missing Field Diagnostics",
+          "type": "boolean",
+          "default": true,
+          "description": "Show errors for replacements without a field name."
+        },
         "anki-editor.customFieldNames": {
           "title": "Custom Fields",
           "type": "array",
