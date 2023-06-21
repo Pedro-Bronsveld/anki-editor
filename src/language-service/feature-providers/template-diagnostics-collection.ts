@@ -11,7 +11,7 @@ import { partsToUri, uriPathToParts } from '../../note-types/uri-parser';
 import { DiagnosticCode } from '../diagnostic-codes';
 import { conditionalStartChar, getParentConditionals, getUnavailableFieldNames } from '../parser/ast-utils';
 import EmbeddedHandler from '../embedded-handler';
-import { getExtendedFilterNames, getExtendedSpecialFieldNames } from '../anki-custom';
+import { getExtendedFilterNames, getExtendedFilters, getExtendedSpecialFieldNames } from '../anki-custom';
 import { isClozeReplacement } from '../cloze-fields';
 import { objectEntries } from '../../util/object-utilities';
 
@@ -56,6 +56,8 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
             const validFields: Set<string> = new Set();
             const modelAvailable: boolean = document.uri.scheme === ANKI_EDITOR_SCHEME_BASE;
             let modelName = "";
+            const validFiltersMap = getExtendedFilters();
+            const validFilterNames = getExtendedFilterNames();
 
             if (modelAvailable) {
                 getExtendedSpecialFieldNames().forEach(validFields.add, validFields);
@@ -117,9 +119,13 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                     : -1;
                 const containsTtsVoicesFilter = ttsVoicesFilterSegmentIndex >= 0;
 
+                // Check if replacement contains any filters that explicitly state a field is not required
+                const fieldOptional = replacement.type === AstItemType.replacement &&
+                    replacement.filterSegments.some(({ filter }) => filter && validFiltersMap.get(filter.content)?.fieldRequired === false);
+
                 // Check if field exists in model
                 const { field } = replacement.fieldSegment;
-                if (!field && !containsTtsVoicesFilter) {
+                if (!field && !fieldOptional ) {
                     // Provide diagnostic for missing field name
                     allDiagnostics.push(createDiagnostic(document, replacement.fieldSegment.start, replacement.fieldSegment.end,
                         "Missing field name."));
@@ -208,7 +214,7 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                             continue;
                         }
                         // Check if filter name exists
-                        else if (config.get("invalidFilterDiagnostics") && filter && !getExtendedFilterNames().includes(filter.content))
+                        else if (config.get("invalidFilterDiagnostics") && filter && !validFilterNames.includes(filter.content))
                             allDiagnostics.push(createDiagnostic(document, filter.start, filter.end,
                                 `'${filter.content}' is not a built-in filter.`,
                                 DiagnosticCode.invalidFilterName));

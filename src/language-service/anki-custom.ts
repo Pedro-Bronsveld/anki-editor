@@ -1,28 +1,51 @@
 import * as vscode from 'vscode';
 import { ANKI_EDITOR_CONFIG } from '../constants';
-import { BuiltIn, builtinFiltersList, builtinFiltersNames, specialFieldsList, specialFieldsNames, toMap } from './anki-builtin';
+import { BuiltIn, BuiltInFilter, builtinFiltersList, builtinFiltersNames, specialFieldsList, specialFieldsNames, toMap } from './anki-builtin';
 
-const getItemsFromConfig = (section: "customFieldNames" | "customFilterNames"): string[] => {
+export type CustomFilter = {
+    name: string;
+    fieldRequired?: boolean;
+}
+
+const getItemsFromConfig = (section: "customFieldNames" | "customFilterNames"): (string | object)[] => {
     const possibleCustomFieldNames = vscode.workspace.getConfiguration(ANKI_EDITOR_CONFIG).get(section);
 
     return (possibleCustomFieldNames instanceof Array ? possibleCustomFieldNames : [])
-        .filter((possibleFieldName): possibleFieldName is string => typeof possibleFieldName === "string");
+        .filter((possibleItem): possibleItem is string | object => typeof possibleItem === "string" || typeof possibleItem === "object");
 }
 
-export const getCustomFieldNames = () => getItemsFromConfig("customFieldNames")
+export const getCustomFieldNames = (): string[] => getItemsFromConfig("customFieldNames")
+    .filter((possibleFielName): possibleFielName is string => typeof possibleFielName === "string")
     .filter(customFielName => customFielName.match(/^[^#^/\s:{}\"]+([^:{}\s\"]|\s(?!\s*(}}|$)))*$/));
 
-export const getCustomFilterNames = () => getItemsFromConfig("customFilterNames")
-    .filter(customFilterName => customFilterName.match(/^[^#^/\s:{}"]+$/));
+export const getCustomFilterItems = (): CustomFilter[] => getItemsFromConfig("customFilterNames")
+    .filter((possibleFilter): possibleFilter is string | CustomFilter => typeof possibleFilter === "string" || typeof possibleFilter === "object" && "name" in possibleFilter && typeof possibleFilter.name === "string")
+    .map<CustomFilter>(customFilter => {
+        if (typeof customFilter === "object")
+            return {
+                name: customFilter.name,
+                fieldRequired: customFilter.fieldRequired ?? true
+            }
+        
+        return {
+            name: customFilter,
+            fieldRequired: true
+        }
+    })
+    .filter(customFilter => customFilter.name.match(/^[^#^/\s:{}"]+$/));
+
+export const getCustomFilterNames = () => getCustomFilterItems()
+    .map(({ name }) => name);
 
 export const getCustomFieldsList = () => getCustomFieldNames().map<BuiltIn>(fieldName => ({
     name: fieldName,
     description: "Custom field defined in anki-editor extension settings."
 }));
 
-export const getCustomFiltersList = () => getCustomFilterNames().map<BuiltIn>(filterName => ({
-    name: filterName,
-    description: "Custom filter defined in anki-editor extension settings."
+export const getCustomFiltersList = () => getCustomFilterItems().map<BuiltInFilter>(customFilter => ({
+    name: customFilter.name,
+    description: "Custom filter defined in anki-editor extension settings.",
+    fieldRequired: customFilter.fieldRequired ?? true
 }));
 
 export const getExtendedSpecialFieldsList = () => specialFieldsList.concat(getCustomFieldsList());
