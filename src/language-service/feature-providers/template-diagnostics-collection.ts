@@ -121,8 +121,8 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
 
                 // Check if replacement contains any filters that explicitly state a field is not required
                 const fieldOptional = replacement.type === AstItemType.replacement &&
-                    replacement.filterSegments.some(({ filter }) => filter && validFiltersMap.get(filter.content)?.fieldRequired === false)
-                    || !config.get("missingFieldDiagnostics");
+                    (replacement.filterSegments.some(({ filter }) => filter && validFiltersMap.get(filter.content)?.fieldRequired === false)
+                    || !config.get("missingFieldDiagnostics"));
 
                 // Check if field exists in model
                 const { field } = replacement.fieldSegment;
