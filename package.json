@@ -183,7 +183,8 @@
               {
                 "type": "string",
                 "pattern": "^[^#^/\\s:{}\"]+$",
-                "patternErrorMessage": "Custom filter names can't contain spaces or # ^ / : \" { }"
+                "patternErrorMessage": "Custom filter names can't contain spaces or # ^ / : \" { }",
+                "examples": ["custom-filter"]
               },
               {
                 "type": "object",
@@ -192,7 +193,8 @@
                     "type": "string",
                     "pattern": "^[^#^/\\s:{}\"]+$",
                     "patternErrorMessage": "Custom filter names can't contain spaces or # ^ / : \" { }",
-                    "description": "Name of the custom filter."
+                    "description": "Name of the custom filter.",
+                    "examples": ["custom-filter"]
                   },
                   "fieldRequired": {
                     "type": "boolean",
@@ -200,17 +202,16 @@
                     "description": "Specifies if a field name is required when this filter is used.\nDefaults to true."
                   }
                 },
-                "required": ["name"]
+                "required": ["name"],
+                "examples": [
+                  {
+                    "name": "custom-filter",
+                    "fieldRequired": true
+                  }
+                ]
               }
             ]
           },
-          "default": [
-            "custom-filter",
-            {
-              "name": "custom-filter",
-              "fieldRequired": true
-            }
-          ],
           "markdownDescription": "Extra filters to show in completion suggestions, and to ignore when checking for errors.\nA custom filter can be defined as a string such as `\"custom-filter\"` or an object such as `{ \"name\": \"custom-filter\", \"fieldRequired\": \"true\" }`."
         },
         "anki-editor.checkJsLevel": {
