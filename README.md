@@ -138,13 +138,27 @@ Leave this empty if `"apiKey"` in the Anki-Connect configuration is set to `null
 
 * `anki-editor.invalidFieldDiagnostics`: Enable or disable error detection of field names in template replacements.
 
+* `anki-editor.missingFieldDiagnostics`: Enable or disable error detection of missing field names in template replacements.
+
 * `anki-editor.invalidFilterDiagnostics`: Enable or disable error detection of filter names in template replacements.
 
 * `anki-editor.customFieldNames`: Add extra field names that will be allowed in template replacements, and will be used for completion suggestions.
-This can be used when an Anki add-on is installed that adds extra special fields.
+  This can be used when an Anki add-on is installed that adds extra special fields.
 
 * `anki-editor.customFilterNames`: Add extra filter names that will be allowed in template replacements, and will be used for completion suggestions.
-This can be used when an Anki add-on is installed that adds extra filters.
+  This can be used when an Anki add-on is installed that adds extra filters.
+  A custom filter can be defined as a string or an object.
+
+  Example:
+  ```json
+  "anki-editor.customFilterNames": [
+      "custom-filter1",
+      {
+          "name": "custom-filter2",
+          "fieldRequired": true
+      }
+  ]
+  ```
 
 * `anki-editor.checkJsLevel`: Sets the level of type checking for embedded Javascript type errors.
   The values `"on"`, `"default"` and `"off"` correspond to the values `true`, `undefined` and `false` of the [`checkJs`](https://www.typescriptlang.org/tsconfig#checkJs) property in the TypeScript compiler options.

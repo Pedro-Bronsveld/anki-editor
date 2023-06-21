@@ -9,6 +9,10 @@ export interface BuiltIn {
     htmlDescription?: boolean;
 }
 
+export type BuiltInFilter = BuiltIn & {
+    fieldRequired: boolean;
+}
+
 // Built-in special fields
 
 export const specialFieldsList: readonly BuiltIn[] = [
@@ -62,7 +66,7 @@ export const specialFieldsList: readonly BuiltIn[] = [
 
 // Built-in filters
 
-export const builtinFiltersList: readonly BuiltIn[] = [
+export const builtinFiltersList: readonly BuiltInFilter[] = [
     {
         name: "tts",
         description: "Converts the value of the field in this replacement to spoken words.\n\n" +
@@ -72,14 +76,16 @@ export const builtinFiltersList: readonly BuiltIn[] = [
             "### Options Example\n\n" +
             "The options `voices` and `speed` can optionally be used to set the voice used for conversion, and the speed at which the audio is played.\n\n" +
             quotedCodeBlock(TEMPLATE_LANGUAGE_ID, "{{tts en_US voices=Microsoft_George speed=1.0:Field}}") +
-            docsLink("Text to Speech", "https://docs.ankiweb.net/templates/fields.html#text-to-speech")
+            docsLink("Text to Speech", "https://docs.ankiweb.net/templates/fields.html#text-to-speech"),
+        fieldRequired: true
     },
     {
         name: "tts-voices",
         description: "Displays a list of tts languages and voices available on the system the card or card preview is rendered on.\n\n" +
             "### Example\n\n" +
             quotedCodeBlock(TEMPLATE_LANGUAGE_ID, "{{tts-voices:}}") +
-            docsLink("Text to Speech", "https://docs.ankiweb.net/templates/fields.html#text-to-speech")
+            docsLink("Text to Speech", "https://docs.ankiweb.net/templates/fields.html#text-to-speech"),
+        fieldRequired: false
     },
     {
         name: "cloze",
@@ -92,14 +98,16 @@ export const builtinFiltersList: readonly BuiltIn[] = [
                     front: "This is a **[...]** cloze deletion.",
                     back: "This is a **sample** cloze deletion."
                 }) +
-            docsLink("Cloze Deletion", "https://docs.ankiweb.net/editing.html#cloze-deletion")
+            docsLink("Cloze Deletion", "https://docs.ankiweb.net/editing.html#cloze-deletion"),
+        fieldRequired: true
     },
     {
         name: "cloze-only",
         description: "When used in combination with the `tts` filter, only the deleted text will be read.\n\n" +
             "### Example\n\n" +
             quotedCodeBlock(TEMPLATE_LANGUAGE_ID, "{{tts en_US:cloze-only:Field}}") +
-            docsLink("Text to Speech", "https://docs.ankiweb.net/templates/fields.html#text-to-speech")
+            docsLink("Text to Speech", "https://docs.ankiweb.net/templates/fields.html#text-to-speech"),
+        fieldRequired: true
     },
     {
         name: "hint",
@@ -107,7 +115,8 @@ export const builtinFiltersList: readonly BuiltIn[] = [
             filterExample("{{hint:Field}}", "This is some hint text.", "[Field](https://docs.ankiweb.net/templates/fields.html#hint-fields)") + "\n\n" +
             "When the 'Field' text is clicked, the field's content is revealed:\n\n" +
             quotedCodeBlock("text", "This is some hint text.") +
-            docsLink("Hint Fields", "https://docs.ankiweb.net/templates/fields.html#hint-fields")
+            docsLink("Hint Fields", "https://docs.ankiweb.net/templates/fields.html#hint-fields"),
+        fieldRequired: true
     },
     {
         name: "type",
@@ -115,13 +124,15 @@ export const builtinFiltersList: readonly BuiltIn[] = [
             "Displays the correct and incorrect letters of the user's input when also used on the back of the card template.\n\n" +
             "### Example\n\n" +
             quotedCodeBlock(TEMPLATE_LANGUAGE_ID, "{{type:Field}}") +
-            docsLink("Checking Your Answer", "https://docs.ankiweb.net/templates/fields.html#checking-your-answer")
+            docsLink("Checking Your Answer", "https://docs.ankiweb.net/templates/fields.html#checking-your-answer"),
+        fieldRequired: true
     },
     {
         name: "text",
         description: "Displays the source content of the field without any formatting.\n\n" +
             filterExample("{{text:Field}}", "**Bold** and *Italic* text.", "Bold and Italic text.", true) +
-            docsLink("HTML Stripping", "https://docs.ankiweb.net/templates/fields.html#html-stripping")
+            docsLink("HTML Stripping", "https://docs.ankiweb.net/templates/fields.html#html-stripping"),
+        fieldRequired: true
     },
     {
         name: "furigana",
@@ -129,21 +140,24 @@ export const builtinFiltersList: readonly BuiltIn[] = [
             "Ruby characters will be displayed above the logographic characters.\n\n" +
             rubyFilterExample("furigana") +
             docsLink("Ruby Characters", "https://docs.ankiweb.net/templates/fields.html#ruby-characters"),
-        htmlDescription: true
+        htmlDescription: true,
+        fieldRequired: true
     },
     {
         name: "kana",
         description: "Allows for the use of logographic and ruby characters in a field.\n\n" +
             "Only the ruby characters will be displayed.\n\n" +
             rubyFilterExample("kana") +
-            docsLink("Additional Ruby Character Filters", "https://docs.ankiweb.net/templates/fields.html#additional-ruby-character-filters")
+            docsLink("Additional Ruby Character Filters", "https://docs.ankiweb.net/templates/fields.html#additional-ruby-character-filters"),
+        fieldRequired: true
     },
     {
         name: "kanji",
         description: "Allows for the use of logographic and ruby characters in a field.\n\n" +
             "Only the logographic characters will be displayed.\n\n" +
             rubyFilterExample("kanji") +
-            docsLink("Additional Ruby Character Filters", "https://docs.ankiweb.net/templates/fields.html#additional-ruby-character-filters")
+            docsLink("Additional Ruby Character Filters", "https://docs.ankiweb.net/templates/fields.html#additional-ruby-character-filters"),
+        fieldRequired: true
     }
 ];
 

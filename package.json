@@ -157,6 +157,12 @@
           "default": true,
           "description": "Show errors for filter names that are not built into Anki."
         },
+        "anki-editor.missingFieldDiagnostics": {
+          "title": "Missing Field Diagnostics",
+          "type": "boolean",
+          "default": true,
+          "description": "Show an error when a replacement does not contain a field name."
+        },
         "anki-editor.customFieldNames": {
           "title": "Custom Fields",
           "type": "array",
@@ -172,12 +178,41 @@
           "title": "Custom Filters",
           "type": "array",
           "items": {
-            "type": "string",
-            "pattern": "^[^#^/\\s:{}\"]+$",
-            "patternErrorMessage": "Custom filter names can't contain spaces or # ^ / : \" { }"
+            "type": ["string", "object"],
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[^#^/\\s:{}\"]+$",
+                "patternErrorMessage": "Custom filter names can't contain spaces or # ^ / : \" { }",
+                "examples": ["custom-filter"]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "pattern": "^[^#^/\\s:{}\"]+$",
+                    "patternErrorMessage": "Custom filter names can't contain spaces or # ^ / : \" { }",
+                    "description": "Name of the custom filter.",
+                    "examples": ["custom-filter"]
+                  },
+                  "fieldRequired": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Specifies if a field name is required when this filter is used.\nDefaults to true."
+                  }
+                },
+                "required": ["name"],
+                "examples": [
+                  {
+                    "name": "custom-filter",
+                    "fieldRequired": true
+                  }
+                ]
+              }
+            ]
           },
-          "default": [],
-          "description": "Extra filter names to show in completion suggestions, and to ignore when checking errors."
+          "markdownDescription": "Extra filters to show in completion suggestions, and to ignore when checking for errors.\nA custom filter can be defined as a string such as `\"custom-filter\"` or an object such as `{ \"name\": \"custom-filter\", \"fieldRequired\": true }`."
         },
         "anki-editor.checkJsLevel": {
           "title": "Javascript type checking level",
