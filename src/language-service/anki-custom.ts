@@ -15,8 +15,8 @@ const getItemsFromConfig = (section: "customFieldNames" | "customFilterNames"): 
 }
 
 export const getCustomFieldNames = (): string[] => getItemsFromConfig("customFieldNames")
-    .filter((possibleFielName): possibleFielName is string => typeof possibleFielName === "string")
-    .filter(customFielName => customFielName.match(/^[^#^/\s:{}\"]+([^:{}\s\"]|\s(?!\s*(}}|$)))*$/));
+    .filter((possibleFieldName): possibleFieldName is string => typeof possibleFieldName === "string")
+    .filter(customFieldName => customFieldName.match(/^[^#^/\s:{}\"]+([^:{}\s\"]|\s(?!\s*(}}|$)))*$/));
 
 export const getCustomFilterItems = (): CustomFilter[] => getItemsFromConfig("customFilterNames")
     .filter((possibleFilter): possibleFilter is string | CustomFilter => typeof possibleFilter === "string" || typeof possibleFilter === "object" && "name" in possibleFilter && typeof possibleFilter.name === "string")
