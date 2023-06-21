@@ -161,7 +161,7 @@
           "title": "Missing Field Diagnostics",
           "type": "boolean",
           "default": true,
-          "description": "Show errors for replacements without a field name."
+          "description": "Show an error when a replacement does not contain a field name."
         },
         "anki-editor.customFieldNames": {
           "title": "Custom Fields",
@@ -212,7 +212,7 @@
               }
             ]
           },
-          "markdownDescription": "Extra filters to show in completion suggestions, and to ignore when checking for errors.\nA custom filter can be defined as a string such as `\"custom-filter\"` or an object such as `{ \"name\": \"custom-filter\", \"fieldRequired\": \"true\" }`."
+          "markdownDescription": "Extra filters to show in completion suggestions, and to ignore when checking for errors.\nA custom filter can be defined as a string such as `\"custom-filter\"` or an object such as `{ \"name\": \"custom-filter\", \"fieldRequired\": true }`."
         },
         "anki-editor.checkJsLevel": {
           "title": "Javascript type checking level",
