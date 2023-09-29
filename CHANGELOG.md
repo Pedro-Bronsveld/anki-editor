@@ -1,5 +1,11 @@
 # Change Log
 
+## [1.0.4] - 2023-09-29
+
+Updated uri parsing.
+
+* Fixed an issue where templates files could not be opened if their note or card name contained a special character.
+
 ## [1.0.3] - 2023-06-21
 
 Updated extension settings for custom filters and field diagnostics.
