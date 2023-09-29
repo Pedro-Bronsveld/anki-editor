@@ -12,7 +12,7 @@ export const lookupNoteType = async (uri: vscode.Uri, ankiConnect: AnkiConnect):
 
     if (parts.length === 0) {
         // Uri is root of note types folder, return list of note type directories
-        console.log("fetching modelNames");
+        // console.log("fetching modelNames");
         const modelNames = await ankiConnect.getModelNames();
 
         const rootDir = new Directory("");
