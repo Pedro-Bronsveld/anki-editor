@@ -38,6 +38,8 @@ export const partsToUri = (parts: string[]): vscode.Uri => {
                 parts[2] = escapeText(parts[2]);
     }
 
-    const path = resultParts.join("/");
+    const path = resultParts
+        .map(part => encodeURIComponent(part))
+        .join("/");
     return vscode.Uri.parse(`${ANKI_EDITOR_SCHEME}${path}`);
 }
