@@ -1,4 +1,3 @@
-import { ApiKey } from '@autoanki/anki-connect';
 import * as vscode from 'vscode';
 import { createCachedFunction } from "../cache/cached-function";
 import { ANKI_EDITOR_CONFIG } from '../constants';
@@ -11,6 +10,7 @@ import { requestPermission } from './request-permission';
 import { updateModelStyling } from "./update-model-styling";
 import { updateModelTemplates } from "./update-model-templates";
 import { getMediaFilesNames } from './get-media-files-names';
+import { ApiKey } from '../models/anki-connect/api-key';
 
 export default class AnkiConnect {
 
@@ -36,7 +36,7 @@ export default class AnkiConnect {
 
         const permissionResult = await this.requestPermission();
 
-        if (permissionResult.permission === "granted" && permissionResult.requireApiKey === false)
+        if (permissionResult.permission === "granted" && permissionResult.requireApikey === false)
             // Don't return api key if not required for requests.
             return undefined;
             

@@ -1,4 +1,4 @@
-import { ApiKey } from "@autoanki/anki-connect";
+import { ApiKey } from "../models/anki-connect/api-key";
 import File from "../models/file";
 import { wrappedInvoke } from "./wrapper-invoke";
 

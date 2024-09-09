@@ -1,5 +1,5 @@
-import { invoke } from "@autoanki/anki-connect"
 import * as vscode from 'vscode';
+import { invoke } from './invoke';
 
  /**
  * Wrapped version of autoanki's invoke function.
