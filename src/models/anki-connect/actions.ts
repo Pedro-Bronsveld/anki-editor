@@ -191,7 +191,7 @@ export type AnkiConnectActions = {
             request: void,
             response: {
                 permission: "granted",
-                requireApiKey: boolean,
+                requireApikey: boolean,
                 version: 6
             } | {
                 permission: "denied"

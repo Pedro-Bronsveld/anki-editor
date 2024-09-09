@@ -36,7 +36,7 @@ export default class AnkiConnect {
 
         const permissionResult = await this.requestPermission();
 
-        if (permissionResult.permission === "granted" && permissionResult.requireApiKey === false)
+        if (permissionResult.permission === "granted" && permissionResult.requireApikey === false)
             // Don't return api key if not required for requests.
             return undefined;
             
