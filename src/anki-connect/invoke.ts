@@ -2,6 +2,7 @@
  * extracted from https://github.com/chenlijun99/autoanki/blob/main/packages/anki-connect/src/index.ts
  */
 
+import axios from "axios";
 import { ActionNames } from "../models/anki-connect/actions";
 import { InvokeArgs, InvokeResponse } from "../models/anki-connect/invoke";
 import { DefaultAnkiConnectVersion, SupportedAnkiConnectVersions } from "../models/anki-connect/versions";
@@ -16,22 +17,50 @@ export const invoke = async <
     const origin = args.origin ?? "http://127.0.0.1:8765";
     const key = args.key;
 
-    const fetchResponse = await fetch(origin, {
+    const headers = {
+        'Accept': 'application/json',
+        'Content-Type': action === "requestPermission"
+            ? "text/plain" // request permission requires a different content type
+            : "application/json"
+    }
+
+    const body = {
+        action,
+        version,
+        params,
+        ...(key !== undefined && {
+            key,
+        }),
+    }
+
+    if (typeof globalThis.fetch !== "function") {
+        // axios request fallback for older VSCode versions
+        const axiosResponse = await axios.post(origin,
+            body, {
+                headers
+            }
+        )
+
+        if (Object.getOwnPropertyNames(axiosResponse.data).length !== 2) {
+            throw new Error('axios response has an unexpected number of fields');
+        }
+        if (!('error' in axiosResponse.data)) {
+            throw new Error('axios response is missing required error field');
+        }
+        if (!('result' in axiosResponse.data)) {
+            throw new Error('axios response is missing required result field');
+        }
+        if (axiosResponse.data.error) {
+            throw new Error(`Anki-connect axios request failed: "${axiosResponse.data.error}"`);
+        }
+        return axiosResponse.data.result;
+    }
+
+    // fetch request
+    const fetchResponse = await globalThis.fetch(origin, {
         method: "POST",
-        headers: action === "requestPermission" ? {
-            "Content-Type": "text/plain" // request permission request requires a different content type
-        } : {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            action,
-            version,
-            params,
-            ...(key !== undefined && {
-                key,
-            }),
-        })
+        headers: headers,
+        body: JSON.stringify(body)
     });
 
     const responseData = await fetchResponse.json();
