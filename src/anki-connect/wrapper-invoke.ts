@@ -1,4 +1,3 @@
-import * as vscode from 'vscode';
 import { invoke } from './invoke';
 
  /**
@@ -9,6 +8,6 @@ import { invoke } from './invoke';
 export const wrappedInvoke: typeof invoke = async (args) =>
     await invoke(args)
         .catch(err => {
-            vscode.window.showErrorMessage(`Anki Editor - ${err}`);
-            return Promise.reject(err);
+            // vscode.window.showErrorMessage(`Anki Editor - ${err}`);
+            return Promise.reject(`Anki Editor - ${err}`);
         });
