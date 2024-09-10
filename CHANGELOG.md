@@ -1,5 +1,9 @@
 # Change Log
 
+## [1.0.6] - 2024-09-10
+
+Fix Anki Connect url and api key from extension settings not being passed to all invoke calls.
+
 ## [1.0.5] - 2024-09-09
 
 Fix socket connection error after updating VSCode to version 1.93.0.
