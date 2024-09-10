@@ -5,7 +5,6 @@ import { wrappedInvoke } from "./wrapper-invoke";
 export const getModelStyling = async (modelName: string, cardName: string, origin?: string, key?: ApiKey) =>
     await wrappedInvoke({
         action: "modelStyling",
-        version: 6,
         request: {
             modelName
         },

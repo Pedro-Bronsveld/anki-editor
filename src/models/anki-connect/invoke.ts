@@ -4,28 +4,29 @@
 
 import { ActionNames, AnkiConnectActions } from "./actions";
 import { ApiKey } from "./api-key";
-import { DefaultAnkiConnectVersion, SupportedAnkiConnectVersions } from "./versions";
+import {
+    DefaultAnkiConnectVersion,
+    SupportedAnkiConnectVersions,
+} from "./versions";
 
 export type InvokeArgs<
-  ActionName extends ActionNames,
-  VersionNumber extends SupportedAnkiConnectVersions = DefaultAnkiConnectVersion,
-  RequestParams = AnkiConnectActions[ActionName][VersionNumber]['request']
+    ActionName extends ActionNames,
+    VersionNumber extends SupportedAnkiConnectVersions = DefaultAnkiConnectVersion,
+    RequestParams = AnkiConnectActions[ActionName][VersionNumber]["request"]
 > = {
     action: ActionName;
     version?: VersionNumber;
-    origin?: string;
-    key?: ApiKey;
-} & (
-RequestParams extends void
+    origin: string | undefined;
+    key: ApiKey | undefined;
+} & (RequestParams extends void
     ? {
         request?: undefined;
     }
     : {
         request: RequestParams;
-    }
-);
+    });
 
 export type InvokeResponse<
-  ActionName extends ActionNames,
-  VersionNumber extends SupportedAnkiConnectVersions = DefaultAnkiConnectVersion
-> = AnkiConnectActions[ActionName][VersionNumber]['response'];
+    ActionName extends ActionNames,
+    VersionNumber extends SupportedAnkiConnectVersions = DefaultAnkiConnectVersion
+> = AnkiConnectActions[ActionName][VersionNumber]["response"];

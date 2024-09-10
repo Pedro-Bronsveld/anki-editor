@@ -65,7 +65,8 @@ export default class AnkiConnect {
     public getModelStyling = createCachedFunction(async (modelName: string, cardName: string) =>
         getModelStyling(modelName, cardName, this.origin, await this.getApiKey()));
 
-    public getMediaFilesNames = createCachedFunction(getMediaFilesNames);
+    public getMediaFilesNames = createCachedFunction(async (pattern: string) =>
+        getMediaFilesNames(pattern, this.origin, await this.getApiKey()));
 
     public updateModelTemplates = async (modelName: string, cardName: string, side: Side, html: string) => {
         this.clearCacheForModel(modelName);
