@@ -7,6 +7,7 @@ export interface BuiltIn {
     name: string;
     description: string;
     htmlDescription?: boolean;
+    requiredPrecedingFilter?: string;
 }
 
 export type BuiltInFilter = BuiltIn & {
@@ -158,6 +159,15 @@ export const builtinFiltersList: readonly BuiltInFilter[] = [
             rubyFilterExample("kanji") +
             docsLink("Additional Ruby Character Filters", "https://docs.ankiweb.net/templates/fields.html#additional-ruby-character-filters"),
         fieldRequired: true
+    },
+    {
+        name: "nc",
+        description: "Ignores characters combined with other characters, such as diacritics, when comparing the typed input to the field's content.\n\n" +
+            "Can only be used directly after the 'type' filter.\n\n" +
+            "### Example\n\n" +
+            quotedCodeBlock(TEMPLATE_LANGUAGE_ID, "{{type:nc:Field}}"),
+        fieldRequired: true,
+        requiredPrecedingFilter: "type"
     }
 ];
 

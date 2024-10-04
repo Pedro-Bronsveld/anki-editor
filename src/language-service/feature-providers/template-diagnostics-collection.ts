@@ -14,6 +14,7 @@ import EmbeddedHandler from '../embedded-handler';
 import { getExtendedFilterNames, getExtendedFilters, getExtendedSpecialFieldNames } from '../anki-custom';
 import { isClozeReplacement } from '../cloze-fields';
 import { objectEntries } from '../../util/object-utilities';
+import { missingRequiredPrecedingFilter } from './preceding-filter';
 
 export default class TemplateDiagnosticsProvider extends LanguageFeatureProviderBase {
 
@@ -202,6 +203,7 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                     for (const [i, filterSegment] of replacement.filterSegments.entries()) {
 
                         const { filter } = filterSegment;
+                        const builtInFilter = filter ? validFiltersMap.get(filter.content) : undefined;
 
                         if (filter && containsTtsVoicesFilter && i !== ttsVoicesFilterSegmentIndex) {
                             // Provide warning when the tts-voices filter is present in this replacement
@@ -219,6 +221,12 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                             allDiagnostics.push(createDiagnostic(document, filter.start, filter.end,
                                 `'${filter.content}' is not a built-in filter.`,
                                 DiagnosticCode.invalidFilterName));
+                        // Check if filter is missing a required preceding filter
+                        else if (config.get("invalidFilterDiagnostics") && filter && builtInFilter
+                            && missingRequiredPrecedingFilter(builtInFilter, replacement.filterSegments.slice(0, i)))
+                            allDiagnostics.push(createDiagnostic(document, filter.start, filter.end,
+                                `'${filter.content}' can only be used directly after the '${builtInFilter.requiredPrecedingFilter}' filter.`,
+                                DiagnosticCode.invalidFilter));
                         // Check for cloze filter used on non-cloze template
                         else if (modelAvailable && !modelProbablyCloze && (filter?.content === "cloze" || filter?.content === "cloze-only"))
                             allDiagnostics.push(createDiagnostic(document, filter.start, filter.end,
