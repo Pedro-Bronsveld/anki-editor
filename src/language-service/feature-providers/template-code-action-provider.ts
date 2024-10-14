@@ -3,7 +3,7 @@ import { ANKI_EDITOR_SCHEME_BASE, TEMPLATE_LANGUAGE_ID } from '../../constants';
 import { uriPathToParts } from '../../note-types/uri-parser';
 import { ttsOptionsNames } from '../anki-builtin';
 import AnkiModelDataProvider from '../anki-model-data-provider';
-import { getExtendedFilterNames, getExtendedSpecialFieldNames } from '../anki-custom';
+import { getExtendedFilterNames, getExtendedFilters, getExtendedSpecialFieldNames } from '../anki-custom';
 import { DiagnosticCode } from '../diagnostic-codes';
 import { documentRange } from '../document-util';
 import EmbeddedHandler from '../embedded-handler';
@@ -134,6 +134,15 @@ export default class TemplateCodeActionProvider extends LanguageFeatureProviderB
                             const workspaceEdit = new vscode.WorkspaceEdit();
                             workspaceEdit.replace(document.uri, diagnostic.range, "cloze:");
                             return createCodeAction("Insert cloze filter.", workspaceEdit);
+                        }
+                    case DiagnosticCode.missingPrecedingFilter:
+                        {
+                            const builtinFilter = getExtendedFilters().get(diagnosticContent);
+                            if (!builtinFilter?.requiredPrecedingFilter)
+                                return;
+                            const workspaceEdit = new vscode.WorkspaceEdit();
+                            workspaceEdit.insert(document.uri, diagnostic.range.start, builtinFilter.requiredPrecedingFilter + ":");
+                            return createCodeAction(`Insert missing '${ builtinFilter.requiredPrecedingFilter }' filter.`, workspaceEdit);
                         }
                     default:
                         return;

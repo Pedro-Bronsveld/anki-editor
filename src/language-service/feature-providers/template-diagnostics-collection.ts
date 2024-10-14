@@ -226,7 +226,7 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                             && missingRequiredPrecedingFilter(builtInFilter, replacement.filterSegments.slice(0, i)))
                             allDiagnostics.push(createDiagnostic(document, filter.start, filter.end,
                                 `'${filter.content}' can only be used directly after the '${builtInFilter.requiredPrecedingFilter}' filter.`,
-                                DiagnosticCode.invalidFilter));
+                                DiagnosticCode.missingPrecedingFilter));
                         // Check for cloze filter used on non-cloze template
                         else if (modelAvailable && !modelProbablyCloze && (filter?.content === "cloze" || filter?.content === "cloze-only"))
                             allDiagnostics.push(createDiagnostic(document, filter.start, filter.end,
