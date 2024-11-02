@@ -137,7 +137,7 @@ export default class TemplateCodeActionProvider extends LanguageFeatureProviderB
                         }
                     case DiagnosticCode.missingPrecedingFilter:
                         {
-                            const builtinFilter = getExtendedFilters().get(diagnosticContent);
+                            const builtinFilter = getExtendedFilters(true).get(diagnosticContent);
                             if (!builtinFilter?.requiredPrecedingFilter)
                                 return;
                             const workspaceEdit = new vscode.WorkspaceEdit();
@@ -194,7 +194,7 @@ const createRemovalCodeAction = (
 
 const nameReplacements = {
     [DiagnosticCode.invalidTtsOption]: () => ttsOptionsNames,
-    [DiagnosticCode.invalidFilterName]: getExtendedFilterNames
+    [DiagnosticCode.invalidFilterName]: () => getExtendedFilterNames(true)
 } as const
 
 const removalName = {

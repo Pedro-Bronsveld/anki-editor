@@ -153,7 +153,7 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                     const appendColon = !replacement.content.substring(offset - replacement.start).match(/^\s*(?=:)/);
                     const suffix = (appendColon ? ":" : "");
                     const precedingFilterSegments = replacement.filterSegments.filter(otherFilterSegment => otherFilterSegment.end < offset);
-                    completionItemList.push(...getExtendedFiltersList()
+                    completionItemList.push(...getExtendedFiltersList(true)
                     .filter(({ name }) => !modelAvailable || modelProbablyCloze || name !== "cloze" && name !== "cloze-only")
                     .filter(filter => !filter.requiredPrecedingFilter || !missingRequiredPrecedingFilter(filter, precedingFilterSegments))
                     .map(filter =>

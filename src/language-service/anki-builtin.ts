@@ -8,6 +8,7 @@ export interface BuiltIn {
     description: string;
     htmlDescription?: boolean;
     requiredPrecedingFilter?: string;
+    internal?: boolean;
 }
 
 export type BuiltInFilter = BuiltIn & {
@@ -168,7 +169,13 @@ export const builtinFiltersList: readonly BuiltInFilter[] = [
             quotedCodeBlock(TEMPLATE_LANGUAGE_ID, "{{type:nc:Field}}"),
         fieldRequired: true,
         requiredPrecedingFilter: "type"
-    }
+    },
+    {
+        name: "type-nc",
+        description: "Combination of filters `type:nc`. Used internally by Anki.",
+        fieldRequired: true,
+        internal: true
+    },
 ];
 
 export const toMap = <T extends BuiltIn>(builtins: readonly T[]): Map<string, T> => new Map(builtins.map(builtin => [builtin.name, builtin]));
@@ -179,6 +186,12 @@ export const specialFieldsNames = toNames(specialFieldsList.filter(({ name }) =>
 
 export const builtinFilters = toMap(builtinFiltersList);
 export const builtinFiltersNames = toNames(builtinFiltersList);
+
+// Subset of filters that are documented for use by the end-user in the Anki documentation.
+// These lists and maps contain non-internal filters that can be suggested as completion items and in code actions.
+export const publicBuiltinFiltersList = builtinFiltersList.filter(({ internal }) => !internal)
+export const publicBuiltinFilters = toMap(publicBuiltinFiltersList);
+export const publicBuiltinFiltersNames = toNames(publicBuiltinFiltersList);
 
 // Builtin tts filter options
 
