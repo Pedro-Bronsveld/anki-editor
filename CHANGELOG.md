@@ -1,5 +1,9 @@
 # Change Log
 
+## [1.0.7] - 2024-12-07
+
+Added support for `type:nc` filter added in Anki 24.11.
+
 ## [1.0.6] - 2024-09-10
 
 Fix Anki Connect url and api key from extension settings not being passed to all invoke calls.
