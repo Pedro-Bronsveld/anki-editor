@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { ANKI_EDITOR_CONFIG } from '../constants';
-import { BuiltIn, BuiltInFilter, builtinFiltersList, builtinFiltersNames, specialFieldsList, specialFieldsNames, toMap } from './anki-builtin';
+import { BuiltIn, BuiltInFilter, builtinFiltersList, builtinFiltersNames, publicBuiltinFiltersList, publicBuiltinFiltersNames, specialFieldsList, specialFieldsNames, toMap } from './anki-builtin';
 
 export type CustomFilter = {
     name: string;
@@ -49,10 +49,16 @@ export const getCustomFiltersList = () => getCustomFilterItems().map<BuiltInFilt
 }));
 
 export const getExtendedSpecialFieldsList = () => specialFieldsList.concat(getCustomFieldsList());
-export const getExtendedFiltersList = () => builtinFiltersList.concat(getCustomFiltersList());
+export const getExtendedFiltersList = (publicOnly = false) => (publicOnly
+        ? publicBuiltinFiltersList
+        : builtinFiltersList)
+    .concat(getCustomFiltersList());
 
 export const getExtendedSpecialFields = () => toMap(getExtendedSpecialFieldsList());
-export const getExtendedFilters = () => toMap(getExtendedFiltersList());
+export const getExtendedFilters = (publicOnly = false) => toMap(getExtendedFiltersList(publicOnly));
 
 export const getExtendedSpecialFieldNames = () => specialFieldsNames.concat(getCustomFieldNames());
-export const getExtendedFilterNames = () => builtinFiltersNames.concat(getCustomFilterNames());
+export const getExtendedFilterNames = (publicOnly = false) => (publicOnly
+        ? publicBuiltinFiltersNames
+        : builtinFiltersNames)
+    .concat(getCustomFilterNames());

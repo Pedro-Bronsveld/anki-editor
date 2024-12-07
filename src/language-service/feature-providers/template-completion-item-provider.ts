@@ -14,6 +14,7 @@ import { getClozeFieldSuggestions } from '../cloze-fields';
 import { getFieldsInTemplate } from '../parser/template-fields';
 import { FileStat as HtmlFileStat, DocumentUri as HtmlDocumentUri, getLanguageService, FileType as HtmlFileType, TextDocument as HtmlTextDocument, CompletionItemKind as HtmlCompletionItemKind } from 'vscode-html-languageservice';
 import { LanguageService as HtmlLanguageService } from 'vscode-html-languageservice';
+import { missingRequiredPrecedingFilter } from './preceding-filter';
 
 export default class TemplateCompletionItemProvider extends LanguageFeatureProviderBase implements vscode.CompletionItemProvider {
 
@@ -151,8 +152,10 @@ export default class TemplateCompletionItemProvider extends LanguageFeatureProvi
                     // Create builtin and custom filter suggestions, ending with colon if not already followed by one
                     const appendColon = !replacement.content.substring(offset - replacement.start).match(/^\s*(?=:)/);
                     const suffix = (appendColon ? ":" : "");
-                    completionItemList.push(...getExtendedFiltersList()
+                    const precedingFilterSegments = replacement.filterSegments.filter(otherFilterSegment => otherFilterSegment.end < offset);
+                    completionItemList.push(...getExtendedFiltersList(true)
                     .filter(({ name }) => !modelAvailable || modelProbablyCloze || name !== "cloze" && name !== "cloze-only")
+                    .filter(filter => !filter.requiredPrecedingFilter || !missingRequiredPrecedingFilter(filter, precedingFilterSegments))
                     .map(filter =>
                         createCompletionItem(filter.name + suffix, 
                             builtinFilters.has(filter.name)
