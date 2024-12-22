@@ -23,7 +23,7 @@ export default class TemplateDocumentFormattingEditProvider extends LanguageFeat
         const templateRegions = getReplacementTemplateLanguageRegions(embeddedDocument.content, false);
         const escapedDocumentContent = escapeTemplateRegions(embeddedDocument.content, templateRegions);
 
-        const escapedDocumentUri = createVirtualUri("html-escaped", "html", embeddedDocument.virtualUri);
+        const escapedDocumentUri = createVirtualUri("html-escaped", "html", document.uri);
         this.virtualDocumentProvider.setDocumentContent(escapedDocumentUri, escapedDocumentContent);
 
         const formatTextEdits: vscode.TextEdit[] = [];

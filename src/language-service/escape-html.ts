@@ -15,7 +15,7 @@ export const unescapeHtml = (escapedHtml: string) => escapedHtml
     .replace(/&quot;/g, '"')
     .replace(/&gt;/g, ">")
     .replace(/&lt;/g, "<")
-    .replace(/"&amp;"/g, "&")
+    .replace(/"&amp;"/g, "&");
 
 const convertTemplateRegions = (inputHtmlContent: string, templateRegions: LanguageRegion[], escape: boolean): string => {
     const outputHtmlContent = templateRegions.reduce((accumulated, templateRegion) => {
@@ -40,7 +40,7 @@ const convertTemplateRegions = (inputHtmlContent: string, templateRegions: Langu
 }
 
 export const escapeTemplateRegions = (inputHtmlContent: string, templateRegions: LanguageRegion[]): string =>
-    convertTemplateRegions(inputHtmlContent, templateRegions, true)
+    convertTemplateRegions(inputHtmlContent, templateRegions, true);
 
 export const unescapeTemplateRegions = (inputHtmlContent: string, templateRegions: LanguageRegion[]): string =>
-    convertTemplateRegions(inputHtmlContent, templateRegions, false)
+    convertTemplateRegions(inputHtmlContent, templateRegions, false);
