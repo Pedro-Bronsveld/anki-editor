@@ -10,6 +10,7 @@ export interface LanguageRegion {
     content: string;
     start: number;
     end: number;
+    blankSurroundings: boolean;
 }
 
 export const getLanguageRegions = (document: vscode.TextDocument): LanguageRegion[] => {
@@ -18,18 +19,7 @@ export const getLanguageRegions = (document: vscode.TextDocument): LanguageRegio
     const languageRegions: LanguageRegion[] = [];
 
     // extract anki-template regions
-    const replacementMatches = getReplacementMatches(documentText);
-
-    const templateRegions = replacementMatches
-        .map<LanguageRegion>(({ 0: text, index }) => 
-            ({
-                languageId: TEMPLATE_LANGUAGE_ID,
-                fileExtension: TEMPLATE_EXTENSION,
-                content: blankOutSurrounding(documentText, index ?? 0, (index ?? 0) + text.length),
-                start: index ?? 0,
-                end: (index ?? 0) + text.length
-            })
-        );
+    const templateRegions = getReplacementTemplateLanguageRegions(documentText, true);
     languageRegions.push(...templateRegions);
 
     // Remove template regions from document before extracing javascript and css
@@ -46,7 +36,8 @@ export const getLanguageRegions = (document: vscode.TextDocument): LanguageRegio
                     fileExtension: "js",
                     content: blankOutSurrounding(clearedDocument, scanner.getTokenOffset(), scanner.getTokenEnd()),
                     start: scanner.getTokenOffset(),
-                    end: scanner.getTokenEnd()
+                    end: scanner.getTokenEnd(),
+                    blankSurroundings: true
                 });
                 break;
             case TokenType.Styles:
@@ -55,7 +46,8 @@ export const getLanguageRegions = (document: vscode.TextDocument): LanguageRegio
                     fileExtension: "css",
                     content: blankOutSurrounding(clearedDocument, scanner.getTokenOffset(), scanner.getTokenEnd()),
                     start: scanner.getTokenOffset(),
-                    end: scanner.getTokenEnd()
+                    end: scanner.getTokenEnd(),
+                    blankSurroundings: true
                 });
                 break;
 		}
@@ -65,6 +57,25 @@ export const getLanguageRegions = (document: vscode.TextDocument): LanguageRegio
     languageRegions.push(defaultLanguageRegion(document));
     
     return languageRegions;
+}
+
+export const getReplacementTemplateLanguageRegions = (documentText: string, includeBlankSurroundings: boolean): LanguageRegion[] => {
+    const replacementMatches = getReplacementMatches(documentText);
+
+    const templateRegions = replacementMatches
+        .map<LanguageRegion>(({ 0: text, index }) => 
+            ({
+                languageId: TEMPLATE_LANGUAGE_ID,
+                fileExtension: TEMPLATE_EXTENSION,
+                content: includeBlankSurroundings
+                    ? blankOutSurrounding(documentText, index ?? 0, (index ?? 0) + text.length)
+                    : text,
+                start: index ?? 0,
+                end: (index ?? 0) + text.length,
+                blankSurroundings: includeBlankSurroundings
+            })
+        );
+    return templateRegions;
 }
 
 export const combineLanguageRegionsById = (languageRegions: LanguageRegion[]): LanguageRegion[] => 
@@ -79,7 +90,8 @@ export const combineLanguageRegionsById = (languageRegions: LanguageRegion[]): L
         content: regions.slice(1).reduce((outputContent, region) => 
             replaceRange(outputContent, region.start, region.end, region.content.substring(region.start, region.end)), regions[0].content),
         start: regions[0].start,
-        end: regions[regions.length-1].end
+        end: regions[regions.length-1].end,
+        blankSurroundings: true
     }));
 
 export const defaultLanguageRegion = (document: vscode.TextDocument): LanguageRegion => {
@@ -89,7 +101,8 @@ export const defaultLanguageRegion = (document: vscode.TextDocument): LanguageRe
         fileExtension: "html",
         content: htmlContent,
         start: 0,
-        end: htmlContent.length 
+        end: htmlContent.length,
+        blankSurroundings: false
     }
 }
 
@@ -106,5 +119,5 @@ const blankOutSurrounding = (content: string, start: number, end: number): strin
     content.slice(start, end) + 
     content.slice(end).replace(blankOutRegexp, " ");
 
-const replaceRange = (text: string, start: number, end: number, substitute: string): string =>
+export const replaceRange = (text: string, start: number, end: number, substitute: string): string =>
     text.substring(0, start) + substitute + text.substring(end);
