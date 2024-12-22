@@ -1,5 +1,9 @@
 # Change Log
 
+## [1.0.8] - 2024-12-22
+
+Improved compatibility with html formatting extensions.
+
 ## [1.0.7] - 2024-12-07
 
 Added support for `type:nc` filter added in Anki 24.11.
