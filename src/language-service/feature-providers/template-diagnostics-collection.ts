@@ -103,14 +103,6 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
 
             for (const replacement of templateDocument.replacements) {
                 
-                // Check for invalid characters
-                const invalidCharsMatches = [...replacement.content.substring(2, replacement.content.length - 2).matchAll(/["{}]+/g)];
-                allDiagnostics.push(...invalidCharsMatches.map(match =>
-                    matchToDiagnostic(document, match, 2 + replacement.start,
-                        `${match[0]} is not a valid character inside a template replacement.`,
-                        DiagnosticCode.invalidCharacter)
-                ));
-                
                 // Check if this replacement contains a valid tts-voices filter
                 const ttsVoicesFilterSegmentIndex = replacement.type === AstItemType.replacement
                     ? replacement.filterSegments
@@ -152,6 +144,13 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                         allDiagnostics.push(matchToDiagnostic(document, invalidStartCharMatch, replacement.fieldSegment.start,
                             "A field name can't start with '#', '^' or '/'.",
                             DiagnosticCode.invalidCharacter));
+                    
+                    const invalidCharsMatches = [...replacement.fieldSegment.content.matchAll(/["{}]+/g)];
+                    allDiagnostics.push(...invalidCharsMatches.map(match =>
+                        matchToDiagnostic(document, match, replacement.fieldSegment.start,
+                            `${match[0]} is not a valid character inside a field.`,
+                            DiagnosticCode.invalidCharacter)
+                    ));
                 }
                 
                 if (replacement.type === AstItemType.replacement) {

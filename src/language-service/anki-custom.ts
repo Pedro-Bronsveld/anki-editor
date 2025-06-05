@@ -32,7 +32,7 @@ export const getCustomFilterItems = (): CustomFilter[] => getItemsFromConfig("cu
             fieldRequired: true
         }
     })
-    .filter(customFilter => customFilter.name.match(/^[^#^/\s:{}"]+$/));
+    .filter(customFilter => customFilter.name.match(/^(?:(?!}})[^\s:])+$/));
 
 export const getCustomFilterNames = () => getCustomFilterItems()
     .map(({ name }) => name);
