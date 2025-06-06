@@ -270,9 +270,12 @@
     "@vscode/vsce": "^3.1.0",
     "esbuild": "^0.25.5",
     "eslint": "^9.10.0",
-    "glob": "^11.0.0",
+    "glob": "^11.0.2",
     "mocha": "^11.5.0",
     "typescript": "^5.6.2"
+  },
+  "overrides": {
+    "@types/minimatch": "5.1.1"
   },
   "dependencies": {
     "@ts-morph/bootstrap": "^0.27.0",
