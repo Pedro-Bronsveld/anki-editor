@@ -4,7 +4,7 @@ import { TextDocument as CssTextDocument, LanguageService as CSSLanguageService 
 import { Project, ts } from "@ts-morph/bootstrap";
 import { ANKI_EDITOR_CONFIG, ANKI_EDITOR_SCHEME_BASE, TEMPLATE_EXTENSION, TEMPLATE_LANGUAGE_ID } from '../../constants';
 import { AstItemType, StandardReplacement } from '../parser/ast-models';
-import { ttsOptionsList, ttsOptions } from '../anki-builtin';
+import { ttsOptionsList, ttsOptions, builtinFiltersNames } from '../anki-builtin';
 import { isBackSide } from '../template-util';
 import AnkiModelDataProvider from '../anki-model-data-provider';
 import { partsToUri, uriPathToParts } from '../../note-types/uri-parser';
@@ -103,14 +103,6 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
 
             for (const replacement of templateDocument.replacements) {
                 
-                // Check for invalid characters
-                const invalidCharsMatches = [...replacement.content.substring(2, replacement.content.length - 2).matchAll(/["{}]+/g)];
-                allDiagnostics.push(...invalidCharsMatches.map(match =>
-                    matchToDiagnostic(document, match, 2 + replacement.start,
-                        `${match[0]} is not a valid character inside a template replacement.`,
-                        DiagnosticCode.invalidCharacter)
-                ));
-                
                 // Check if this replacement contains a valid tts-voices filter
                 const ttsVoicesFilterSegmentIndex = replacement.type === AstItemType.replacement
                     ? replacement.filterSegments
@@ -152,6 +144,13 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                         allDiagnostics.push(matchToDiagnostic(document, invalidStartCharMatch, replacement.fieldSegment.start,
                             "A field name can't start with '#', '^' or '/'.",
                             DiagnosticCode.invalidCharacter));
+                    
+                    const invalidCharsMatches = [...replacement.fieldSegment.content.matchAll(/["{}]+/g)];
+                    allDiagnostics.push(...invalidCharsMatches.map(match =>
+                        matchToDiagnostic(document, match, replacement.fieldSegment.start,
+                            `${match[0]} is not a valid character inside a field.`,
+                            DiagnosticCode.invalidCharacter)
+                    ));
                 }
                 
                 if (replacement.type === AstItemType.replacement) {
@@ -342,6 +341,12 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                                     }
                                 }
                             }
+                        }
+                        // Check if arguments were provided for a built-in filter other than the tts filter
+                        else if (config.get("invalidFilterDiagnostics") && filter && filter.arguments.length > 0 && builtinFiltersNames.includes(filter.content)) {
+                            allDiagnostics.push(createDiagnostic(document, filter.end, filter.arguments[filter.arguments.length-1].end,
+                                `'${filter.content}' filter does not take any arguments.`,
+                                DiagnosticCode.invalidFilterArgument));
                         }
                     }
                 }

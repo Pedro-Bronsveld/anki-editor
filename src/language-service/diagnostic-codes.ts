@@ -13,4 +13,5 @@ export enum DiagnosticCode {
     missingClozeFilter = 12,
     incorrectSpace = 13,
     missingPrecedingFilter = 14,
+    invalidFilterArgument = 15,
 }

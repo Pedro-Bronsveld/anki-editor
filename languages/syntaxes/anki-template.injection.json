@@ -66,7 +66,8 @@
 					"match": "(?<=[#^/\\s])[#^/]",
 					"name": "invalid.illegal.anki.conditional"
 				},
-				{ 	"include": "#anki-field" }
+				{ 	"include": "#anki-field" },
+				{ 	"include": "#anki-field-invalid-characters" }
 			],
 			"name": "meta.anki.conditional.block"
 		},
@@ -79,24 +80,21 @@
 			},
 			"end": "(?=:|}})",
 			"patterns": [
-				{ "include": "#anki-template-filter-invalid-characters" },
 				{ "include": "#anki-template-filter-invalid" },
 				{ "include": "#anki-template-filter" },
 				{ "include": "#anki-template-filter-tts" },
-				{ "include": "#anki-field" }
+				{ "include": "#anki-field" },
+				{ "include": "#anki-field-invalid-characters" }
 			],
 			"name": "meta.anki.template.segment"
 		},
 		"anki-template-filter": {
-			"match": "(?<=(?::|{{|^)\\s*)(?:(tts|tts-voices|cloze(?:-only)?|hint|type|nc|text|furigana|kana|kanji)|([^\"{}\\s:]+))(?=\\s*:)",
+			"match": "(?<=(?::|{{|^)\\s*)(?:(tts|tts-voices|cloze(?:-only)?|hint|type|nc|text|furigana|kana|kanji)|([^\\s:]+))(?=\\s*:)",
 			"name": "meta.anki.template.filter.$1",
 			"captures": {
-				"1": { "name": "support.function.anki.filter.$1" }
+				"1": { "name": "support.function.anki.filter.$1" },
+				"2": { "name": "text.anki.filter" }
 			}
-		},
-		"anki-template-filter-invalid-characters": {
-			"match": "[#^/\"{}]",
-			"name": "invalid.illegal.anki.template.filter.characters"
 		},
 		"anki-template-filter-invalid": {
 			"match": "(?<={{|^|\\s)([=,][^{}\\s:]+)",
@@ -109,7 +107,6 @@
 			},
 			"end": "(?=:)|(?=}})",
 			"patterns": [
-				{ "include": "#anki-template-filter-invalid-characters" },
 				{ "include": "#tts-language" },
 				{ "include": "#tts-language-option-value" },
 				{ "include": "#tts-invalid-argument" }
@@ -160,13 +157,17 @@
 			"match": "(?<==)\\d*\\.?\\d*(?=[:}\\s\n]|$)",
 			"name": "constant.numeric.anki.tts.option.decimal"
 		},
+		"anki-field-invalid-characters": {
+			"match": "[\"{}](?![^:]*:)|(?<=:\\s*)[#^/](?![^:]*:)",
+			"name": "invalid.illegal.anki.field.characters"
+		},
 		"anki-field-special": {
 			"name": "variable.other.constant.anki.special-field",
 			"match": "(?<=[#^\/\\s:{}\"])(Tags|Type|Deck|Subdeck|CardFlag|Card|FrontSide)($|\\s*$)"
 		},
 		"anki-field": {
 			"name": "variable.anki.field",
-			"match": "[^#^/\\s:{}\"]([^:{}\\s\"]|\\s(?!\\s*(}}|$)))*(?![^}]*:)",
+			"match": "[^#^/\\s:{}\"]([^:{}\\s\"]|\\s(?!\\s*(}}|$)))*(?![^:]*:)",
 			"captures": {
 				"0": { "patterns": [{ "include": "#anki-field-special" }] }
 			}
