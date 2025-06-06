@@ -1,5 +1,9 @@
 # Change Log
 
+## [1.0.9] - 2025-06-07
+
+Improved filter syntax parsing.
+
 ## [1.0.8] - 2024-12-22
 
 Improved compatibility with html formatting extensions.

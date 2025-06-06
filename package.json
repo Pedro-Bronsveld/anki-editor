@@ -2,7 +2,7 @@
   "name": "anki-editor",
   "displayName": "Anki Editor",
   "description": "Edit Anki card templates in Visual Studio Code with syntax highlighting and intellisense.",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "author": "Pedro Bronsveld",
   "publisher": "pedro-bronsveld",
   "repository": {
@@ -186,7 +186,7 @@
               {
                 "type": "string",
                 "pattern": "^(?:(?!}})[^\\s:])+$",
-                "patternErrorMessage": "Custom filter names can't contain spaces or : or }}",
+                "patternErrorMessage": "Custom filter names can't contain spaces, : or }}",
                 "examples": [
                   "custom-filter"
                 ]
@@ -197,7 +197,7 @@
                   "name": {
                     "type": "string",
                     "pattern": "^(?:(?!}})[^\\s:])+$",
-                    "patternErrorMessage": "Custom filter names can't contain spaces or : or }}",
+                    "patternErrorMessage": "Custom filter names can't contain spaces, : or }}",
                     "description": "Name of the custom filter.",
                     "examples": [
                       "custom-filter"
