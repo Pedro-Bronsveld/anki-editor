@@ -48,6 +48,8 @@ export default class TemplateCodeActionProvider extends LanguageFeatureProviderB
                         return createRemovalCodeAction(document, diagnostic.code, diagnostic.range, diagnosticContent.length > 1);
                     case DiagnosticCode.invalidFilter:
                         return createRemovalCodeAction(document, diagnostic.code, diagnostic.range, [...diagnosticContent.matchAll(/:/g)].length > 1);
+                    case DiagnosticCode.invalidFilterArgument:
+                        return createRemovalCodeAction(document, diagnostic.code, diagnostic.range, [...diagnosticContent.matchAll(/[^\s]+/g)].length > 1);
                     case DiagnosticCode.invalidField:
                     case DiagnosticCode.invalidTtsOption:
                     case DiagnosticCode.invalidFilterName:
@@ -213,5 +215,9 @@ const removalName = {
     [DiagnosticCode.invalidFilter]: {
         single: "filter",
         multiple: "filters"
+    },
+    [DiagnosticCode.invalidFilterArgument]: {
+        single: "filter argument",
+        multiple: "filter arguments"
     }
 } as const

@@ -4,7 +4,7 @@ import { TextDocument as CssTextDocument, LanguageService as CSSLanguageService 
 import { Project, ts } from "@ts-morph/bootstrap";
 import { ANKI_EDITOR_CONFIG, ANKI_EDITOR_SCHEME_BASE, TEMPLATE_EXTENSION, TEMPLATE_LANGUAGE_ID } from '../../constants';
 import { AstItemType, StandardReplacement } from '../parser/ast-models';
-import { ttsOptionsList, ttsOptions } from '../anki-builtin';
+import { ttsOptionsList, ttsOptions, builtinFiltersNames } from '../anki-builtin';
 import { isBackSide } from '../template-util';
 import AnkiModelDataProvider from '../anki-model-data-provider';
 import { partsToUri, uriPathToParts } from '../../note-types/uri-parser';
@@ -341,6 +341,12 @@ export default class TemplateDiagnosticsProvider extends LanguageFeatureProvider
                                     }
                                 }
                             }
+                        }
+                        // Check if arguments were provided for a built-in filter other than the tts filter
+                        else if (config.get("invalidFilterDiagnostics") && filter && filter.arguments.length > 0 && builtinFiltersNames.includes(filter.content)) {
+                            allDiagnostics.push(createDiagnostic(document, filter.end, filter.arguments[filter.arguments.length-1].end,
+                                `'${filter.content}' filter does not take any arguments.`,
+                                DiagnosticCode.invalidFilterArgument));
                         }
                     }
                 }
