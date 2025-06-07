@@ -12,7 +12,7 @@ jobs:
       VSIX_FILE: "anki-editor-${{ github.ref_name }}.vsix"
     steps:
       - name: Download vsix release asset
-        uses: dsaltares/fetch-gh-release-asset@1.1.0
+        uses: dsaltares/fetch-gh-release-asset@1.1.2
         with:
           version: "tags/${{ github.ref_name }}"
           file: ${{ env.VSIX_FILE }}
