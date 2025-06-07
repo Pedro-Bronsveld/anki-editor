@@ -278,7 +278,7 @@
     "@types/minimatch": "5.1.1"
   },
   "dependencies": {
-    "@ts-morph/bootstrap": "^0.27.0",
+    "@ts-morph/bootstrap": "^0.26.1",
     "axios": "^1.7.7",
     "vscode-css-languageservice": "^6.2.3",
     "vscode-html-languageservice": "^5.0.4"
