@@ -38,10 +38,10 @@ export const escapeCardName = (rawCardName: string): string =>
     escapeText(rawCardName)
         // Add escape character to end of card name
         // when card name is exactly "Styling.css".
-        .replace(/^(Styling.css)$/, "$1\u200B");
+        .replace(/^(Styling\.css)$/, "$1\u200B");
 
 export const unescapeCardName = (escapedCardName: string): string =>
     unescapeText(
         // Remove escape character from end of card name
         // when card name is exactly "Styling.css"
-        escapedCardName.replace(/^(Styling.css)\u200B$/, "$1"));
+        escapedCardName.replace(/^(Styling\.css)\u200B$/, "$1"));

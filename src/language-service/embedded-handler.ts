@@ -5,7 +5,7 @@ import { createCachedFunction } from "../cache/cached-function";
 import { EmbeddedDocument } from '../models/embedded-document';
 import { embeddedLanguages, LanguageId } from '../models/embedded-languages';
 import { objectEntries } from '../util/object-utilities';
-import { createVirtualUri } from './feature-providers/embedded-functions';
+import { createVirtualUri } from './feature-providers/virtual-uris';
 import { combineLanguageRegionsById, defaultLanguageRegion, getLanguageRegions, LanguageRegion } from './language-regions';
 import { parseTemplateDocument } from './parser/template-parser';
 import VirtualDocumentProvider from "./virtual-documents-provider";

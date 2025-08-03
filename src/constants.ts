@@ -9,6 +9,9 @@ export const ANKI_EDITOR_SCHEME = `${ANKI_EDITOR_SCHEME_BASE}:/`;
 export const ANKI_EDITOR_EMBEDDED_SCHEME_BASE = "anki-editor-embedded";
 export const ANKI_EDITOR_EMBEDDED_SCHEME = `${ANKI_EDITOR_EMBEDDED_SCHEME_BASE}:/`;
 
+export const ANKI_EDITOR_INITIAL_SCHEME_BASE = "anki-editor-initial";
+export const ANKI_EDITOR_INITIAL_SCHEME = `${ANKI_EDITOR_INITIAL_SCHEME_BASE}:/`;
+
 export const TEMPLATE_SELECTOR: DocumentFilter = { language: TEMPLATE_LANGUAGE_ID } as const;
 export const STYLING_SELECTOR: DocumentFilter = { language: "css", scheme: ANKI_EDITOR_SCHEME_BASE } as const;
 export const EMBEDDED_STYLING_SELECTOR: DocumentFilter = { language: "css", scheme: ANKI_EDITOR_EMBEDDED_SCHEME_BASE } as const;

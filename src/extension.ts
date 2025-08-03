@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { AnkiEditorFs } from './anki-editor-filesystem';
-import { ANKI_EDITOR_CONFIG, ANKI_EDITOR_EMBEDDED_SCHEME_BASE, ANKI_EDITOR_SCHEME, ANKI_EDITOR_SCHEME_BASE, EMBEDDED_STYLING_SELECTOR, STYLING_SELECTOR, TEMPLATE_LANGUAGE_ID, TEMPLATE_SELECTOR } from './constants';
+import { ANKI_EDITOR_CONFIG, ANKI_EDITOR_EMBEDDED_SCHEME_BASE, ANKI_EDITOR_INITIAL_SCHEME_BASE, ANKI_EDITOR_SCHEME, ANKI_EDITOR_SCHEME_BASE, EMBEDDED_STYLING_SELECTOR, STYLING_SELECTOR, TEMPLATE_LANGUAGE_ID, TEMPLATE_SELECTOR } from './constants';
 import TemplateCompletionItemProvider from './language-service/feature-providers/template-completion-item-provider';
 import TemplateDefinitionProvider from './language-service/feature-providers/template-definition-provider';
 import TemplateDiagnosticsProvider from './language-service/feature-providers/template-diagnostics-collection';
@@ -25,6 +25,9 @@ import AnkiConnect from './anki-connect/anki-connect';
 import EmbeddedHandler from './language-service/embedded-handler';
 import { updateAllDiagnostics } from './language-service/run-diagnostics';
 import StylingCompletionItemProvider from './language-service/feature-providers/styling-completion-item-provider';
+import TemplateSourceControl from './language-service/feature-providers/source-control/template-source-control';
+import { toInitialUri } from './language-service/feature-providers/virtual-uris';
+import { LineChange } from './models/vscode/scm/line-change';
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -82,6 +85,18 @@ export function activate(context: vscode.ExtensionContext) {
 			ankiConnect.clearCache();
 			embeddedHandler.clearCache();
 		}));
+	
+	// Discard source control changes
+	context.subscriptions.push(
+		vscode.commands.registerCommand("anki-editor.source-control.discard", async (sourceControlPane: vscode.SourceControl) => {
+			templateSourceControl.discard();
+		}));
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand("anki-editor.source-control.revertLineChanges", async (uri: vscode.Uri, changes: LineChange[], index: number) => {
+			console.log("revertLineChanges", uri, changes, index);
+			await templateSourceControl.revertLineChanges(uri, changes, index);
+		}));
 
 	// Language service features
 	const virtualDocumentProvider = new VirtualDocumentProvider();
@@ -107,7 +122,12 @@ export function activate(context: vscode.ExtensionContext) {
 	const templateFoldingRangeProvider = new TemplateFoldingRangeProvider(embeddedHandler);
 
 	const stylingCompletionItemProvider = new StylingCompletionItemProvider(ankiConnect);
+
+	// Source control features
+	const initialDocumentProvider = new VirtualDocumentProvider();
+	const templateSourceControl = new TemplateSourceControl(initialDocumentProvider);
 	
+	// Setup context subscriptions
 	context.subscriptions.push(
 		vscode.workspace.onDidChangeConfiguration((event) => {
 			if (event.affectsConfiguration(ANKI_EDITOR_CONFIG)) {
@@ -128,6 +148,10 @@ export function activate(context: vscode.ExtensionContext) {
 			if (document.uri.scheme === ANKI_EDITOR_EMBEDDED_SCHEME_BASE)
 				embeddedHandler.clearCache(document);
 		})
+	);
+
+	context.subscriptions.push(
+		vscode.workspace.registerTextDocumentContentProvider(ANKI_EDITOR_INITIAL_SCHEME_BASE, initialDocumentProvider)
 	);
 
 	context.subscriptions.push(
@@ -162,13 +186,20 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	context.subscriptions.push(vscode.workspace.onDidOpenTextDocument(document => {
+		console.log("onDidOpenTextDocument", document.uri.toString());
 		if (document.languageId === TEMPLATE_LANGUAGE_ID)
 			templateDiagnosticsProvider.updateDiagnostics(document);
+		if (document.uri.scheme === ANKI_EDITOR_SCHEME_BASE && !initialDocumentProvider.has(document.uri)) {
+			// Save initial version of the document seen by the user in-memory for source control
+			initialDocumentProvider.setDocumentContent(toInitialUri(document.uri), document.getText());
+		}
 	}));
 	
 	context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(event => {
 		if (event.document.languageId === TEMPLATE_LANGUAGE_ID)
 			templateDiagnosticsProvider.updateDiagnostics(event.document);
+		if (event.document.uri.scheme === ANKI_EDITOR_SCHEME_BASE)
+			templateSourceControl.updateResourceGroupResources();
 	}));
 
 	context.subscriptions.push(
@@ -220,6 +251,9 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.languages.registerCompletionItemProvider([STYLING_SELECTOR, EMBEDDED_STYLING_SELECTOR], stylingCompletionItemProvider, ".")
 	);
+
+	// Source control
+	context.subscriptions.push(templateSourceControl.sourceControl);
 	
 }
 

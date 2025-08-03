@@ -50,6 +50,16 @@
         "title": "Clear Cache",
         "category": "Anki Editor",
         "icon": "$(clear-all)"
+      },
+      {
+        "command": "anki-editor.source-control.discard",
+        "title": "Discard in-memory changes made in Anki Editor",
+        "icon": "$(discard)"
+      },
+      {
+        "command": "anki-editor.source-control.revertLineChanges",
+        "title": "Revert Change",
+        "icon": "$(discard)"
       }
     ],
     "viewsContainers": {
@@ -70,6 +80,12 @@
       ]
     },
     "menus": {
+      "commandPalette": [
+        {
+          "command": "anki-editor.source-control.revertLineChanges",
+          "when": "false"
+        }
+      ],
       "view/title": [
         {
           "command": "anki-editor.refreshNoteTypesTree",
@@ -85,6 +101,19 @@
           "command": "anki-editor.addFolderToWorkspace",
           "when": "view == note-types-tree",
           "group": "navigation"
+        }
+      ],
+      "scm/title": [
+				{
+					"command": "anki-editor.source-control.discard",
+					"group": "navigation",
+					"when": "scmProvider == anki-editor-templates"
+				}
+			],
+      "scm/change/title": [
+        {
+          "command": "anki-editor.source-control.revertLineChanges",
+          "when": "scmProvider == anki-editor-templates"
         }
       ]
     },

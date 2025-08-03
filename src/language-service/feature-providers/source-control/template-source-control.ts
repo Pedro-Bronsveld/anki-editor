@@ -1,0 +1,117 @@
+import * as vscode from 'vscode';
+import TemplateQuickDiffProvider from './template-quick-diff-provider';
+import { toAnkiEditorUri, toInitialUri } from '../virtual-uris';
+import VirtualDocumentProvider from '../../virtual-documents-provider';
+import { LineChange } from '../../../models/vscode/scm/line-change';
+
+export default class TemplateSourceControl implements vscode.Disposable {
+    readonly sourceControl: vscode.SourceControl;
+    private resourceGroup: vscode.SourceControlResourceGroup;
+    readonly quickDiffProvider: TemplateQuickDiffProvider;
+
+    constructor(private initialDocumentProvider: VirtualDocumentProvider) {
+        this.sourceControl = vscode.scm.createSourceControl("anki-editor-templates", "Anki Editor Templates");
+        this.resourceGroup = this.sourceControl.createResourceGroup("workingTree", "In-Memory Changes");
+        this.quickDiffProvider = new TemplateQuickDiffProvider();
+        this.sourceControl.quickDiffProvider = this.quickDiffProvider;
+        this.sourceControl.inputBox.placeholder = "Message not used by anki-editor.";
+    }
+
+    async updateResourceGroupResources(): Promise<void> {
+
+        const uris = this.initialDocumentProvider.uriEntries
+            .map(([initialUri]) => toAnkiEditorUri(initialUri));
+        
+        const sourceControlResourceStates = uris.map(uri => this.toSourceControlResourceState(uri, false));
+        
+        this.resourceGroup.resourceStates = sourceControlResourceStates;
+        this.sourceControl.count = sourceControlResourceStates.length;
+    }
+
+    toSourceControlResourceState(docUri: vscode.Uri, deleted: boolean): vscode.SourceControlResourceState {
+
+		const initialUri = toInitialUri(docUri);
+
+		const command: vscode.Command | null = !deleted
+			? {
+				title: "Show changes",
+				command: "vscode.diff",
+				arguments: [initialUri, docUri, `Initial Temlate ↔ Current Template`],
+				tooltip: "Diff your changes"
+			}
+			: null;
+
+		const resourceState: vscode.SourceControlResourceState = {
+			resourceUri: docUri,
+			command: command ?? undefined,
+			decorations: {
+				strikeThrough: deleted,
+				tooltip: 'Template was deleted or renamed.'
+			}
+		};
+
+		return resourceState;
+	}
+
+    discard() {
+        throw new Error("Discard method not implemented.");
+    }
+
+    async revertLineChanges(uri: vscode.Uri, changes: LineChange[], index: number) {
+        if (!uri || index < 0 || index >= changes.length)
+            return;
+
+		const textEditor = vscode.window.visibleTextEditors.filter(e => e.document.uri.toString() === uri.toString())[0];
+
+        const initialUri = toInitialUri(uri);
+        const initialDocument = await vscode.workspace.openTextDocument(initialUri);
+
+        if (!textEditor)
+            return;
+
+        const revertChange = changes[index];
+
+        const isInsertion = revertChange.originalEndLineNumber === 0;
+        const isDeletion = revertChange.modifiedEndLineNumber === 0;
+
+        // Determine zero-based start and end line indexes
+        const modifiedStartLineIndex = revertChange.modifiedStartLineNumber - (isDeletion ? 0 : 1);
+        const modifiedEndLineIndex = isDeletion
+            ? modifiedStartLineIndex
+            : revertChange.modifiedEndLineNumber;
+        
+        const originalStartLineIndex = revertChange.originalStartLineNumber - (isInsertion ? 0 : 1);
+        const originalEndLineIndex = isInsertion
+            ? originalStartLineIndex
+            : revertChange.originalEndLineNumber;
+            
+        // Setup document ranges and replacements text
+        const isAtEndOfDocument = originalEndLineIndex === initialDocument.lineCount;
+        
+        const modifiedRange = new vscode.Range(
+            isInsertion && isAtEndOfDocument
+                ? textEditor.document.lineAt(modifiedStartLineIndex-1).range.end
+                : new vscode.Position(modifiedStartLineIndex, 0),
+            new vscode.Position(modifiedEndLineIndex, 0)
+        );
+        const modifiedText = textEditor.document.getText(modifiedRange);
+        
+        const originalRange = new vscode.Range(
+            isDeletion && isAtEndOfDocument
+                ? initialDocument.lineAt(originalStartLineIndex-1).range.end
+                : new vscode.Position(originalStartLineIndex, 0),
+            new vscode.Position(originalEndLineIndex, 0)
+        );
+        const originalText = initialDocument.getText(originalRange);
+        
+        // Create and apply edit
+        const edit = new vscode.WorkspaceEdit();
+        edit.replace(uri, modifiedRange, originalText);
+        vscode.workspace.applyEdit(edit);
+    }
+    
+    dispose() {
+        throw new Error("Dispose method not implemented.");
+    }
+
+}

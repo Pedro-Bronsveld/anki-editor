@@ -4,7 +4,7 @@ import EmbeddedHandler from '../embedded-handler';
 import VirtualDocumentProvider from '../virtual-documents-provider';
 import { escapeTemplateRegions, unescapeTemplateRegions } from '../escape-html';
 import { getReplacementTemplateLanguageRegions } from '../language-regions';
-import { createVirtualUri } from './embedded-functions';
+import { createVirtualUri } from './virtual-uris';
 
 export default class TemplateDocumentFormattingEditProvider extends LanguageFeatureProviderBase implements vscode.DocumentFormattingEditProvider {
 
