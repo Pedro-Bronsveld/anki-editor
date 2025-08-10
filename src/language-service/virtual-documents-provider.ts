@@ -27,5 +27,9 @@ export default class VirtualDocumentProvider implements vscode.TextDocumentConte
     has(uri: vscode.Uri) {
         return this.documents.has(uri.toString());
     }
+
+    get(uri: vscode.Uri) {
+        return this.documents.get(uri.toString());
+    }
     
 }

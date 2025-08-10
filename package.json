@@ -52,7 +52,7 @@
         "icon": "$(clear-all)"
       },
       {
-        "command": "anki-editor.source-control.discard",
+        "command": "anki-editor.source-control.revertAllChanges",
         "title": "Discard in-memory changes made in Anki Editor",
         "icon": "$(discard)"
       },
@@ -105,7 +105,7 @@
       ],
       "scm/title": [
 				{
-					"command": "anki-editor.source-control.discard",
+					"command": "anki-editor.source-control.revertAllChanges",
 					"group": "navigation",
 					"when": "scmProvider == anki-editor-templates"
 				}

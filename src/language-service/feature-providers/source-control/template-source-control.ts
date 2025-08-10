@@ -19,18 +19,26 @@ export default class TemplateSourceControl implements vscode.Disposable {
 
     async updateResourceGroupResources(): Promise<void> {
 
-        const uris = this.initialDocumentProvider.uriEntries
-            .map(([initialUri]) => toAnkiEditorUri(initialUri));
+        const allInitialUris = this.initialDocumentProvider.uriEntries
+            .map(([initialUri]) => ({
+                docUri: toAnkiEditorUri(initialUri),
+                initialUri
+            }));
         
-        const sourceControlResourceStates = uris.map(uri => this.toSourceControlResourceState(uri, false));
+        const changedUris = (await Promise.all(allInitialUris.map(async input => ({
+            ...input,
+            hasChanges: await this.hasChanges(input.docUri, input.initialUri)
+        })))).filter(({ hasChanges }) => hasChanges);
+
+        const sourceControlResourceStates = changedUris.map(({ docUri, initialUri }) => this.toSourceControlResourceState(docUri, initialUri, false));
         
         this.resourceGroup.resourceStates = sourceControlResourceStates;
         this.sourceControl.count = sourceControlResourceStates.length;
     }
 
-    toSourceControlResourceState(docUri: vscode.Uri, deleted: boolean): vscode.SourceControlResourceState {
+    toSourceControlResourceState(docUri: vscode.Uri, initialUri: vscode.Uri, deleted: boolean): vscode.SourceControlResourceState {
 
-		const initialUri = toInitialUri(docUri);
+		// const initialUri = toInitialUri(docUri);
 
 		const command: vscode.Command | null = !deleted
 			? {
@@ -53,7 +61,19 @@ export default class TemplateSourceControl implements vscode.Disposable {
 		return resourceState;
 	}
 
-    discard() {
+    async hasChanges(docUri: vscode.Uri, initialUri: vscode.Uri): Promise<boolean> {
+        const initialDocumentText = this.initialDocumentProvider.get(initialUri);
+
+        if (initialDocumentText === undefined)
+            return false;
+        
+        const document = await vscode.workspace.openTextDocument(docUri);
+        const documentText = document.getText();
+
+        return initialDocumentText !== documentText;
+    }
+
+    revertAllChanges() {
         throw new Error("Discard method not implemented.");
     }
 

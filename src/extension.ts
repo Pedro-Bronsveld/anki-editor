@@ -88,8 +88,8 @@ export function activate(context: vscode.ExtensionContext) {
 	
 	// Discard source control changes
 	context.subscriptions.push(
-		vscode.commands.registerCommand("anki-editor.source-control.discard", async (sourceControlPane: vscode.SourceControl) => {
-			templateSourceControl.discard();
+		vscode.commands.registerCommand("anki-editor.source-control.revertAllChanges", async (sourceControlPane: vscode.SourceControl) => {
+			templateSourceControl.revertAllChanges();
 		}));
 
 	context.subscriptions.push(
@@ -186,7 +186,7 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	context.subscriptions.push(vscode.workspace.onDidOpenTextDocument(document => {
-		console.log("onDidOpenTextDocument", document.uri.toString());
+		// console.log("onDidOpenTextDocument", document.uri.toString());
 		if (document.languageId === TEMPLATE_LANGUAGE_ID)
 			templateDiagnosticsProvider.updateDiagnostics(document);
 		if (document.uri.scheme === ANKI_EDITOR_SCHEME_BASE && !initialDocumentProvider.has(document.uri)) {
