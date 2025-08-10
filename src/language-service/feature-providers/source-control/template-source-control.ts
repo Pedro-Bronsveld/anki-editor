@@ -3,6 +3,7 @@ import TemplateQuickDiffProvider from './template-quick-diff-provider';
 import { toAnkiEditorUri, toInitialUri } from '../virtual-uris';
 import VirtualDocumentProvider from '../../virtual-documents-provider';
 import { LineChange } from '../../../models/vscode/scm/line-change';
+import { ANKI_EDITOR_SCHEME, ANKI_EDITOR_SCHEME_BASE } from '../../../constants';
 
 export default class TemplateSourceControl implements vscode.Disposable {
     readonly sourceControl: vscode.SourceControl;
@@ -10,7 +11,7 @@ export default class TemplateSourceControl implements vscode.Disposable {
     readonly quickDiffProvider: TemplateQuickDiffProvider;
 
     constructor(private initialDocumentProvider: VirtualDocumentProvider) {
-        this.sourceControl = vscode.scm.createSourceControl("anki-editor-templates", "Anki Editor Templates");
+        this.sourceControl = vscode.scm.createSourceControl("anki-editor-templates", "Anki Editor Templates", vscode.Uri.parse(ANKI_EDITOR_SCHEME));
         this.resourceGroup = this.sourceControl.createResourceGroup("workingTree", "In-Memory Changes");
         this.quickDiffProvider = new TemplateQuickDiffProvider();
         this.sourceControl.quickDiffProvider = this.quickDiffProvider;
@@ -73,8 +74,40 @@ export default class TemplateSourceControl implements vscode.Disposable {
         return initialDocumentText !== documentText;
     }
 
-    revertAllChanges() {
-        throw new Error("Discard method not implemented.");
+    async revertAllChanges() {
+        await this.revertResourceStates(this.resourceGroup.resourceStates);
+    }
+
+    async revertResourceStates(resourceStates: vscode.SourceControlResourceState[]) {
+        for (const resourceState of resourceStates) {
+            await this.revertResource(resourceState.resourceUri);
+        }
+    }
+
+    async revertActiveEditor() {
+        if (vscode.window.activeTextEditor && vscode.window.activeTextEditor.document.uri.scheme === ANKI_EDITOR_SCHEME_BASE) {
+            const activeUriString = vscode.window.activeTextEditor.document.uri.toString();
+            const activeResourceState = this.resourceGroup.resourceStates.find(resourceState => resourceState.resourceUri.toString() === activeUriString);
+            if (activeResourceState)
+                this.revertResource(activeResourceState.resourceUri);
+        }
+    }
+
+    async revertResource(uri: vscode.Uri) {
+        const document = await vscode.workspace.openTextDocument(uri);
+        
+        const initialUri = toInitialUri(uri);
+        const initialDocument = await vscode.workspace.openTextDocument(initialUri);
+        const initialDocumentText = initialDocument.getText();
+
+        const edit = new vscode.WorkspaceEdit();
+        edit.replace(uri,
+            new vscode.Range(new vscode.Position(0, 0), document.lineAt(document.lineCount-1).range.end),
+            initialDocumentText
+        );
+
+        await vscode.workspace.applyEdit(edit);
+        await document.save();
     }
 
     async revertLineChanges(uri: vscode.Uri, changes: LineChange[], index: number) {

@@ -86,15 +86,22 @@ export function activate(context: vscode.ExtensionContext) {
 			embeddedHandler.clearCache();
 		}));
 	
-	// Discard source control changes
+	// Revert source control changes
 	context.subscriptions.push(
 		vscode.commands.registerCommand("anki-editor.source-control.revertAllChanges", async (sourceControlPane: vscode.SourceControl) => {
 			templateSourceControl.revertAllChanges();
 		}));
+	
+	context.subscriptions.push(
+		vscode.commands.registerCommand("anki-editor.source-control.revertResourceChanges", async (...resourceStates: vscode.SourceControlResourceState[]) => {
+			if (resourceStates.length > 0)
+				await templateSourceControl.revertResourceStates(resourceStates);
+			else
+				await templateSourceControl.revertActiveEditor();
+		}));
 
 	context.subscriptions.push(
 		vscode.commands.registerCommand("anki-editor.source-control.revertLineChanges", async (uri: vscode.Uri, changes: LineChange[], index: number) => {
-			console.log("revertLineChanges", uri, changes, index);
 			await templateSourceControl.revertLineChanges(uri, changes, index);
 		}));
 
