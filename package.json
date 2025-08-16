@@ -52,18 +52,21 @@
         "icon": "$(clear-all)"
       },
       {
-        "command": "anki-editor.source-control.revertAllChanges",
-        "title": "Revert all in-memory changes made in Anki Editor",
+        "command": "anki-editor.source-control.discardAllChanges",
+        "title": "Discard All Changes",
+        "category": "Anki Editor",
         "icon": "$(discard)"
       },
       {
-        "command": "anki-editor.source-control.revertResourceChanges",
-        "title": "Revert in-memory file changes made in Anki Editor",
+        "command": "anki-editor.source-control.discardResourceChanges",
+        "title": "Discard Changes",
+        "category": "Anki Editor",
         "icon": "$(discard)"
       },
       {
-        "command": "anki-editor.source-control.revertLineChanges",
-        "title": "Revert Change",
+        "command": "anki-editor.source-control.discardLineChanges",
+        "title": "Discard Line Changes",
+        "category": "Anki Editor",
         "icon": "$(discard)"
       }
     ],
@@ -87,7 +90,7 @@
     "menus": {
       "commandPalette": [
         {
-          "command": "anki-editor.source-control.revertLineChanges",
+          "command": "anki-editor.source-control.discardLineChanges",
           "when": "false"
         }
       ],
@@ -110,22 +113,22 @@
       ],
       "scm/title": [
 				{
-					"command": "anki-editor.source-control.revertAllChanges",
+					"command": "anki-editor.source-control.discardAllChanges",
 					"group": "navigation",
-					"when": "scmProvider == anki-editor-templates"
+					"when": "scmProvider == anki-editor-scm"
 				}
 			],
-      "scm/change/title": [
-        {
-          "command": "anki-editor.source-control.revertLineChanges",
-          "when": "scmProvider == anki-editor-templates"
-        }
-      ],
       "scm/resourceState/context": [
         {
-          "command": "anki-editor.source-control.revertResourceChanges",
-          "when": "scmProvider == anki-editor-templates",
+          "command": "anki-editor.source-control.discardResourceChanges",
+          "when": "scmProvider == anki-editor-scm",
           "group": "inline"
+        }
+      ],
+      "scm/change/title": [
+        {
+          "command": "anki-editor.source-control.discardLineChanges",
+          "when": "scmProvider == anki-editor-scm"
         }
       ]
     },

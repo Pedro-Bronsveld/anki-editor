@@ -1,32 +1,32 @@
 import * as vscode from 'vscode';
-import TemplateQuickDiffProvider from './template-quick-diff-provider';
+import VirtualQuickDiffProvider from './virtual-quick-diff-provider';
 import { toAnkiEditorUri, toInitialUri } from '../virtual-uris';
 import VirtualDocumentProvider from '../../virtual-documents-provider';
 import { LineChange } from '../../../models/vscode/scm/line-change';
 import { ANKI_EDITOR_SCHEME, ANKI_EDITOR_SCHEME_BASE } from '../../../constants';
 
-export default class TemplateSourceControl implements vscode.Disposable {
+export default class VirtualSourceControl implements vscode.Disposable {
     readonly sourceControl: vscode.SourceControl;
     private resourceGroup: vscode.SourceControlResourceGroup;
-    readonly quickDiffProvider: TemplateQuickDiffProvider;
+    readonly quickDiffProvider: VirtualQuickDiffProvider;
 
     constructor(private initialDocumentProvider: VirtualDocumentProvider) {
-        this.sourceControl = vscode.scm.createSourceControl("anki-editor-templates", "Anki Editor Templates", vscode.Uri.parse(ANKI_EDITOR_SCHEME));
-        this.resourceGroup = this.sourceControl.createResourceGroup("workingTree", "In-Memory Changes");
-        this.quickDiffProvider = new TemplateQuickDiffProvider();
+        this.sourceControl = vscode.scm.createSourceControl("anki-editor-scm", "Anki Editor Changes", vscode.Uri.parse(ANKI_EDITOR_SCHEME));
+        this.resourceGroup = this.sourceControl.createResourceGroup("workingTree", "Changes since opened");
+        this.quickDiffProvider = new VirtualQuickDiffProvider();
         this.sourceControl.quickDiffProvider = this.quickDiffProvider;
-        this.sourceControl.inputBox.placeholder = "Message not used by anki-editor.";
+        this.sourceControl.inputBox.placeholder = "Message not used by Anki Editor.";
     }
 
     async updateResourceGroupResources(): Promise<void> {
 
-        const allInitialUris = this.initialDocumentProvider.uriEntries
+        const allUris = this.initialDocumentProvider.uriEntries
             .map(([initialUri]) => ({
                 docUri: toAnkiEditorUri(initialUri),
                 initialUri
             }));
         
-        const changedUris = (await Promise.all(allInitialUris.map(async input => ({
+        const changedUris = (await Promise.all(allUris.map(async input => ({
             ...input,
             hasChanges: await this.hasChanges(input.docUri, input.initialUri)
         })))).filter(({ hasChanges }) => hasChanges);
@@ -74,26 +74,26 @@ export default class TemplateSourceControl implements vscode.Disposable {
         return initialDocumentText !== documentText;
     }
 
-    async revertAllChanges() {
-        await this.revertResourceStates(this.resourceGroup.resourceStates);
+    async discardAllChanges() {
+        await this.discardResourceStates(this.resourceGroup.resourceStates);
     }
 
-    async revertResourceStates(resourceStates: vscode.SourceControlResourceState[]) {
+    async discardResourceStates(resourceStates: vscode.SourceControlResourceState[]) {
         for (const resourceState of resourceStates) {
-            await this.revertResource(resourceState.resourceUri);
+            await this.discardResource(resourceState.resourceUri);
         }
     }
 
-    async revertActiveEditor() {
+    async discardActiveEditor() {
         if (vscode.window.activeTextEditor && vscode.window.activeTextEditor.document.uri.scheme === ANKI_EDITOR_SCHEME_BASE) {
             const activeUriString = vscode.window.activeTextEditor.document.uri.toString();
             const activeResourceState = this.resourceGroup.resourceStates.find(resourceState => resourceState.resourceUri.toString() === activeUriString);
             if (activeResourceState)
-                this.revertResource(activeResourceState.resourceUri);
+                this.discardResource(activeResourceState.resourceUri);
         }
     }
 
-    async revertResource(uri: vscode.Uri) {
+    async discardResource(uri: vscode.Uri) {
         const document = await vscode.workspace.openTextDocument(uri);
         
         const initialUri = toInitialUri(uri);
@@ -110,7 +110,7 @@ export default class TemplateSourceControl implements vscode.Disposable {
         await document.save();
     }
 
-    async revertLineChanges(uri: vscode.Uri, changes: LineChange[], index: number) {
+    async discardLineChanges(uri: vscode.Uri, changes: LineChange[], index: number) {
         if (!uri || index < 0 || index >= changes.length)
             return;
 

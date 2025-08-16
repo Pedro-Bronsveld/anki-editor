@@ -25,7 +25,7 @@ import AnkiConnect from './anki-connect/anki-connect';
 import EmbeddedHandler from './language-service/embedded-handler';
 import { updateAllDiagnostics } from './language-service/run-diagnostics';
 import StylingCompletionItemProvider from './language-service/feature-providers/styling-completion-item-provider';
-import TemplateSourceControl from './language-service/feature-providers/source-control/template-source-control';
+import VirtualSourceControl from './language-service/feature-providers/source-control/virtual-source-control';
 import { toInitialUri } from './language-service/feature-providers/virtual-uris';
 import { LineChange } from './models/vscode/scm/line-change';
 
@@ -88,21 +88,21 @@ export function activate(context: vscode.ExtensionContext) {
 	
 	// Revert source control changes
 	context.subscriptions.push(
-		vscode.commands.registerCommand("anki-editor.source-control.revertAllChanges", async (sourceControlPane: vscode.SourceControl) => {
-			templateSourceControl.revertAllChanges();
+		vscode.commands.registerCommand("anki-editor.source-control.discardAllChanges", async (sourceControlPane: vscode.SourceControl) => {
+			virtualSourceControl.discardAllChanges();
 		}));
 	
 	context.subscriptions.push(
-		vscode.commands.registerCommand("anki-editor.source-control.revertResourceChanges", async (...resourceStates: vscode.SourceControlResourceState[]) => {
+		vscode.commands.registerCommand("anki-editor.source-control.discardResourceChanges", async (...resourceStates: vscode.SourceControlResourceState[]) => {
 			if (resourceStates.length > 0)
-				await templateSourceControl.revertResourceStates(resourceStates);
+				await virtualSourceControl.discardResourceStates(resourceStates);
 			else
-				await templateSourceControl.revertActiveEditor();
+				await virtualSourceControl.discardActiveEditor();
 		}));
 
 	context.subscriptions.push(
-		vscode.commands.registerCommand("anki-editor.source-control.revertLineChanges", async (uri: vscode.Uri, changes: LineChange[], index: number) => {
-			await templateSourceControl.revertLineChanges(uri, changes, index);
+		vscode.commands.registerCommand("anki-editor.source-control.discardLineChanges", async (uri: vscode.Uri, changes: LineChange[], index: number) => {
+			await virtualSourceControl.discardLineChanges(uri, changes, index);
 		}));
 
 	// Language service features
@@ -132,7 +132,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// Source control features
 	const initialDocumentProvider = new VirtualDocumentProvider();
-	const templateSourceControl = new TemplateSourceControl(initialDocumentProvider);
+	const virtualSourceControl = new VirtualSourceControl(initialDocumentProvider);
 	
 	// Setup context subscriptions
 	context.subscriptions.push(
@@ -206,7 +206,7 @@ export function activate(context: vscode.ExtensionContext) {
 		if (event.document.languageId === TEMPLATE_LANGUAGE_ID)
 			templateDiagnosticsProvider.updateDiagnostics(event.document);
 		if (event.document.uri.scheme === ANKI_EDITOR_SCHEME_BASE)
-			templateSourceControl.updateResourceGroupResources();
+			virtualSourceControl.updateResourceGroupResources();
 	}));
 
 	context.subscriptions.push(
@@ -260,7 +260,7 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 
 	// Source control
-	context.subscriptions.push(templateSourceControl);
+	context.subscriptions.push(virtualSourceControl);
 	
 }
 
