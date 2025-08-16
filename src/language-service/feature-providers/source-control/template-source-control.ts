@@ -164,7 +164,8 @@ export default class TemplateSourceControl implements vscode.Disposable {
     }
     
     dispose() {
-        throw new Error("Dispose method not implemented.");
+        this.initialDocumentProvider.clear();
+        this.sourceControl.dispose();
     }
 
 }

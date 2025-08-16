@@ -260,7 +260,7 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 
 	// Source control
-	context.subscriptions.push(templateSourceControl.sourceControl);
+	context.subscriptions.push(templateSourceControl);
 	
 }
 
