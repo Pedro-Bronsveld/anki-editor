@@ -14,9 +14,3 @@ export const toAnkiEditorUri = (uri: vscode.Uri) =>
     uri.with({
         scheme: ANKI_EDITOR_SCHEME_BASE
     });
-
-export const stripUri = (uri: vscode.Uri) =>
-    uri.with({
-        query: "",
-        fragment: ""
-    });
