@@ -4,6 +4,7 @@ import { toAnkiEditorUri, toInitialUri } from '../virtual-uris';
 import VirtualDocumentProvider from '../../virtual-documents-provider';
 import { LineChange } from '../../../models/vscode/scm/line-change';
 import { ANKI_EDITOR_SCHEME, ANKI_EDITOR_SCHEME_BASE } from '../../../constants';
+import { UriPair, ChangedUriPair } from '../../../models/vscode/scm/uri-pair';
 
 export default class VirtualSourceControl implements vscode.Disposable {
     readonly sourceControl: vscode.SourceControl;
@@ -12,40 +13,60 @@ export default class VirtualSourceControl implements vscode.Disposable {
 
     constructor(private initialDocumentProvider: VirtualDocumentProvider) {
         this.sourceControl = vscode.scm.createSourceControl("anki-editor-scm", "Anki Editor Changes", vscode.Uri.parse(ANKI_EDITOR_SCHEME));
-        this.resourceGroup = this.sourceControl.createResourceGroup("workingTree", "Changes since opened");
+        this.resourceGroup = this.sourceControl.createResourceGroup("workingTree", "Saved changes since opened");
         this.quickDiffProvider = new VirtualQuickDiffProvider();
         this.sourceControl.quickDiffProvider = this.quickDiffProvider;
         this.sourceControl.inputBox.placeholder = "Message not used by Anki Editor.";
     }
 
-    async updateResourceGroupResources(): Promise<void> {
+    async updateResourceGroupResources(uris?: vscode.Uri | vscode.Uri[]): Promise<void> {
 
-        const allUris = this.initialDocumentProvider.uriEntries
-            .map(([initialUri]) => ({
-                docUri: toAnkiEditorUri(initialUri),
-                initialUri
-            }));
+        const providedUris = uris ? (uris instanceof Array ? uris : [uris]) : undefined;
         
-        const changedUris = (await Promise.all(allUris.map(async input => ({
+        const uriPairs: UriPair[] = providedUris
+            // Check for changed only in provided uris
+            ? providedUris.map<UriPair>(uri => ({
+                    docUri: uri,
+                    initialUri: toInitialUri(uri)
+                }))
+                .filter(({ initialUri }) => this.initialDocumentProvider.has(initialUri))
+            // Check for changes in all resources saved in initial uris document provider
+            : this.initialDocumentProvider.uriEntries
+                .map<UriPair>(([initialUri]) => ({
+                    docUri: toAnkiEditorUri(initialUri),
+                    initialUri
+                }));
+        
+        const checkedUriPairs = (await Promise.all(uriPairs.map<Promise<ChangedUriPair>>(async input => ({
             ...input,
             hasChanges: await this.hasChanges(input.docUri, input.initialUri)
-        })))).filter(({ hasChanges }) => hasChanges);
+        }))));
+                
+        const changedUriPairs = checkedUriPairs.filter(({ hasChanges }) => hasChanges);
 
-        const sourceControlResourceStates = changedUris.map(({ docUri, initialUri }) => this.toSourceControlResourceState(docUri, initialUri, false));
+        const sourceControlResourceStates = changedUriPairs.map(({ docUri, initialUri }) => this.toSourceControlResourceState(docUri, initialUri, false));
         
-        this.resourceGroup.resourceStates = sourceControlResourceStates;
-        this.sourceControl.count = sourceControlResourceStates.length;
+        if (providedUris) {
+            // Update only resource states for provided uris, leave others unchanged
+            const providedUrisSet = new Set(providedUris.map(uri => uri.toString()));
+            this.resourceGroup.resourceStates = this.resourceGroup.resourceStates
+                .filter(resourceState => !providedUrisSet.has( resourceState.resourceUri.toString() ))
+                .concat(sourceControlResourceStates);
+        }
+        else {
+            this.resourceGroup.resourceStates = sourceControlResourceStates;
+        }
+
+        this.sourceControl.count = this.resourceGroup.resourceStates.length;
     }
 
     toSourceControlResourceState(docUri: vscode.Uri, initialUri: vscode.Uri, deleted: boolean): vscode.SourceControlResourceState {
-
-		// const initialUri = toInitialUri(docUri);
 
 		const command: vscode.Command | null = !deleted
 			? {
 				title: "Show changes",
 				command: "vscode.diff",
-				arguments: [initialUri, docUri, `Initial Temlate ↔ Current Template`],
+				arguments: [initialUri, docUri, `Initial ↔ Current`],
 				tooltip: "Diff your changes"
 			}
 			: null;
@@ -68,10 +89,17 @@ export default class VirtualSourceControl implements vscode.Disposable {
         if (initialDocumentText === undefined)
             return false;
         
-        const document = await vscode.workspace.openTextDocument(docUri);
+        // Get document as currently saved in Anki.
+        const document = await vscode.workspace.openTextDocument(docUri.with({
+            query: (new URLSearchParams({
+                keepInitial: "false",
+                t: Date.now().toString()
+            })).toString()
+        }));
         const documentText = document.getText();
 
-        return initialDocumentText !== documentText;
+        const res = initialDocumentText !== documentText;
+        return res;
     }
 
     async discardAllChanges() {
