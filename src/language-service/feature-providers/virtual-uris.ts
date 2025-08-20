@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { ANKI_EDITOR_EMBEDDED_SCHEME, ANKI_EDITOR_EMBEDDED_SCHEME_BASE, ANKI_EDITOR_INITIAL_SCHEME_BASE, ANKI_EDITOR_SCHEME_BASE } from '../../constants';
+import { ANKI_EDITOR_EMBEDDED_SCHEME, ANKI_EDITOR_INITIAL_SCHEME_BASE, ANKI_EDITOR_SCHEME_BASE } from '../../constants';
 import { LanguageId, VirtualLanguageId } from '../../models/embedded-languages';
 
 export const createVirtualUri = (languageId: LanguageId | VirtualLanguageId, fileExtension: string, originalUri: vscode.Uri) => 
@@ -15,10 +15,8 @@ export const toAnkiEditorUri = (uri: vscode.Uri) =>
         scheme: ANKI_EDITOR_SCHEME_BASE
     });
 
-export const shouldKeepInitial = (uri: vscode.Uri): boolean => {
-    const keepInitial = (new URLSearchParams(uri.query)).get("keepInitial");
-    if (keepInitial === null)
-        return true;
-
-    return keepInitial === "true";
-}
+export const stripUri = (uri: vscode.Uri) =>
+    uri.with({
+        query: "",
+        fragment: ""
+    });

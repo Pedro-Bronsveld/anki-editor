@@ -26,7 +26,7 @@ import EmbeddedHandler from './language-service/embedded-handler';
 import { updateAllDiagnostics } from './language-service/run-diagnostics';
 import StylingCompletionItemProvider from './language-service/feature-providers/styling-completion-item-provider';
 import VirtualSourceControl from './language-service/feature-providers/source-control/virtual-source-control';
-import { shouldKeepInitial, toInitialUri } from './language-service/feature-providers/virtual-uris';
+import { stripUri, toInitialUri } from './language-service/feature-providers/virtual-uris';
 import { LineChange } from './models/vscode/scm/line-change';
 
 export function activate(context: vscode.ExtensionContext) {
@@ -197,10 +197,11 @@ export function activate(context: vscode.ExtensionContext) {
 		// console.log("onDidOpenTextDocument", document.uri.toString());
 		if (document.languageId === TEMPLATE_LANGUAGE_ID)
 			templateDiagnosticsProvider.updateDiagnostics(document);
-		if (document.uri.scheme === ANKI_EDITOR_SCHEME_BASE && shouldKeepInitial(document.uri)) {
-			if (!initialDocumentProvider.has(document.uri)) {
+		if (document.uri.scheme === ANKI_EDITOR_SCHEME_BASE && !document.uri.query && !document.uri.fragment) {
+			const stripppedUri = stripUri(document.uri);
+			if (!initialDocumentProvider.has(stripppedUri)) {
 				// Save initial version of the document seen by the user in-memory for source control
-				initialDocumentProvider.setDocumentContent(toInitialUri(document.uri), document.getText());
+				initialDocumentProvider.setDocumentContent(toInitialUri(stripppedUri), document.getText());
 			}
 			virtualSourceControl.updateResourceGroupResources(document.uri);
 		}
@@ -209,13 +210,11 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(event => {
 		if (event.document.languageId === TEMPLATE_LANGUAGE_ID)
 			templateDiagnosticsProvider.updateDiagnostics(event.document);
-		if (event.document.uri.scheme === ANKI_EDITOR_SCHEME_BASE && !event.document.isDirty)
-			virtualSourceControl.updateResourceGroupResources(event.document.uri);
 	}));
 
 	context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(document => {
 		if (document.uri.scheme === ANKI_EDITOR_SCHEME_BASE)
-			virtualSourceControl.updateResourceGroupResources();
+			virtualSourceControl.updateResourceGroupResources(document.uri);
 	}));
 
 	context.subscriptions.push(

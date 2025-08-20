@@ -91,10 +91,7 @@ export default class VirtualSourceControl implements vscode.Disposable {
         
         // Get document as currently saved in Anki.
         const document = await vscode.workspace.openTextDocument(docUri.with({
-            query: (new URLSearchParams({
-                keepInitial: "false",
-                t: Date.now().toString()
-            })).toString()
+            query: `t=${Date.now()}`
         }));
         const documentText = document.getText();
 
