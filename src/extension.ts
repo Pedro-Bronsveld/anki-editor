@@ -105,6 +105,25 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand("anki-editor.source-control.discardLineChanges", async (uri: vscode.Uri, changes: LineChange[], index: number) => {
 			await virtualSourceControl.discardLineChanges(uri, changes, index);
 		}));
+	
+	// Committing changes
+	context.subscriptions.push(
+		vscode.commands.registerCommand("anki-editor.source-control.commitAllChanges", async () => {
+			await virtualSourceControl.commitAllChanges();
+		}));
+	
+	context.subscriptions.push(
+		vscode.commands.registerCommand("anki-editor.source-control.commitResourceChanges", async (...resourceStates: vscode.SourceControlResourceState[]) => {
+			if (resourceStates.length > 0)
+				await virtualSourceControl.commitResourceStates(resourceStates);
+			else
+				await virtualSourceControl.commitActiveEditor();
+		}));
+	
+	context.subscriptions.push(
+		vscode.commands.registerCommand("anki-editor.source-control.commitLineChanges", async (uri: vscode.Uri, changes: LineChange[], index: number) => {
+			await virtualSourceControl.commitLineChanges(uri, changes, index);
+		}));
 
 	// Language service features
 	const virtualDocumentProvider = new VirtualDocumentProvider();

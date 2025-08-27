@@ -3,8 +3,9 @@ import VirtualQuickDiffProvider from './virtual-quick-diff-provider';
 import { toAnkiEditorUri, toInitialUri } from '../virtual-uris';
 import VirtualDocumentProvider from '../../virtual-documents-provider';
 import { LineChange } from '../../../models/vscode/scm/line-change';
-import { ANKI_EDITOR_SCHEME, ANKI_EDITOR_SCHEME_BASE } from '../../../constants';
+import { ANKI_EDITOR_SCHEME, ANKI_EDITOR_SCHEME_BASE, ANKI_EDITOR_SCM_ID } from '../../../constants';
 import { UriPair, ChangedUriPair } from '../../../models/vscode/scm/uri-pair';
+import { resolveDocumentLineChange } from '../../../source-control/resolve-document-line-change';
 
 export default class VirtualSourceControl implements vscode.Disposable {
     readonly sourceControl: vscode.SourceControl;
@@ -12,7 +13,7 @@ export default class VirtualSourceControl implements vscode.Disposable {
     readonly quickDiffProvider: VirtualQuickDiffProvider;
 
     constructor(private initialDocumentProvider: VirtualDocumentProvider) {
-        this.sourceControl = vscode.scm.createSourceControl("anki-editor-scm", "Anki Editor Changes", vscode.Uri.parse(ANKI_EDITOR_SCHEME));
+        this.sourceControl = vscode.scm.createSourceControl(ANKI_EDITOR_SCM_ID, "Anki Editor Changes", vscode.Uri.parse(ANKI_EDITOR_SCHEME));
         this.resourceGroup = this.sourceControl.createResourceGroup("workingTree", "Saved changes since opened");
         this.quickDiffProvider = new VirtualQuickDiffProvider();
         this.sourceControl.quickDiffProvider = this.quickDiffProvider;
@@ -84,7 +85,8 @@ export default class VirtualSourceControl implements vscode.Disposable {
 	}
 
     async hasChanges(docUri: vscode.Uri, initialUri: vscode.Uri): Promise<boolean> {
-        const initialDocumentText = this.initialDocumentProvider.get(initialUri);
+        const initialDocument = await vscode.workspace.openTextDocument(initialUri)
+        const initialDocumentText = initialDocument.getText();
 
         if (initialDocumentText === undefined)
             return false;
@@ -98,6 +100,8 @@ export default class VirtualSourceControl implements vscode.Disposable {
         const res = initialDocumentText !== documentText;
         return res;
     }
+
+    // Discarding Changes
 
     async discardAllChanges() {
         await this.discardResourceStates(this.resourceGroup.resourceStates);
@@ -114,11 +118,11 @@ export default class VirtualSourceControl implements vscode.Disposable {
             const activeUriString = vscode.window.activeTextEditor.document.uri.toString();
             const activeResourceState = this.resourceGroup.resourceStates.find(resourceState => resourceState.resourceUri.toString() === activeUriString);
             if (activeResourceState)
-                this.discardResource(activeResourceState.resourceUri);
+                await this.discardResource(activeResourceState.resourceUri);
         }
     }
 
-    async discardResource(uri: vscode.Uri) {
+    private async discardResource(uri: vscode.Uri) {
         const document = await vscode.workspace.openTextDocument(uri);
         
         const initialUri = toInitialUri(uri);
@@ -149,43 +153,79 @@ export default class VirtualSourceControl implements vscode.Disposable {
 
         const revertChange = changes[index];
 
-        const isInsertion = revertChange.originalEndLineNumber === 0;
-        const isDeletion = revertChange.modifiedEndLineNumber === 0;
-
-        // Determine zero-based start and end line indexes
-        const modifiedStartLineIndex = revertChange.modifiedStartLineNumber - (isDeletion ? 0 : 1);
-        const modifiedEndLineIndex = isDeletion
-            ? modifiedStartLineIndex
-            : revertChange.modifiedEndLineNumber;
-        
-        const originalStartLineIndex = revertChange.originalStartLineNumber - (isInsertion ? 0 : 1);
-        const originalEndLineIndex = isInsertion
-            ? originalStartLineIndex
-            : revertChange.originalEndLineNumber;
-            
-        // Setup document ranges and replacements text
-        const isAtEndOfDocument = originalEndLineIndex === initialDocument.lineCount;
-        
-        const modifiedRange = new vscode.Range(
-            isInsertion && isAtEndOfDocument
-                ? textEditor.document.lineAt(modifiedStartLineIndex-1).range.end
-                : new vscode.Position(modifiedStartLineIndex, 0),
-            new vscode.Position(modifiedEndLineIndex, 0)
-        );
-        const modifiedText = textEditor.document.getText(modifiedRange);
-        
-        const originalRange = new vscode.Range(
-            isDeletion && isAtEndOfDocument
-                ? initialDocument.lineAt(originalStartLineIndex-1).range.end
-                : new vscode.Position(originalStartLineIndex, 0),
-            new vscode.Position(originalEndLineIndex, 0)
-        );
-        const originalText = initialDocument.getText(originalRange);
+        const {
+            modifiedRange,
+            originalText
+        } = resolveDocumentLineChange(textEditor.document, initialDocument, revertChange);
         
         // Create and apply edit
         const edit = new vscode.WorkspaceEdit();
         edit.replace(uri, modifiedRange, originalText);
-        vscode.workspace.applyEdit(edit);
+        await vscode.workspace.applyEdit(edit);
+        await textEditor.document.save();
+    }
+
+    // Committing Changes
+
+    async commitAllChanges() {
+        await this.commitResourceStates(this.resourceGroup.resourceStates);
+    }
+
+    async commitResourceStates(resourceStates: vscode.SourceControlResourceState[]) {
+        const uris = resourceStates.map(({ resourceUri }) => resourceUri);
+        for (const uri of uris) {
+            await this.commitResource(uri);
+        }
+        await this.updateResourceGroupResources(uris);
+    }
+
+    async commitActiveEditor() {
+        if (vscode.window.activeTextEditor && vscode.window.activeTextEditor.document.uri.scheme === ANKI_EDITOR_SCHEME_BASE) {
+            const activeUriString = vscode.window.activeTextEditor.document.uri.toString();
+            const activeResourceState = this.resourceGroup.resourceStates.find(resourceState => resourceState.resourceUri.toString() === activeUriString);
+            if (activeResourceState) {
+                await this.commitResource(activeResourceState.resourceUri);
+                await this.updateResourceGroupResources(activeResourceState.resourceUri);
+            }
+        }
+    }
+
+    private async commitResource(uri: vscode.Uri) {
+        const document = await vscode.workspace.openTextDocument(uri);
+        const initialUri = toInitialUri(uri);
+        const initialDocument = await vscode.workspace.openTextDocument(initialUri);
+
+        const documentText = document.getText();
+        const edit = new vscode.WorkspaceEdit();
+        const initialDocumentLastLine = initialDocument.lineAt(initialDocument.lineCount-1);
+        edit.replace(initialUri,
+            new vscode.Range(
+                new vscode.Position(0, 0),
+                initialDocumentLastLine.range.end
+            ), documentText);
+        await vscode.workspace.applyEdit(edit);
+    }
+
+    async commitLineChanges(uri: vscode.Uri, changes: LineChange[], index: number) {
+        if (!uri || index < 0 || index >= changes.length)
+            return;
+        
+        const document = await vscode.workspace.openTextDocument(uri);
+        const initialUri = toInitialUri(uri);
+        const initialDocument = await vscode.workspace.openTextDocument(initialUri);
+
+        const commitChange = changes[index];
+        
+        const {
+            modifiedText,
+            originalRange
+        } = resolveDocumentLineChange(document, initialDocument, commitChange);
+
+        const edit = new vscode.WorkspaceEdit();
+        edit.replace(initialUri, originalRange, modifiedText);
+        await vscode.workspace.applyEdit(edit);
+        await document.save();
+        await this.updateResourceGroupResources(uri);
     }
     
     dispose() {

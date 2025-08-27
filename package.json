@@ -68,6 +68,24 @@
         "title": "Discard Line Changes",
         "category": "Anki Editor",
         "icon": "$(discard)"
+      },
+      {
+        "command": "anki-editor.source-control.commitAllChanges",
+        "title": "Confirm All Changes",
+        "category": "Anki Editor",
+        "icon": "$(check)"
+      },
+      {
+        "command": "anki-editor.source-control.commitResourceChanges",
+        "title": "Confirm Changes",
+        "category": "Anki Editor",
+        "icon": "$(check)"
+      },
+      {
+        "command": "anki-editor.source-control.commitLineChanges",
+        "title": "Confirm Line Changes",
+        "category": "Anki Editor",
+        "icon": "$(check)"
       }
     ],
     "viewsContainers": {
@@ -92,6 +110,10 @@
         {
           "command": "anki-editor.source-control.discardLineChanges",
           "when": "false"
+        },
+        {
+          "command": "anki-editor.source-control.commitLineChanges",
+          "when": "false"
         }
       ],
       "view/title": [
@@ -112,6 +134,11 @@
         }
       ],
       "scm/title": [
+        {
+					"command": "anki-editor.source-control.commitAllChanges",
+					"group": "navigation",
+					"when": "scmProvider == anki-editor-scm"
+				},
 				{
 					"command": "anki-editor.source-control.discardAllChanges",
 					"group": "navigation",
@@ -120,12 +147,21 @@
 			],
       "scm/resourceState/context": [
         {
+          "command": "anki-editor.source-control.commitResourceChanges",
+          "when": "scmProvider == anki-editor-scm",
+          "group": "inline"
+        },
+        {
           "command": "anki-editor.source-control.discardResourceChanges",
           "when": "scmProvider == anki-editor-scm",
           "group": "inline"
         }
       ],
       "scm/change/title": [
+        {
+          "command": "anki-editor.source-control.commitLineChanges",
+          "when": "scmProvider == anki-editor-scm"
+        },
         {
           "command": "anki-editor.source-control.discardLineChanges",
           "when": "scmProvider == anki-editor-scm"
