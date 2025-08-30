@@ -19,7 +19,6 @@
     "Education"
   ],
   "activationEvents": [
-    "onCommand:anki-editor.helloWorld",
     "anki-editor.workspaceInit",
     "onFileSystem:anki-editor"
   ],
@@ -55,13 +54,15 @@
         "command": "anki-editor.source-control.discardAllChanges",
         "title": "Discard All Changes",
         "category": "Anki Editor",
-        "icon": "$(discard)"
+        "icon": "$(discard)",
+        "enablement": "scmProvider == anki-editor-scm"
       },
       {
         "command": "anki-editor.source-control.discardResourceChanges",
         "title": "Discard Changes",
         "category": "Anki Editor",
-        "icon": "$(discard)"
+        "icon": "$(discard)",
+        "enablement": "scmProvider == anki-editor-scm"
       },
       {
         "command": "anki-editor.source-control.discardLineChanges",
@@ -73,13 +74,15 @@
         "command": "anki-editor.source-control.commitAllChanges",
         "title": "Confirm All Changes",
         "category": "Anki Editor",
-        "icon": "$(check)"
+        "icon": "$(check)",
+        "enablement": "scmProvider == anki-editor-scm"
       },
       {
         "command": "anki-editor.source-control.commitResourceChanges",
         "title": "Confirm Changes",
         "category": "Anki Editor",
-        "icon": "$(check)"
+        "icon": "$(check)",
+        "enablement": "scmProvider == anki-editor-scm"
       },
       {
         "command": "anki-editor.source-control.commitLineChanges",
