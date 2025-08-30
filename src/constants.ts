@@ -17,5 +17,6 @@ export const STYLING_SELECTOR: DocumentFilter = { language: "css", scheme: ANKI_
 export const EMBEDDED_STYLING_SELECTOR: DocumentFilter = { language: "css", scheme: ANKI_EDITOR_EMBEDDED_SCHEME_BASE } as const;
 
 export const ANKI_EDITOR_CONFIG = "anki-editor";
+export const ANKI_EDITOR_CONFIG_SOURCE_CONTROL = `${ANKI_EDITOR_CONFIG}.sourceControl`;
 
 export const ANKI_EDITOR_SCM_ID = "anki-editor-scm";

@@ -1,6 +1,16 @@
 import * as vscode from 'vscode';
 import { AnkiEditorFs } from './anki-editor-filesystem';
-import { ANKI_EDITOR_CONFIG, ANKI_EDITOR_EMBEDDED_SCHEME_BASE, ANKI_EDITOR_INITIAL_SCHEME_BASE, ANKI_EDITOR_SCHEME, ANKI_EDITOR_SCHEME_BASE, EMBEDDED_STYLING_SELECTOR, STYLING_SELECTOR, TEMPLATE_LANGUAGE_ID, TEMPLATE_SELECTOR } from './constants';
+import { 
+	ANKI_EDITOR_CONFIG,
+	ANKI_EDITOR_EMBEDDED_SCHEME_BASE,
+	ANKI_EDITOR_INITIAL_SCHEME_BASE,
+	ANKI_EDITOR_SCHEME,
+	ANKI_EDITOR_SCHEME_BASE,
+	EMBEDDED_STYLING_SELECTOR,
+	STYLING_SELECTOR,
+	TEMPLATE_LANGUAGE_ID,
+	TEMPLATE_SELECTOR 
+} from './constants';
 import TemplateCompletionItemProvider from './language-service/feature-providers/template-completion-item-provider';
 import TemplateDefinitionProvider from './language-service/feature-providers/template-definition-provider';
 import TemplateDiagnosticsProvider from './language-service/feature-providers/template-diagnostics-collection';
@@ -25,9 +35,9 @@ import AnkiConnect from './anki-connect/anki-connect';
 import EmbeddedHandler from './language-service/embedded-handler';
 import { updateAllDiagnostics } from './language-service/run-diagnostics';
 import StylingCompletionItemProvider from './language-service/feature-providers/styling-completion-item-provider';
-import VirtualSourceControl from './language-service/feature-providers/source-control/virtual-source-control';
 import { toInitialUri } from './language-service/feature-providers/virtual-uris';
 import { LineChange } from './models/vscode/scm/line-change';
+import { ToggleableVirtualSourceControl } from './language-service/toggleable-features/toggleable-virtual-source-control';
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -40,7 +50,7 @@ export function activate(context: vscode.ExtensionContext) {
 			}
 			else {
 				updateAllDiagnostics(templateDiagnosticsProvider, true);
-				virtualSourceControl.updateResourceGroupResources();
+				virtualSourceControl.feature?.updateResourceGroupResources();
 			}
 		})
 	);
@@ -90,39 +100,44 @@ export function activate(context: vscode.ExtensionContext) {
 	// Revert source control changes
 	context.subscriptions.push(
 		vscode.commands.registerCommand("anki-editor.source-control.discardAllChanges", async (sourceControlPane: vscode.SourceControl) => {
-			virtualSourceControl.discardAllChanges();
+			virtualSourceControl.feature?.discardAllChanges();
 		}));
 	
 	context.subscriptions.push(
 		vscode.commands.registerCommand("anki-editor.source-control.discardResourceChanges", async (...resourceStates: vscode.SourceControlResourceState[]) => {
+			if (!virtualSourceControl.feature)
+				return
 			if (resourceStates.length > 0)
-				await virtualSourceControl.discardResourceStates(resourceStates);
+				await virtualSourceControl.feature.discardResourceStates(resourceStates);
 			else
-				await virtualSourceControl.discardActiveEditor();
+				await virtualSourceControl.feature.discardActiveEditor();
 		}));
 
 	context.subscriptions.push(
 		vscode.commands.registerCommand("anki-editor.source-control.discardLineChanges", async (uri: vscode.Uri, changes: LineChange[], index: number) => {
-			await virtualSourceControl.discardLineChanges(uri, changes, index);
+			await virtualSourceControl.feature?.discardLineChanges(uri, changes, index);
 		}));
 	
 	// Committing changes
 	context.subscriptions.push(
 		vscode.commands.registerCommand("anki-editor.source-control.commitAllChanges", async () => {
-			await virtualSourceControl.commitAllChanges();
+			await virtualSourceControl.feature?.commitAllChanges();
 		}));
 	
 	context.subscriptions.push(
 		vscode.commands.registerCommand("anki-editor.source-control.commitResourceChanges", async (...resourceStates: vscode.SourceControlResourceState[]) => {
+			if (!virtualSourceControl)
+				return
+
 			if (resourceStates.length > 0)
-				await virtualSourceControl.commitResourceStates(resourceStates);
+				await virtualSourceControl.feature?.commitResourceStates(resourceStates);
 			else
-				await virtualSourceControl.commitActiveEditor();
+				await virtualSourceControl.feature?.commitActiveEditor();
 		}));
 	
 	context.subscriptions.push(
 		vscode.commands.registerCommand("anki-editor.source-control.commitLineChanges", async (uri: vscode.Uri, changes: LineChange[], index: number) => {
-			await virtualSourceControl.commitLineChanges(uri, changes, index);
+			await virtualSourceControl.feature?.commitLineChanges(uri, changes, index);
 		}));
 
 	// Language service features
@@ -152,7 +167,8 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// Source control features
 	const initialDocumentProvider = new VirtualDocumentProvider();
-	const virtualSourceControl = new VirtualSourceControl(initialDocumentProvider);
+	const virtualSourceControl = new ToggleableVirtualSourceControl(initialDocumentProvider);
+	virtualSourceControl.activate();
 	
 	// Setup context subscriptions
 	context.subscriptions.push(
@@ -163,6 +179,9 @@ export function activate(context: vscode.ExtensionContext) {
 				ankiConnect.clearCache();
 				updateAllDiagnostics(templateDiagnosticsProvider);
 			}
+			if (event.affectsConfiguration(`${ANKI_EDITOR_CONFIG}.sourceControl`)) {
+				virtualSourceControl.update();
+			};
 		})
 	);
 
@@ -216,11 +235,11 @@ export function activate(context: vscode.ExtensionContext) {
 		// console.log("onDidOpenTextDocument", document.uri.toString());
 		if (document.languageId === TEMPLATE_LANGUAGE_ID)
 			templateDiagnosticsProvider.updateDiagnostics(document);
-		if (document.uri.scheme === ANKI_EDITOR_SCHEME_BASE && !document.uri.query && !document.uri.fragment) {
+		if (virtualSourceControl.feature && document.uri.scheme === ANKI_EDITOR_SCHEME_BASE && !document.uri.query && !document.uri.fragment) {
 			if (!initialDocumentProvider.has(document.uri))
 				// Save initial version of the document seen by the user in-memory for source control
 				initialDocumentProvider.setDocumentContent(toInitialUri(document.uri), document.getText());
-			virtualSourceControl.updateResourceGroupResources(document.uri);
+			virtualSourceControl.feature.updateResourceGroupResources(document.uri);
 		}
 	}));
 
@@ -230,8 +249,8 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(document => {
-		if (document.uri.scheme === ANKI_EDITOR_SCHEME_BASE)
-			virtualSourceControl.updateResourceGroupResources(document.uri);
+		if (virtualSourceControl.feature && document.uri.scheme === ANKI_EDITOR_SCHEME_BASE)
+			virtualSourceControl.feature.updateResourceGroupResources(document.uri);
 	}));
 
 	context.subscriptions.push(

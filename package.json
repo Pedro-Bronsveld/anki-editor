@@ -228,6 +228,12 @@
           "type": "string",
           "markdownDescription": "Anki-Connect API key.\n\nThis must match the value set for `\"apiKey\"` in the Anki-Connect config if it's set to anything other than `null`."
         },
+        "anki-editor.sourceControl.enable": {
+          "title": "Source Control Enabled",
+          "type": "boolean",
+          "default": true,
+          "description": "Show changes made since a template or stylesheet was first loaded through Anki-Connect in the Source Control view and in the editor."
+        },
         "anki-editor.invalidFieldDiagnostics": {
           "title": "Invalid Field Diagnostics",
           "type": "boolean",
