@@ -236,9 +236,8 @@ export function activate(context: vscode.ExtensionContext) {
 		if (document.languageId === TEMPLATE_LANGUAGE_ID)
 			templateDiagnosticsProvider.updateDiagnostics(document);
 		if (virtualSourceControl.feature && document.uri.scheme === ANKI_EDITOR_SCHEME_BASE && !document.uri.query && !document.uri.fragment) {
-			if (!initialDocumentProvider.has(document.uri))
-				// Save initial version of the document seen by the user in-memory for source control
-				initialDocumentProvider.setDocumentContent(toInitialUri(document.uri), document.getText());
+			// Only save initial document if it doesn't already exist:
+			initialDocumentProvider.setDocumentContent(toInitialUri(document.uri), document.getText(), false);
 			virtualSourceControl.feature.updateResourceGroupResources(document.uri);
 		}
 	}));

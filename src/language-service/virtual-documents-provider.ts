@@ -12,8 +12,11 @@ export default class VirtualDocumentProvider implements vscode.TextDocumentConte
         return this.documents.get(uri.toString());
     }
 
-    setDocumentContent(uri: vscode.Uri, document: string) {
-        this.documents.set(uri.toString(), document);
+    setDocumentContent(uri: vscode.Uri, document: string, overwriteExisting=true) {
+        const uriString = uri.toString();
+        if (!overwriteExisting && this.documents.has(uriString))
+            return;
+        this.documents.set(uriString, document);
     }
 
     clear() {
