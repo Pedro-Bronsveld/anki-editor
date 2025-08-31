@@ -204,6 +204,7 @@ export default class VirtualSourceControl implements vscode.Disposable {
                 initialDocumentLastLine.range.end
             ), documentText);
         await vscode.workspace.applyEdit(edit);
+        this.initialDocumentProvider.setDocumentContent(initialUri, initialDocument.getText());
     }
 
     async commitLineChanges(uri: vscode.Uri, changes: LineChange[], index: number) {
@@ -224,7 +225,7 @@ export default class VirtualSourceControl implements vscode.Disposable {
         const edit = new vscode.WorkspaceEdit();
         edit.replace(initialUri, originalRange, modifiedText);
         await vscode.workspace.applyEdit(edit);
-        await document.save();
+        this.initialDocumentProvider.setDocumentContent(initialUri, initialDocument.getText());
         await this.updateResourceGroupResources(uri);
     }
     
