@@ -33,7 +33,7 @@ export abstract class ToggleableFeature<Feature extends vscode.Disposable> imple
     protected abstract createFeature(): Feature;
 
     dispose() {
-        this._feature?.dispose();
+        this.deactivate();
     }
 
 }
