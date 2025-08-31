@@ -85,8 +85,7 @@ export default class VirtualSourceControl implements vscode.Disposable {
 	}
 
     async hasChanges(docUri: vscode.Uri, initialUri: vscode.Uri): Promise<boolean> {
-        const initialDocument = await vscode.workspace.openTextDocument(initialUri)
-        const initialDocumentText = initialDocument.getText();
+        const initialDocumentText = this.initialDocumentProvider.get(initialUri);
 
         if (initialDocumentText === undefined)
             return false;
@@ -176,7 +175,6 @@ export default class VirtualSourceControl implements vscode.Disposable {
         for (const uri of uris) {
             await this.commitResource(uri);
         }
-        await this.updateResourceGroupResources(uris);
     }
 
     async commitActiveEditor() {
@@ -185,7 +183,6 @@ export default class VirtualSourceControl implements vscode.Disposable {
             const activeResourceState = this.resourceGroup.resourceStates.find(resourceState => resourceState.resourceUri.toString() === activeUriString);
             if (activeResourceState) {
                 await this.commitResource(activeResourceState.resourceUri);
-                await this.updateResourceGroupResources(activeResourceState.resourceUri);
             }
         }
     }
@@ -193,18 +190,8 @@ export default class VirtualSourceControl implements vscode.Disposable {
     private async commitResource(uri: vscode.Uri) {
         const document = await vscode.workspace.openTextDocument(uri);
         const initialUri = toInitialUri(uri);
-        const initialDocument = await vscode.workspace.openTextDocument(initialUri);
-
         const documentText = document.getText();
-        const edit = new vscode.WorkspaceEdit();
-        const initialDocumentLastLine = initialDocument.lineAt(initialDocument.lineCount-1);
-        edit.replace(initialUri,
-            new vscode.Range(
-                new vscode.Position(0, 0),
-                initialDocumentLastLine.range.end
-            ), documentText);
-        await vscode.workspace.applyEdit(edit);
-        this.initialDocumentProvider.setDocumentContent(initialUri, initialDocument.getText());
+        this.initialDocumentProvider.setDocumentContent(initialUri, documentText);
     }
 
     async commitLineChanges(uri: vscode.Uri, changes: LineChange[], index: number) {
@@ -222,11 +209,15 @@ export default class VirtualSourceControl implements vscode.Disposable {
             originalRange
         } = resolveDocumentLineChange(document, initialDocument, commitChange);
 
-        const edit = new vscode.WorkspaceEdit();
-        edit.replace(initialUri, originalRange, modifiedText);
-        await vscode.workspace.applyEdit(edit);
-        this.initialDocumentProvider.setDocumentContent(initialUri, initialDocument.getText());
-        await this.updateResourceGroupResources(uri);
+        const newInitialText = initialDocument.getText(new vscode.Range(
+            new vscode.Position(0, 0),
+            originalRange.start
+        )) + modifiedText + initialDocument.getText(new vscode.Range(
+            originalRange.end,
+            initialDocument.lineAt(initialDocument.lineCount-1).range.end
+        ));
+
+        this.initialDocumentProvider.setDocumentContent(initialUri, newInitialText);
     }
     
     dispose() {
