@@ -105,12 +105,10 @@ export function activate(context: vscode.ExtensionContext) {
 	
 	context.subscriptions.push(
 		vscode.commands.registerCommand("anki-editor.source-control.discardResourceChanges", async (...resourceStates: vscode.SourceControlResourceState[]) => {
-			if (!virtualSourceControl.feature)
-				return
 			if (resourceStates.length > 0)
-				await virtualSourceControl.feature.discardResourceStates(resourceStates);
+				await virtualSourceControl.feature?.discardResourceStates(resourceStates);
 			else
-				await virtualSourceControl.feature.discardActiveEditor();
+				await virtualSourceControl.feature?.discardActiveEditor();
 		}));
 
 	context.subscriptions.push(
@@ -126,9 +124,6 @@ export function activate(context: vscode.ExtensionContext) {
 	
 	context.subscriptions.push(
 		vscode.commands.registerCommand("anki-editor.source-control.commitResourceChanges", async (...resourceStates: vscode.SourceControlResourceState[]) => {
-			if (!virtualSourceControl)
-				return
-
 			if (resourceStates.length > 0)
 				await virtualSourceControl.feature?.commitResourceStates(resourceStates);
 			else
