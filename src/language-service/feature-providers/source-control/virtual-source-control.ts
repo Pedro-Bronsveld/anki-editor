@@ -20,6 +20,17 @@ export default class VirtualSourceControl implements vscode.Disposable {
         this.quickDiffProvider = new VirtualQuickDiffProvider(this, initialDocumentProvider);
         this.sourceControl.quickDiffProvider = this.quickDiffProvider;
         this.sourceControl.inputBox.placeholder = "Message not used by Anki Editor.";
+
+        // Check if any anki editor documents are already opened in vscode when virtual source control is created
+        const openDocuments = vscode.workspace.textDocuments
+            .filter(document => document.uri.scheme === ANKI_EDITOR_SCHEME_BASE
+                && !document.uri.query
+                && !document.uri.fragment
+            );
+        
+        for (const document of openDocuments) {
+            this.initialDocumentProvider.setDocumentContent(toInitialUri(document.uri), document.getText(), false);
+        }
     }
 
     async updateResourceGroupResources(uris?: vscode.Uri | vscode.Uri[]): Promise<void> {
@@ -222,7 +233,9 @@ export default class VirtualSourceControl implements vscode.Disposable {
     }
     
     dispose() {
-        this.initialDocumentProvider.clear();
+        this.commitAllChanges().then(() => {
+            this.initialDocumentProvider.clear();
+        });
         this.resourceGroup.resourceStates = [];
         this.sourceControl.count = 0;
         this.resourceGroup.dispose();
