@@ -233,9 +233,7 @@ export default class VirtualSourceControl implements vscode.Disposable {
     }
     
     dispose() {
-        this.commitAllChanges().then(() => {
-            this.initialDocumentProvider.clear();
-        });
+        this.initialDocumentProvider.clear();
         this.resourceGroup.resourceStates = [];
         this.sourceControl.count = 0;
         this.resourceGroup.dispose();
