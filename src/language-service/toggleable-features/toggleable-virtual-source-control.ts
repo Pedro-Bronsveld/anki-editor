@@ -29,14 +29,12 @@ export class ToggleableVirtualSourceControl extends ToggleableFeature<VirtualSou
             );
         
         for (const document of openDocuments) {
-            this.initialDocumentProvider.setDocumentContent(toInitialUri(document.uri), document.getText(), false)
+            this.initialDocumentProvider.setDocumentContent(toInitialUri(document.uri), document.getText(), false);
         }
-        this.feature?.updateResourceGroupResources();
     }
 
     public deactivate(): void {
         this.feature?.commitAllChanges();
         super.deactivate();
     }
-
 }

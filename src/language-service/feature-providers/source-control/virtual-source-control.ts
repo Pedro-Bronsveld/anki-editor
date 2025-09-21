@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import VirtualQuickDiffProvider from './virtual-quick-diff-provider';
-import { toAnkiEditorUri, toInitialUri } from '../virtual-uris';
+import { addUriId, timestampUri, toAnkiEditorUri, toInitialUri } from '../virtual-uris';
 import VirtualDocumentProvider from '../../virtual-documents-provider';
 import { LineChange } from '../../../models/vscode/scm/line-change';
 import { ANKI_EDITOR_SCHEME, ANKI_EDITOR_SCHEME_BASE, ANKI_EDITOR_SCM_ID } from '../../../constants';
@@ -11,11 +11,13 @@ export default class VirtualSourceControl implements vscode.Disposable {
     readonly sourceControl: vscode.SourceControl;
     private resourceGroup: vscode.SourceControlResourceGroup;
     readonly quickDiffProvider: VirtualQuickDiffProvider;
+    readonly instanceId = String(Date.now());
 
     constructor(private initialDocumentProvider: VirtualDocumentProvider) {
         this.sourceControl = vscode.scm.createSourceControl(ANKI_EDITOR_SCM_ID, "Anki Editor Changes", vscode.Uri.parse(ANKI_EDITOR_SCHEME));
-        this.resourceGroup = this.sourceControl.createResourceGroup("workingTree", "Changes since opened");
-        this.quickDiffProvider = new VirtualQuickDiffProvider();
+        this.resourceGroup = this.sourceControl.createResourceGroup(`${ANKI_EDITOR_SCM_ID}-working-tree`, "Changes since opened");
+        this.resourceGroup.hideWhenEmpty = true;
+        this.quickDiffProvider = new VirtualQuickDiffProvider(this, initialDocumentProvider);
         this.sourceControl.quickDiffProvider = this.quickDiffProvider;
         this.sourceControl.inputBox.placeholder = "Message not used by Anki Editor.";
     }
@@ -85,15 +87,14 @@ export default class VirtualSourceControl implements vscode.Disposable {
 	}
 
     async hasChanges(docUri: vscode.Uri, initialUri: vscode.Uri): Promise<boolean> {
-        const initialDocumentText = this.initialDocumentProvider.get(initialUri);
+        const initialDocument = await vscode.workspace.openTextDocument(timestampUri(initialUri));
+        const initialDocumentText = initialDocument.getText();
 
         if (initialDocumentText === undefined)
             return false;
         
         // Get document as currently saved in Anki.
-        const document = await vscode.workspace.openTextDocument(docUri.with({
-            query: `t=${Date.now()}`
-        }));
+        const document = await vscode.workspace.openTextDocument(timestampUri(docUri));
         const documentText = document.getText();
 
         const res = initialDocumentText !== documentText;
@@ -191,7 +192,7 @@ export default class VirtualSourceControl implements vscode.Disposable {
         const document = await vscode.workspace.openTextDocument(uri);
         const initialUri = toInitialUri(uri);
         const documentText = document.getText();
-        this.initialDocumentProvider.setDocumentContent(initialUri, documentText);
+        this.initialDocumentProvider.setDocumentContent(addUriId(initialUri, this.instanceId), documentText);
     }
 
     async commitLineChanges(uri: vscode.Uri, changes: LineChange[], index: number) {
@@ -217,11 +218,14 @@ export default class VirtualSourceControl implements vscode.Disposable {
             initialDocument.lineAt(initialDocument.lineCount-1).range.end
         ));
 
-        this.initialDocumentProvider.setDocumentContent(initialUri, newInitialText);
+        this.initialDocumentProvider.setDocumentContent(addUriId(initialUri, this.instanceId), newInitialText);
     }
     
     dispose() {
         this.initialDocumentProvider.clear();
+        this.resourceGroup.resourceStates = [];
+        this.sourceControl.count = 0;
+        this.resourceGroup.dispose();
         this.sourceControl.dispose();
     }
 

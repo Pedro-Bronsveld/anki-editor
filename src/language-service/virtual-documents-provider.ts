@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { stripUri } from './feature-providers/virtual-uris';
 
 export default class VirtualDocumentProvider implements vscode.TextDocumentContentProvider {
 
@@ -15,17 +16,23 @@ export default class VirtualDocumentProvider implements vscode.TextDocumentConte
     }
 
     provideTextDocumentContent(uri: vscode.Uri, token: vscode.CancellationToken): vscode.ProviderResult<string> {
-        return this.documents.get(uri.toString());
+        const strippedUri = stripUri(uri);
+        return this.documents.get(strippedUri.toString());
     }
 
     setDocumentContent(uri: vscode.Uri, document: string, overwriteExisting=true) {
+        const strippedUri = stripUri(uri);
+        const strippedUriString = strippedUri.toString();
         const uriString = uri.toString();
-        if (!overwriteExisting && this.documents.has(uriString))
+        if (!overwriteExisting && this.documents.has(strippedUriString))
             return;
-        const currentDocument = this.documents.get(uriString);
-        this.documents.set(uriString, document);
-        if (document !== currentDocument)
-            this.onDidChangeEmitter.fire(uri);
+        const existingDocument = this.documents.get(strippedUriString);
+        this.documents.set(strippedUriString, document);
+        if (document !== existingDocument) {
+            this.onDidChangeEmitter.fire(strippedUri);
+            if (strippedUriString !== uriString)
+                this.onDidChangeEmitter.fire(uri);
+        }
     }
 
     clear() {

@@ -35,7 +35,7 @@ import AnkiConnect from './anki-connect/anki-connect';
 import EmbeddedHandler from './language-service/embedded-handler';
 import { updateAllDiagnostics } from './language-service/run-diagnostics';
 import StylingCompletionItemProvider from './language-service/feature-providers/styling-completion-item-provider';
-import { toAnkiEditorUri, toInitialUri } from './language-service/feature-providers/virtual-uris';
+import { isStrippedUri, toAnkiEditorUri, toInitialUri } from './language-service/feature-providers/virtual-uris';
 import { LineChange } from './models/vscode/scm/line-change';
 import { ToggleableVirtualSourceControl } from './language-service/toggleable-features/toggleable-virtual-source-control';
 
@@ -238,7 +238,8 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	context.subscriptions.push(initialDocumentProvider.onDidChange(initialUri => {
-		virtualSourceControl.feature?.updateResourceGroupResources(toAnkiEditorUri(initialUri));
+		if (isStrippedUri(initialUri))
+			virtualSourceControl.feature?.updateResourceGroupResources(toAnkiEditorUri(initialUri));
 	}));
 
 	context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(event => {
