@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import VirtualQuickDiffProvider from './virtual-quick-diff-provider';
-import { addUriId, timestampUri, toAnkiEditorUri, toInitialUri } from '../virtual-uris';
+import { addScmIdToUri, timestampUri, toAnkiEditorUri, toInitialUri } from '../virtual-uris';
 import VirtualDocumentProvider from '../../virtual-documents-provider';
 import { LineChange } from '../../../models/vscode/scm/line-change';
 import { ANKI_EDITOR_SCHEME, ANKI_EDITOR_SCHEME_BASE, ANKI_EDITOR_SCM_ID } from '../../../constants';
@@ -203,7 +203,7 @@ export default class VirtualSourceControl implements vscode.Disposable {
         const document = await vscode.workspace.openTextDocument(uri);
         const initialUri = toInitialUri(uri);
         const documentText = document.getText();
-        this.initialDocumentProvider.setDocumentContent(addUriId(initialUri, this.instanceId), documentText);
+        this.initialDocumentProvider.setDocumentContent(addScmIdToUri(initialUri, this.instanceId), documentText);
     }
 
     async commitLineChanges(uri: vscode.Uri, changes: LineChange[], index: number) {
@@ -229,7 +229,7 @@ export default class VirtualSourceControl implements vscode.Disposable {
             initialDocument.lineAt(initialDocument.lineCount-1).range.end
         ));
 
-        this.initialDocumentProvider.setDocumentContent(addUriId(initialUri, this.instanceId), newInitialText);
+        this.initialDocumentProvider.setDocumentContent(addScmIdToUri(initialUri, this.instanceId), newInitialText);
     }
     
     dispose() {

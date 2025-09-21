@@ -48,16 +48,16 @@ export const timestampUri = (uri: vscode.Uri) =>
     });
 
 /**
- * Add an id query parameter to a given uri.
- * Used in some places to force retrieval of the latest version of a document and
- * circumvent a bug when toggling source control.
+ * Add the id of a virtual source control as query parameter to a given uri.
+ * Mainly used to specify the id of a virtual source control that provides an initial uri.
+ * Also used to circumvent diff editor not working when toggling source control.
  * @param uri 
  * @param id 
  * @returns uri with 'uriId' query parameter with the given id value
  */
-export const addUriId = (uri: vscode.Uri, id: string) =>
+export const addScmIdToUri = (uri: vscode.Uri, id: string) =>
     uri.with({
-        query: `uriId=${id}`
+        query: `scmId=${id}`
     });
 
 /**
