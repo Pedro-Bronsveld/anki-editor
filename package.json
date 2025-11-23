@@ -163,11 +163,11 @@
       "scm/change/title": [
         {
           "command": "anki-editor.source-control.commitLineChanges",
-          "when": "scmProvider == anki-editor-scm"
+          "when": "resourceScheme == anki-editor"
         },
         {
           "command": "anki-editor.source-control.discardLineChanges",
-          "when": "scmProvider == anki-editor-scm"
+          "when": "resourceScheme == anki-editor"
         }
       ]
     },

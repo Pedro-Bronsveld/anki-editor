@@ -15,11 +15,11 @@ export default class VirtualSourceControl implements vscode.Disposable {
 
     constructor(private initialDocumentProvider: VirtualDocumentProvider) {
         this.sourceControl = vscode.scm.createSourceControl(ANKI_EDITOR_SCM_ID, "Anki Editor Changes", vscode.Uri.parse(ANKI_EDITOR_SCHEME));
-        this.resourceGroup = this.sourceControl.createResourceGroup(`${ANKI_EDITOR_SCM_ID}-working-tree`, "Changes since opened");
+        this.resourceGroup = this.sourceControl.createResourceGroup(`${ANKI_EDITOR_SCM_ID}`, "Changes since opened");
         this.resourceGroup.hideWhenEmpty = true;
         this.quickDiffProvider = new VirtualQuickDiffProvider(this, initialDocumentProvider);
         this.sourceControl.quickDiffProvider = this.quickDiffProvider;
-        this.sourceControl.inputBox.placeholder = "Message not used by Anki Editor.";
+        this.sourceControl.inputBox.visible = false;
 
         // Check if any anki editor documents are already opened in vscode when virtual source control is created
         const openDocuments = vscode.workspace.textDocuments
