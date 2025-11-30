@@ -95,6 +95,11 @@ Can be triggered using `Ctrl` + `Space` by default, when the cursor is inside a 
 - Snippets for some field replacements and conditional blocks when the cursor is outside a field replacement.
 Can be triggered using `Ctrl` + `Space` by default.
 
+- Basic in-memory tracking of changes made to a card template or stylesheet since it was first opened in the current VSCode window.
+  Changes are kept in-memory until the workspace or window is closed or reloaded.
+
+![In-Memory changes](resources/images/source-control-inline.png)
+
 ## Running on vscode.dev
 
 [vscode.dev](https://vscode.dev/) is a version of Visual Studio Code that runs entirely in the browser.
@@ -162,6 +167,9 @@ Leave this empty if `"apiKey"` in the Anki-Connect configuration is set to `null
 
 * `anki-editor.checkJsLevel`: Sets the level of type checking for embedded Javascript type errors.
   The values `"on"`, `"default"` and `"off"` correspond to the values `true`, `undefined` and `false` of the [`checkJs`](https://www.typescriptlang.org/tsconfig#checkJs) property in the TypeScript compiler options.
+
+* `anki-editor.sourceControl.enable`: Toggles in-memory source control.
+  Showing changes made since a card template or stylesheet was first loaded in the current VSCode window session.
 
 ## Credits
 
