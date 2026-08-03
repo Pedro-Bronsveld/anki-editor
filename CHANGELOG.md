@@ -1,5 +1,10 @@
 # Change Log
 
+## [1.0.10] - 2026-08-03
+
+* Fixed a bug where `styling.css` could not be loaded if its note type contained a forward slash in its name.
+* Updated dependencies.
+
 ## [1.0.9] - 2025-06-07
 
 Improved filter syntax parsing.
