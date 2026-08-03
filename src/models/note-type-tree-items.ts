@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import { TEMPLATE_EXTENSION } from '../constants';
-import { escapeText } from '../note-types/escape-uri';
 import { partsToUri } from '../note-types/uri-parser';
 import { Side } from './template';
 
@@ -47,7 +46,7 @@ export class CardStylingTreeItem extends vscode.TreeItem {
     constructor(
         public readonly noteType: NoteTypeTreeItem,
     ) {
-        super(partsToUri(["Note Types", escapeText(String(noteType.label)), "Styling.css"]));
+        super(partsToUri(["Note Types", String(noteType.label), "Styling.css"]));
         this.label = "Styling";
     }
 }
