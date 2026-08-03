@@ -12,19 +12,23 @@ jobs:
       VSIX_FILE: "anki-editor-${{ github.ref_name }}.vsix"
     steps:
       - name: Download vsix release asset
-        uses: dsaltares/fetch-gh-release-asset@1.1.2
+        uses: robinraju/release-downloader@v1
         with:
-          version: "tags/${{ github.ref_name }}"
-          file: ${{ env.VSIX_FILE }}
+          tag: ${{ github.ref_name }}
+          fileName: ${{ env.VSIX_FILE }}
+          tarBall: false
+          zipBall: false
       - name: Publish to Visual Studio Marketplace
-        uses: HaaLeo/publish-vscode-extension@v1
+        uses: HaaLeo/publish-vscode-extension@v2
         with:
           pat: ${{ secrets.VS_MARKETPLACE_TOKEN }}
           registryUrl: https://marketplace.visualstudio.com
           extensionFile: ${{ env.VSIX_FILE }}
+          dryRun: true
       - name: Publish to Open VSX Registry
-        uses: HaaLeo/publish-vscode-extension@v1
+        uses: HaaLeo/publish-vscode-extension@v2
         with:
           pat: ${{ secrets.OPEN_VSX_TOKEN }}
           registryUrl: https://open-vsx.org
           extensionFile: ${{ env.VSIX_FILE }}
+          dryRun: true
